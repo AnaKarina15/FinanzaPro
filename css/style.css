@@ -1,0 +1,322 @@
+/* --- VARIABLES Y TEMAS --- */
+:root {
+    --bg-fondo: #f8fafc;
+    --bg-panel: #ffffff;
+    --texto-principal: #0f172a;
+    --texto-secundario: #64748b;
+    --borde: #e2e8f0;
+    
+    /* Variables de estructura */
+    --ancho-sidebar: 260px;
+}
+
+/* Clases de Temas que aplicará el JS */
+.theme-green { --color-primario: #059669; --color-primario-hover: #047857; }
+.theme-orange { --color-primario: #ec5b13; --color-primario-hover: #c2470b; }
+.theme-blue { --color-primario: #0066FF; --color-primario-hover: #0052cc; }
+
+/* --- ESTILOS BASE --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-fondo);
+    color: var(--texto-principal);
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+/* --- ESTRUCTURA PRINCIPAL --- */
+.app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+    width: var(--ancho-sidebar);
+    background-color: var(--bg-panel);
+    border-right: 1px solid var(--borde);
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-container {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    background-color: var(--color-primario);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.navegacion {
+    flex: 1;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--texto-secundario);
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: var(--bg-fondo);
+}
+
+.nav-link.activo {
+    background-color: rgba(var(--color-primario), 0.1); /* Requiere RGB si quieres opacidad, pero lo simplificamos */
+    background-color: var(--bg-fondo);
+    color: var(--color-primario);
+    font-weight: 700;
+}
+
+.usuario-perfil {
+    padding: 16px;
+    border-top: 1px solid var(--borde);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.info-usuario {
+    display: flex;
+    flex-direction: column;
+}
+
+.nombre { font-weight: 600; font-size: 14px; }
+.plan { font-size: 12px; color: var(--texto-secundario); }
+
+/* --- CONTENIDO PRINCIPAL --- */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px;
+}
+
+/* Lógica de pantallas ocultas/visibles */
+.pantalla { display: none; }
+.pantalla.activa { display: block; animation: fadeIn 0.4s ease; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header-pantalla {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 32px;
+}
+
+.header-pantalla h2 { font-size: 28px; font-weight: 800; }
+.header-pantalla p { color: var(--texto-secundario); margin-top: 4px; }
+
+/* --- COMPONENTES (Tarjetas, Botones, Formularios) --- */
+.grid-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.card {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.card-destacada { border: 2px solid var(--color-primario); }
+.bg-primario { background-color: var(--color-primario); transition: background-color 0.3s; }
+
+.card-titulo { font-size: 14px; color: var(--texto-secundario); font-weight: 500; }
+.card-valor { font-size: 32px; font-weight: 700; margin-top: 8px; }
+.texto-primario { color: var(--color-primario); transition: color 0.3s; }
+
+.h-alto { min-height: 300px; }
+
+.flex-row { display: flex; align-items: center; gap: 24px; }
+.avatar-grande { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--color-primario); }
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.btn-primario {
+    background-color: var(--color-primario);
+    color: white;
+    transition: background-color 0.2s;
+}
+
+.btn-primario:hover {
+    background-color: var(--color-primario-hover);
+}
+
+.formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.formulario input {
+    padding: 12px 16px;
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    outline: none;
+    font-family: inherit;
+}
+
+.formulario input:focus {
+    border-color: var(--color-primario);
+}
+
+/* ESTILOS ESPECÍFICOS DEL DASHBOARD*/
+
+/* --- Utilidades de Layout --- */
+.header-botones { display: flex; gap: 12px; }
+.btn-secundario { background-color: white; border: 1px solid var(--borde); color: var(--texto-principal); }
+.btn-secundario:hover { background-color: #f1f5f9; }
+.shadow-btn { box-shadow: 0 4px 14px rgba(var(--color-primario), 0.3); }
+.w-full { width: 100%; justify-content: center; margin-top: 16px; }
+
+/* --- Tarjetas Superiores --- */
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+
+/* Iconos Cuadrados */
+.icon-box { padding: 8px; border-radius: 8px; display: inline-flex; }
+.icon-emerald { background-color: #d1fae5; color: #059669; }
+.icon-blue { background-color: #dbeafe; color: #2563eb; }
+.icon-primary { background-color: rgba(var(--color-primario), 0.1); color: var(--color-primario); }
+
+/* Etiquetas (Badges) */
+.badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.badge-emerald { background-color: #ecfdf5; color: #059669; }
+.badge-rose { background-color: #fff1f2; color: #e11d48; }
+.badge-primary { background-color: rgba(var(--color-primario), 0.1); color: var(--color-primario); }
+.badge-blue { background-color: #eff6ff; color: #2563eb; }
+.badge-amber { background-color: #fffbeb; color: #d97706; }
+
+/* Textos de colores */
+.text-rose { color: #e11d48; }
+.text-emerald { color: #059669; }
+.text-right { text-align: right; }
+.font-bold { font-weight: 700; }
+
+/* --- Grid Principal 2 Columnas --- */
+.grid-layout-principal {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 32px;
+}
+@media (max-width: 1024px) {
+    .grid-layout-principal { grid-template-columns: 1fr; }
+}
+.col-izquierda { display: flex; flex-direction: column; gap: 32px; }
+.col-derecha { display: flex; flex-direction: column; gap: 24px; }
+
+/* --- Gráfico de Barras --- */
+.card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+.leyenda { display: flex; gap: 12px; font-size: 12px; color: var(--texto-secundario); }
+.leyenda span { display: flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot-primary { background-color: var(--color-primario); }
+.dot-secondary { background-color: #2563eb; }
+
+.chart-area { display: flex; justify-content: space-between; align-items: flex-end; height: 250px; padding: 0 10px; }
+.bar-group { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; height: 100%; }
+.bars { display: flex; align-items: flex-end; gap: 4px; width: 100%; height: 100%; justify-content: center; }
+.bar { width: 40%; border-radius: 4px 4px 0 0; }
+.bar-light { background-color: rgba(5, 150, 105, 0.4); /* Verde semi-transparente */ }
+.bar-dark { background-color: #2563eb; /* Azul oscuro */ }
+.mes { font-size: 12px; font-weight: 500; color: #94a3b8; }
+
+/* --- Tabla de Movimientos --- */
+.card-no-padding { padding: 0; overflow: hidden; }
+.card-header-border { padding: 24px; border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; align-items: center; }
+.link-primario { color: var(--color-primario); text-decoration: none; font-size: 14px; font-weight: 600; }
+.link-primario:hover { text-decoration: underline; }
+.table-responsive { overflow-x: auto; }
+.tabla-moderna { width: 100%; border-collapse: collapse; text-align: left; }
+.tabla-moderna th { background-color: #f8fafc; padding: 16px 24px; font-size: 12px; text-transform: uppercase; color: var(--texto-secundario); font-weight: 700; border-bottom: 1px solid var(--borde); }
+.tabla-moderna td { padding: 16px 24px; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
+.tabla-moderna tr:hover td { background-color: #f8fafc; }
+.flex-align { display: flex; align-items: center; gap: 12px; }
+.icon-small { width: 32px; height: 32px; background-color: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--texto-secundario); }
+.icon-small span { font-size: 16px; }
+
+/* --- Tarjeta Salud Financiera (Gradiente) --- */
+.card-gradient { background: linear-gradient(135deg, var(--color-primario) 0%, #047857 100%); border-radius: 16px; padding: 32px; color: white; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.2); }
+.z-index-content { position: relative; z-index: 2; }
+.card-gradient h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.progress-container { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.progress-bar-bg { flex: 1; height: 8px; background-color: rgba(255,255,255,0.2); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background-color: white; border-radius: 999px; }
+.progress-container span { font-size: 12px; font-weight: 700; }
+.card-gradient p { font-size: 14px; opacity: 0.9; line-height: 1.5; margin-bottom: 24px; }
+.btn-blanco { background-color: white; color: var(--color-primario); width: 100%; justify-content: center; }
+.bg-icon { position: absolute; bottom: -40px; right: -40px; font-size: 180px; opacity: 0.1; z-index: 1; }
+
+/* --- Tarjeta Tips de Ahorro --- */
+.card-title-icon { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.tips-lista { display: flex; flex-direction: column; gap: 16px; }
+.tip-item { background-color: #f8fafc; padding: 12px; border-radius: 8px; }
+.tip-tag { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; margin-bottom: 4px; }
+.tip-item p { font-size: 14px; font-weight: 500; }
+
+/* --- Tarjeta Próximo Vencimiento --- */
+.card-blue-light { background-color: #eff6ff; border: 1px solid #dbeafe; padding: 24px; border-radius: 16px; }
+.title-blue { color: #1e3a8a; font-weight: 700; margin-bottom: 8px; }
+.vencimiento-flex { display: flex; justify-content: space-between; align-items: center; }
+.text-blue-dark { font-size: 14px; color: #1d4ed8; }
+.text-blue-italic { font-size: 12px; color: #3b82f6; font-style: italic; margin-top: 4px; }
+.vencimiento-monto { font-size: 20px; font-weight: 700; color: #1e3a8a; }
+.btn-outline-blue { border: 1px solid #bfdbfe; color: #1d4ed8; background: transparent; }
+.btn-outline-blue:hover { background-color: #dbeafe; }
