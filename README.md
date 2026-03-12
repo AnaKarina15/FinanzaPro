@@ -42,7 +42,7 @@ Para cumplir con los estándares de diseño y usabilidad, implementamos:
 
     ## 👥 Equipo de Desarrollo
 
-* **Ana Karina Rivera Julio**
-* **Yuranis Patricia Botto Jiménez**
+* **Ana Karina Rivera **
+* **Yuranis Patricia Botto**
 * **Andrés Rivera**
 * **Andrés Charris**
