@@ -40,10 +40,10 @@ Para cumplir con los estándares de diseño y usabilidad, implementamos:
     ├── login.html          # Pantalla de inicio de sesión
     └── dashboard.html      # Panel principal de usuario
 ```
-...
-    ## 👥 Equipo de Desarrollo
 
-* **Ana Karina Rivera **
+## 👥 Equipo de Desarrollo
+
+* **Ana Karina Rivera**
 * **Yuranis Patricia Botto**
 * **Andrés Rivera**
 * **Andrés Charris**
