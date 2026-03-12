@@ -39,7 +39,8 @@ Para cumplir con los estándares de diseño y usabilidad, implementamos:
 └── /views
     ├── login.html          # Pantalla de inicio de sesión
     └── dashboard.html      # Panel principal de usuario
-
+```
+...
     ## 👥 Equipo de Desarrollo
 
 * **Ana Karina Rivera **
