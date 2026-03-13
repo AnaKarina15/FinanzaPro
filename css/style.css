@@ -38,6 +38,7 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-fondo);
     color: var(--texto-principal);
+    width: 90vw;
 }
 
 .material-symbols-outlined {
@@ -759,7 +760,7 @@ body {
 }
 
 .logo-container-login {
-    flex-direction: column;
+    display: flex;
     gap: 12px;
 }
 
