@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - FinanzaPro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
     <div class="app-container">
         <aside class="sidebar">
@@ -15,7 +19,7 @@
                 <div class="logo-icon"><span class="material-symbols-outlined">payments</span></div>
                 <h1>FinanzaPro</h1>
             </header>
-            
+
             <nav class="navegacion">
                 <a href="dashboard.html" class="nav-link activo">
                     <span class="material-symbols-outlined">grid_view</span> Inicio
@@ -34,11 +38,12 @@
             <footer href="#" class="usuario-perfil">
                 <a href="#" class="profile-link">
                     <div class="avatar">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTSJTyzGtTni8ccyOIbqrFa8YmoBPV37ihdbcySGP46uAhHVMWqg3ULJbWPABrZ4B5ttc3RXBu-7nBf7ZWGFlZCe2RiEajZ_j_kIpz5h3QEmtWamvpeL_ALWcdL1rTwYIXV2tCywysPGJVWUMj3O6KlSBFWs1nMEGwVIi0QfJxlbOzFO09ddBeGkLvFS3zJZMV0cmK3en2U68k_SgJ7V_QNMVLU_VSD-lRiTx-7PGJDIMe6d6eEH1eI8h1bV6gfVkR6WUeiIEbicA" alt="Foto de perfil de Valentina" class="avatar-grande">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTSJTyzGtTni8ccyOIbqrFa8YmoBPV37ihdbcySGP46uAhHVMWqg3ULJbWPABrZ4B5ttc3RXBu-7nBf7ZWGFlZCe2RiEajZ_j_kIpz5h3QEmtWamvpeL_ALWcdL1rTwYIXV2tCywysPGJVWUMj3O6KlSBFWs1nMEGwVIi0QfJxlbOzFO09ddBeGkLvFS3zJZMV0cmK3en2U68k_SgJ7V_QNMVLU_VSD-lRiTx-7PGJDIMe6d6eEH1eI8h1bV6gfVkR6WUeiIEbicA"
+                            alt="Foto de perfil de Valentina" class="avatar-grande">
                     </div>
                     <span class="nombre">Valentina</span>
                 </a>
-                
+
             </footer>
         </aside>
 
@@ -62,14 +67,16 @@
                 <section class="grid-tarjetas">
                     <article class="card available-card">
                         <header class="card-top">
-                            <div class="icon-box icon-primary"><span class="material-symbols-outlined">account_balance_wallet</span></div>
+                            <div class="icon-box icon-primary"><span
+                                    class="material-symbols-outlined">account_balance_wallet</span></div>
                             <p class="card-titulo">Disponible</p>
                         </header>
                         <p class="card-valor texto-primario">$1.800.000</p>
                     </article>
                     <article class="card">
                         <header class="card-top">
-                            <div class="icon-box icon-emerald"><span class="material-symbols-outlined">trending_up</span></div>
+                            <div class="icon-box icon-emerald"><span
+                                    class="material-symbols-outlined">trending_up</span></div>
                             <p class="card-titulo">Total de ingresos</p>
                             <span class="badge badge-emerald">+12.5%</span>
                         </header>
@@ -77,7 +84,8 @@
                     </article>
                     <article class="card ">
                         <header class="card-top">
-                            <div class="icon-box icon-blue"><span class="material-symbols-outlined">shopping_cart</span></div>
+                            <div class="icon-box icon-blue"><span class="material-symbols-outlined">shopping_cart</span>
+                            </div>
                             <p class="card-titulo">Total de gastos</p>
                             <span class="badge badge-rose">-5.2%</span>
                         </header>
@@ -87,6 +95,46 @@
 
                 <div class="grid-layout-principal">
                     <section class="col-izquierda">
+                        <article class="card">
+                            <header class="card-header-border flex-between">
+                                <h3>Gastos por mes</h3>
+                                <div class="legend">
+                                    <span class="dot ingresos"></span> Ingresos
+                                    <span class="dot gastos"></span> Gastos
+                                </div>
+                            </header>
+                            <div class="chart-bars">
+                                <div class="bar-group">
+                                    <div class="bar-wrapper">
+                                        <div class="bar bar-ingresos" style="height: 60%;"></div>
+                                        <div class="bar bar-gastos" style="height: 40%;"></div>
+                                    </div>
+                                    <span class="bar-label">Ene</span>
+                                </div>
+                                <div class="bar-group">
+                                    <div class="bar-wrapper">
+                                        <div class="bar bar-ingresos" style="height: 80%;"></div>
+                                        <div class="bar bar-gastos" style="height: 50%;"></div>
+                                    </div>
+                                    <span class="bar-label">Feb</span>
+                                </div>
+                                <div class="bar-group">
+                                    <div class="bar-wrapper">
+                                        <div class="bar bar-ingresos" style="height: 90%;"></div>
+                                        <div class="bar bar-gastos" style="height: 30%;"></div>
+                                    </div>
+                                    <span class="bar-label">Mar</span>
+                                </div>
+                                <div class="bar-group">
+                                    <div class="bar-wrapper">
+                                        <div class="bar bar-ingresos" style="height: 45%;"></div>
+                                        <div class="bar bar-gastos" style="height: 20%;"></div>
+                                    </div>
+                                    <span class="bar-label">Abr</span>
+                                </div>
+                            </div>
+                        </article>
+
                         <article class="card card-no-padding">
                             <header class="card-header-border">
                                 <h3>Últimos movimientos</h3>
@@ -106,7 +154,8 @@
                                         <tr>
                                             <td>
                                                 <div class="flex-align">
-                                                    <div class="icon-small"><span class="material-symbols-outlined">shopping_bag</span></div>
+                                                    <div class="icon-small"><span
+                                                            class="material-symbols-outlined">shopping_bag</span></div>
                                                     <strong>Suscripción Netflix</strong>
                                                 </div>
                                             </td>
@@ -131,7 +180,7 @@
 
                         <article class="card">
                             <header class="card-title-icon">
-                                <span class="material-symbols-outlined texto-primario">lightbulb</span> 
+                                <span class="material-symbols-outlined texto-primario">lightbulb</span>
                                 <h4>Tips de Ahorro</h4>
                             </header>
                             <ul class="tips-lista">
@@ -153,4 +202,5 @@
 
     <script src="../js/script.js"></script>
 </body>
+
 </html>
