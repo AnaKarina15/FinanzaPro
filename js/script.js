@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (email !== "" && password !== "") {
                 // Redirigir al dashboard
-                window.location.href = "dashboard.html";
+                window.location.href = "./views/dashboard.html";
             } else {
                 alert("Por favor, llena todos los campos.");
             }
