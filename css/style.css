@@ -384,7 +384,6 @@ main {
 .usuario-perfil {
     padding: 16px;
     border-radius: 12px;
-    text-decoration: none;
     color: var(--texto-secundario);
     font-weight: 500;
     transition: all 0.2s ease;
@@ -394,6 +393,7 @@ main {
     justify-content: center;
     padding: 6px;
     border-radius: 12px;
+    text-decoration: none;
 }
 
 .nav-link:hover,
@@ -407,8 +407,14 @@ main {
     font-weight: 700;
 }
 
+.nav-link,
 .usuario-perfil {
-    border-top: 1px solid var(--borde);
+    padding: 16px;
+    border-radius: 12px;
+    color: var(--texto-secundario);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
 }
 
 .avatar img {
@@ -421,6 +427,7 @@ main {
 .nombre {
     font-weight: 600;
     font-size: 14px;
+
 }
 
 /* --- Contenido Principal --- */
