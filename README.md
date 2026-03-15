@@ -33,12 +33,12 @@ Para cumplir con los estándares de diseño y usabilidad, implementamos:
 ├── index.html              # Landing Page principal (Entrada)
 ├── README.md               # Documentación del proyecto
 ├── /css
-│   └── style.css           # Hoja de estilos unificada y optimizada
+│   └── style.css           # Hoja de estilos
 ├── /js
 │   └── script.js           # Lógica de ruteo y validaciones
 └── /views
-    ├── login.html          # Pantalla de inicio de sesión
-    └── dashboard.html      # Panel principal de usuario
+│   └── dashboard.html      # Panel principal de usuario
+└── index.html          # Pantalla de inicial
 ```
 
 ## 👥 Equipo de Desarrollo
