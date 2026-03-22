@@ -1,97 +1,54 @@
-/* --- LAYOUT PRINCIPAL --- */
-.main-grid {
+/* --- Layout Principal de la Vista --- */
+.transactions-grid {
     display: grid;
-    /* Divide el espacio: 1 parte para el formulario, 1.5 para el resumen */
-    grid-template-columns: 1fr 1.5fr; 
-    gap: 2rem; 
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 32px;
+    margin-bottom: 32px;
 }
 
-
-.card {
-    background: var(--surface);
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid var(--outline);
-    box-shadow: var(--shadow);
-}
-
-/* --- SELECTOR GASTO/INGRESO  --- */
-.toggle-switch {
-    background: var(--surface-variant); 
+/* --- Selector de Gasto / Ingreso --- */
+.toggle-type {
     display: flex;
-    padding: 0.3rem;
-    border-radius: 0.8rem;
-    margin-bottom: 1.5rem;
+    background-color: var(--bg-fondo);
+    padding: 6px;
+    border-radius: 12px;
+    margin-bottom: 24px;
 }
 
-.toggle-btn {
+.type-btn {
     flex: 1;
+    padding: 10px;
     border: none;
-    padding: 0.6rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
     background: transparent;
+    border-radius: 8px;
     font-weight: 600;
-    text-transform: none; 
-}
-
-/* Estilo del botón activo*/
-.toggle-btn.active {
-    background: var(--surface);
-    color: var(--primary);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-/* --- CAMPO DE MONTO --- */
-.amount-input {
-    background: var(--surface-container);
-    display: flex;
-    align-items: center;
-    padding: 0.8rem 1rem;
-    border-radius: 0.8rem;
-}
-
-.amount-input input {
-    background: transparent;
-    border: none;
-    outline: none;
-    font-size: 1.2rem;
-    font-weight: bold;
-    width: 100%;
-    margin-left: 0.5rem;
-    color: var(--text-main);
-}
-
-/* --- BOTÓN GUARDAR --- */
-.btn-primary {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(to bottom right, var(--primary), var(--primary-container));
-    color: white;
-    border: none;
-    border-radius: 0.8rem;
-    font-weight: bold;
+    font-family: inherit;
+    color: var(--texto-secundario);
     cursor: pointer;
-    transition: transform 0.2s;
-    text-transform: none; 
+    transition: all 0.3s ease;
 }
 
-.btn-primary:hover { transform: scale(1.02); }
-
-/* --- ETIQUETAS DE LA TABLA --- */
-.tag {
-    background: var(--surface-container);
-    color: var(--text-muted);
-    padding: 0.3rem 0.8rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    display: inline-block;
+/* Estilo cuando el botón está seleccionado */
+.type-btn.active {
+    background-color: var(--bg-panel);
+    color: var(--texto-principal);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Estilo Gastos */
-.neg { 
-    color: var(--tertiary); 
-    font-weight: bold; 
+/* Detalles de color al seleccionar */
+.type-btn.active#btn-gasto {
+    color: #e11d48; 
+}
+.type-btn.active#btn-ingreso {
+    color: var(--color-primario);
+}
+
+/* --- Input Especial para el Monto --- */
+.monto-input {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: var(--texto-principal);
+    background-color: var(--bg-fondo) !important;
+    padding: 16px 20px !important;
+    letter-spacing: -0.5px;
 }
