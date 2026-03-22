@@ -380,24 +380,8 @@ main {
     flex-direction: column;
 }
 
-.nav-link,
-.usuario-perfil {
-    padding: 16px;
-    border-radius: 12px;
-    color: var(--texto-secundario);
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.usuario-perfil>a {
-    justify-content: center;
-    padding: 6px;
-    border-radius: 12px;
-    text-decoration: none;
-}
-
 .nav-link:hover,
-.usuario-perfil>a:hover {
+.profile-link>a:hover {
     background-color: var(--bg-fondo-hover);
 }
 
@@ -408,7 +392,7 @@ main {
 }
 
 .nav-link,
-.usuario-perfil {
+.profile-link {
     padding: 16px;
     border-radius: 12px;
     color: var(--texto-secundario);
