@@ -142,6 +142,10 @@ main {
     text-decoration: underline;
 }
 
+.mt-auto {
+    margin-top: auto !important;
+}
+
 /*COMPONENTES*/
 /* -- Header -- */
 .logo-container {
@@ -381,8 +385,9 @@ main {
 }
 
 .nav-link:hover,
-.profile-link>a:hover {
+.profile-link:hover {
     background-color: var(--bg-fondo-hover);
+    color: var(--color-primario);
 }
 
 .nav-link.activo {
