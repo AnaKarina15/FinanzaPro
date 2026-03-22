@@ -1,0 +1,97 @@
+/* --- LAYOUT PRINCIPAL --- */
+.main-grid {
+    display: grid;
+    /* Divide el espacio: 1 parte para el formulario, 1.5 para el resumen */
+    grid-template-columns: 1fr 1.5fr; 
+    gap: 2rem; 
+    margin-bottom: 2rem;
+}
+
+
+.card {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid var(--outline);
+    box-shadow: var(--shadow);
+}
+
+/* --- SELECTOR GASTO/INGRESO  --- */
+.toggle-switch {
+    background: var(--surface-variant); 
+    display: flex;
+    padding: 0.3rem;
+    border-radius: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.toggle-btn {
+    flex: 1;
+    border: none;
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    background: transparent;
+    font-weight: 600;
+    text-transform: none; 
+}
+
+/* Estilo del botón activo*/
+.toggle-btn.active {
+    background: var(--surface);
+    color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* --- CAMPO DE MONTO --- */
+.amount-input {
+    background: var(--surface-container);
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-radius: 0.8rem;
+}
+
+.amount-input input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    width: 100%;
+    margin-left: 0.5rem;
+    color: var(--text-main);
+}
+
+/* --- BOTÓN GUARDAR --- */
+.btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(to bottom right, var(--primary), var(--primary-container));
+    color: white;
+    border: none;
+    border-radius: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+    text-transform: none; 
+}
+
+.btn-primary:hover { transform: scale(1.02); }
+
+/* --- ETIQUETAS DE LA TABLA --- */
+.tag {
+    background: var(--surface-container);
+    color: var(--text-muted);
+    padding: 0.3rem 0.8rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* Estilo Gastos */
+.neg { 
+    color: var(--tertiary); 
+    font-weight: bold; 
+}
