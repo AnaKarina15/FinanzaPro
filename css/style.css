@@ -85,6 +85,10 @@ main {
     margin-top: 16px;
 }
 
+.mt-auto {
+    margin-top: auto !important;
+}
+
 .card-no-padding {
     padding: 0;
     overflow: hidden;
@@ -140,10 +144,6 @@ main {
 
 .link-primario:hover {
     text-decoration: underline;
-}
-
-.mt-auto {
-    margin-top: auto !important;
 }
 
 /*COMPONENTES*/
@@ -351,7 +351,6 @@ main {
     background-color: var(--bg-fondo);
 }
 
-
 /* LAYOUT PRINCIPAL */
 .app-container {
     display: flex;
@@ -417,7 +416,6 @@ main {
     font-weight: 600;
     font-size: 14px;
     color: black;
-
 }
 
 /* --- Contenido Principal --- */
@@ -475,184 +473,6 @@ main {
     margin-bottom: 32px;
 }
 
-.grid-layout-principal {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 32px;
-}
-
-.col-izquierda { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 20px;
-}
-
-.col-derecha {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-@media (max-width: 1024px) {
-    .grid-layout-principal {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* VISTAS ESPECÍFICAS */
-
-/* --- Dashboard: Gráfica */
-.chart-full-width {
-    margin-bottom: 32px;
-}
-
-.chart-bars {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    height: 120px;
-    padding-top: 10px;
-    border-bottom: 1px solid var(--borde);
-}
-
-.bar-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 60px;
-}
-
-.bar-wrapper {
-    display: flex;
-    align-items: flex-end;
-    gap: 6px;
-    height: 100px;
-    width: 100%;
-    justify-content: center;
-}
-
-.bar {
-    width: 14px;
-    border-radius: 4px 4px 0 0;
-    transition: all 0.3s ease;
-}
-
-.bar:hover {
-    filter: brightness(1.1);
-    cursor: pointer;
-    transform: scaleY(1.05);
-}
-
-.bar-ingresos {
-    background-color: var(--color-primario);
-}
-
-.bar-gastos {
-    background-color: #3b82f6;
-}
-
-.bar-label {
-    margin-top: 10px;
-    font-size: 12px;
-    color: var(--texto-secundario);
-}
-
-.legend {
-    font-size: 12px;
-    color: var(--texto-secundario);
-}
-
-.dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 10px;
-    margin-right: 4px;
-}
-
-.dot.ingresos {
-    background-color: var(--color-primario);
-}
-
-.dot.gastos {
-    background-color: #3b82f6;
-}
-
-/* --- Dashboard: Tarjeta Salud Financiera --- */
-.card-gradient {
-    background: linear-gradient(135deg, var(--color-primario) 0%, rgba(0, 0, 0, 0.8) 100%);
-    border-radius: 16px;
-    padding: 32px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.z-index-content {
-    position: relative;
-    z-index: 2;
-}
-
-.card-gradient h3 {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.card-gradient p {
-    font-size: 14px;
-    opacity: 0.9;
-    line-height: 1.5;
-    margin-bottom: 24px;
-}
-
-.bg-icon {
-    position: absolute;
-    bottom: -40px;
-    right: -40px;
-    font-size: 180px;
-    opacity: 0.1;
-    z-index: 1;
-}
-
-/* --- Dashboard: Tips --- */
-.card-title-icon {
-    gap: 8px;
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.tips-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    list-style: none;
-}
-
-.tip-item {
-    background-color: var(--bg-fondo);
-    padding: 12px;
-    border-radius: 8px;
-}
-
-.tip-tag {
-    font-size: 12px;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.tip-item p {
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
-}
-
 /* --- Vista: Login --- */
 .login-card {
     padding: 65px 32px;
@@ -695,21 +515,17 @@ main {
     color: var(--texto-secundario);
 }
 
-/* por si acaso el input tiene algún margen extraño, lo reseteamos */
 .checkbox-container input {
     margin: 0;
     cursor: pointer;
 }
 
 /* --- Vista: Registro (Index) --- */
-
-/* Fila para Nombre y Apellido */
 .input-row {
     display: flex;
     gap: 12px;
 }
 
-/* Fila para el Teléfono (Select + Input) */
 .telefono-row {
     display: flex;
     gap: 8px;
@@ -731,9 +547,8 @@ main {
     width: 100%;
 }
 
-/* Diseño de los inputs */
 .input-soft {
-    background-color: #eef2f6; 
+    background-color: #eef2f6;
     border: 1px solid transparent;
     border-radius: 8px;
     padding: 12px 16px;
@@ -749,14 +564,12 @@ main {
     background-color: #ffffff;
 }
 
-/* Contenedor para inputs con iconos */
 .input-con-icono {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-/* Icono a la izquierda (Email, Candado) */
 .input-con-icono .icono-izq {
     position: absolute;
     left: 12px;
@@ -764,7 +577,6 @@ main {
     font-size: 20px;
 }
 
-/* Icono a la derecha (Ojito de contraseña) */
 .input-con-icono .icono-der {
     position: absolute;
     right: 12px;
@@ -777,7 +589,6 @@ main {
     padding-left: 40px !important;
 }
 
-/* Texto de ayuda de la contraseña */
 .password-hint {
     font-size: 11px;
     color: var(--texto-secundario);
@@ -790,7 +601,7 @@ main {
 }
 
 .texto-error {
-    color: #ef4444 !important; /* Rojo intenso */
+    color: #ef4444 !important;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -799,10 +610,9 @@ main {
 
 .input-error {
     border: 1px solid #ef4444 !important;
-    background-color: #fef2f2 !important; /* Un fondito rojo muy claro */
+    background-color: #fef2f2 !important;
 }
 
-/* estilos para los términos en el registro */
 .terminos-container {
     margin-top: 16px;
     text-align: center;
@@ -867,7 +677,7 @@ main {
     min-height: 70vh;
 }
 
-#tarjeta-registro{
+#tarjeta-registro {
     padding: 30px 32px;
 }
 
