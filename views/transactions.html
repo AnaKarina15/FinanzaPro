@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingresos y Gastos - FinanzaPro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/transactions.css">
 </head>
+
 <body>
     <div class="app-container">
-        
+
         <aside class="sidebar">
-            <header class="logo-container">
+            <div class="logo-container">
                 <div class="logo-icon"><span class="material-symbols-outlined">payments</span></div>
                 <h1>FinanzaPro</h1>
-            </header>
+            </div>
 
             <nav class="navegacion">
                 <a href="dashboard.html" class="nav-link">
@@ -32,147 +36,166 @@
                     <span class="material-symbols-outlined">analytics</span> Reportes y Análisis
                 </a>
                 <a href="profile.html" class="profile-link">
-                <div class="avatar">
-                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTSJTyzGtTni8ccyOIbqrFa8YmoBPV37ihdbcySGP46uAhHVMWqg3ULJbWPABrZ4B5ttc3RXBu-7nBf7ZWGFlZCe2RiEajZ_j_kIpz5h3QEmtWamvpeL_ALWcdL1rTwYIXV2tCywysPGJVWUMj3O6KlSBFWs1nMEGwVIi0QfJxlbOzFO09ddBeGkLvFS3zJZMV0cmK3en2U68k_SgJ7V_QNMVLU_VSD-lRiTx-7PGJDIMe6d6eEH1eI8h1bV6gfVkR6WUeiIEbicA" alt="Foto de perfil de Valentina" class="avatar-grande">
-                    <span class="nombre">Valentina</span>
-                </div>
-            </a>
+                    <div class="avatar">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTSJTyzGtTni8ccyOIbqrFa8YmoBPV37ihdbcySGP46uAhHVMWqg3ULJbWPABrZ4B5ttc3RXBu-7nBf7ZWGFlZCe2RiEajZ_j_kIpz5h3QEmtWamvpeL_ALWcdL1rTwYIXV2tCywysPGJVWUMj3O6KlSBFWs1nMEGwVIi0QfJxlbOzFO09ddBeGkLvFS3zJZMV0cmK3en2U68k_SgJ7V_QNMVLU_VSD-lRiTx-7PGJDIMe6d6eEH1eI8h1bV6gfVkR6WUeiIEbicA"
+                            alt="Foto de perfil de Valentina" class="avatar-grande">
+                        <span class="nombre">Valentina</span>
+                    </div>
+                </a>
             </nav>
         </aside>
 
-        <main class="main-content">
-            <section class="pantalla activa">
-                
-                <header class="top-bar header-pantalla">
-                    <div>
-                        <h2>Ingresos y Gastos</h2>
-                        <p>Registra y administra tus movimientos financieros.</p>
-                    </div>
-                    <div class="header-tools flex-align">
-                        <span class="material-symbols-outlined">notifications</span>
-                    </div>
-                </header>
-
-                <div class="transactions-grid">
-                    <section class="card form-card">
-                        <h3>Registro de Movimientos</h3>
-                        <div class="toggle-type">
-                            <button class="type-btn active" id="btn-gasto">Gasto</button>
-                            <button class="type-btn" id="btn-ingreso">Ingreso</button>
-                        </div>
-
-                        <form id="transaction-form" class="formulario">
-                            <div class="input-group">
-                                <label>MONTO</label>
-                                <input type="number" step="0.01" placeholder="$ 0.00" class="monto-input" required>
-                            </div>
-                            
-                            <div class="form-row" style="display: flex; gap: 16px;">
-                                <div class="input-group" style="flex: 1;">
-                                    <label>FECHA</label>
-                                    <input type="date" required>
-                                </div>
-                                <div class="input-group" style="flex: 1;">
-                                    <label>CATEGORÍA</label>
-                                    <select id="category-select" style="width: 100%; padding: 12px; border: 1px solid var(--borde); border-radius: 8px;">
-                                        <option value="alimentacion">Alimentación</option>
-                                        <option value="transporte">Transporte</option>
-                                        <option value="ocio">Ocio</option>
-                                        <option value="otros">Otros</option>
-                                        <option value="new">+ Agregar nueva...</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="input-group">
-                                <label>DESCRIPCIÓN</label>
-                                <input type="text" placeholder="Ej. Compra semanal de víveres" required>
-                            </div>
-
-                            <button type="submit" class="btn btn-primario w-full shadow-btn" style="margin-top: 8px;">Guardar Transacción</button>
-                        </form>
-                    </section>
-
-                    <section class="summary-col" style="display: flex; flex-direction: column; gap: 24px;">
-                        <div class="grid-tarjetas" style="margin-bottom: 0;">
-                            <article class="card">
-                                <header class="card-top">
-                                    <div class="icon-box icon-emerald"><span class="material-symbols-outlined">trending_up</span></div>
-                                    <p class="card-titulo">Ingresos este mes</p>
-                                </header>
-                                <p class="card-valor">$5.000.000</p>
-                            </article>
-                            <article class="card">
-                                <header class="card-top">
-                                    <div class="icon-box badge-rose" style="color: #e11d48;"><span class="material-symbols-outlined">trending_down</span></div>
-                                    <p class="card-titulo">Gastos este mes</p>
-                                </header>
-                                <p class="card-valor">$1.840.500</p>
-                            </article>
-                        </div>
-
-                        <div class="card chart-card flex-1">
-                            <div class="card-header-border flex-between" style="padding: 0 0 16px 0;">
-                                <h3>Gastos por Categoría</h3>
-                                <a href="#" class="link-primario">Ver detalles</a>
-                            </div>
-                            <div class="chart-container flex-center" style="height: 150px;">
-                                <div class="donut-placeholder" style="width: 100px; height: 100px; border-radius: 50%; border: 15px solid var(--bg-fondo); border-top-color: var(--color-primario); border-right-color: #3b82f6;"></div>
-                            </div>
-                        </div>
-                    </section>
+        <div class="container">
+            <header class="header-pantalla">
+                <div>
+                    <h2>Ingresos y Gastos</h2>
+                    <p>Registra y administra tus movimientos financieros.</p>
                 </div>
+                <div class="header-botones">
+                    <button class="btn-secundario btn-notifications">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button class="btn btn-primario shadow-btn">
+                        <span class="material-symbols-outlined text-sm">add</span> Nuevo Movimiento
+                    </button>
+                </div>
+            </header>
+            <main class="main-content">
+                <section class="pantalla activa">
 
-                <section class="card history-card card-no-padding mt-4">
-                    <div class="card-header-border flex-between">
-                        <h3>Historial de Transacciones</h3>
-                        <div class="table-filters flex-align">
-                            <button class="btn btn-primario" style="padding: 6px 12px; font-size: 12px;">Todos</button>
-                            <button class="btn btn-secundario" style="padding: 6px 12px; font-size: 12px;">Ingresos</button>
-                            <button class="btn btn-secundario" style="padding: 6px 12px; font-size: 12px;">Gastos</button>
+                    <div class="transactions-grid">
+                        <section class="card form-card">
+                            <h3>Registro de Movimientos</h3>
+                            <div class="toggle-type">
+                                <button class="type-btn active" id="btn-gasto">Gasto</button>
+                                <button class="type-btn" id="btn-ingreso">Ingreso</button>
+                            </div>
+
+                            <form id="transaction-form" class="formulario">
+                                <div class="input-group">
+                                    <label>MONTO</label>
+                                    <input type="number" step="0.01" placeholder="$ 0.00" class="monto-input" required>
+                                </div>
+
+                                <div class="form-row" style="display: flex; gap: 16px;">
+                                    <div class="input-group" style="flex: 1;">
+                                        <label>FECHA</label>
+                                        <input type="date" required>
+                                    </div>
+                                    <div class="input-group" style="flex: 1;">
+                                        <label>CATEGORÍA</label>
+                                        <select id="category-select"
+                                            style="width: 100%; padding: 12px; border: 1px solid var(--borde); border-radius: 8px;">
+                                            <option value="alimentacion">Alimentación</option>
+                                            <option value="transporte">Transporte</option>
+                                            <option value="ocio">Ocio</option>
+                                            <option value="otros">Otros</option>
+                                            <option value="new">+ Agregar nueva...</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="input-group">
+                                    <label>DESCRIPCIÓN</label>
+                                    <input type="text" placeholder="Ej. Compra semanal de víveres" required>
+                                </div>
+
+                                <button type="submit" class="btn btn-primario w-full shadow-btn"
+                                    style="margin-top: 8px;">Guardar Transacción</button>
+                            </form>
+                        </section>
+
+                        <section class="summary-col" style="display: flex; flex-direction: column; gap: 24px;">
+                            <div class="grid-tarjetas" style="margin-bottom: 0;">
+                                <article class="card">
+                                    <header class="card-top">
+                                        <div class="icon-box icon-emerald"><span
+                                                class="material-symbols-outlined">trending_up</span></div>
+                                        <p class="card-titulo">Ingresos este mes</p>
+                                    </header>
+                                    <p class="card-valor">$5.000.000</p>
+                                </article>
+                                <article class="card">
+                                    <header class="card-top">
+                                        <div class="icon-box badge-rose" style="color: #e11d48;"><span
+                                                class="material-symbols-outlined">trending_down</span></div>
+                                        <p class="card-titulo">Gastos este mes</p>
+                                    </header>
+                                    <p class="card-valor">$1.840.500</p>
+                                </article>
+                            </div>
+
+                            <div class="card chart-card flex-1">
+                                <div class="card-header-border flex-between" style="padding: 0 0 16px 0;">
+                                    <h3>Gastos por Categoría</h3>
+                                    <a href="#" class="link-primario">Ver detalles</a>
+                                </div>
+                                <div class="chart-container flex-center" style="height: 150px;">
+                                    <div class="donut-placeholder"
+                                        style="width: 100px; height: 100px; border-radius: 50%; border: 15px solid var(--bg-fondo); border-top-color: var(--color-primario); border-right-color: #3b82f6;">
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <section class="card history-card card-no-padding mt-4">
+                        <div class="card-header-border flex-between">
+                            <h3>Historial de Transacciones</h3>
+                            <div class="table-filters flex-align">
+                                <button class="btn btn-primario"
+                                    style="padding: 6px 12px; font-size: 12px;">Todos</button>
+                                <button class="btn btn-secundario"
+                                    style="padding: 6px 12px; font-size: 12px;">Ingresos</button>
+                                <button class="btn btn-secundario"
+                                    style="padding: 6px 12px; font-size: 12px;">Gastos</button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="table-responsive">
-                        <table class="tabla-moderna">
-                            <thead>
-                                <tr>
-                                    <th>DETALLE</th>
-                                    <th>CATEGORÍA</th>
-                                    <th>FECHA</th>
-                                    <th class="text-right">MONTO</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="flex-align">
-                                            <div class="icon-small"><span class="material-symbols-outlined">restaurant</span></div>
-                                            <strong>Almuerzo Ejecutivo</strong>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge badge-emerald">ALIMENTACIÓN</span></td>
-                                    <td>24 Oct, 2023</td>
-                                    <td class="text-right text-rose font-bold">-$24.500</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="flex-align">
-                                            <div class="icon-small"><span class="material-symbols-outlined">payments</span></div>
-                                            <strong>Pago de Nómina Mensual</strong>
-                                        </div>
-                                    </td>
-                                    <td><span class="badge badge-blue">SUELDO</span></td>
-                                    <td>22 Oct, 2023</td>
-                                    <td class="text-right texto-primario font-bold">+$3.200.000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                        <div class="table-responsive">
+                            <table class="tabla-moderna">
+                                <thead>
+                                    <tr>
+                                        <th>DETALLE</th>
+                                        <th>CATEGORÍA</th>
+                                        <th>FECHA</th>
+                                        <th class="text-right">MONTO</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="flex-align">
+                                                <div class="icon-small"><span
+                                                        class="material-symbols-outlined">restaurant</span></div>
+                                                <strong>Almuerzo Ejecutivo</strong>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-emerald">ALIMENTACIÓN</span></td>
+                                        <td>24 Oct, 2023</td>
+                                        <td class="text-right text-rose font-bold">-$24.500</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="flex-align">
+                                                <div class="icon-small"><span
+                                                        class="material-symbols-outlined">payments</span></div>
+                                                <strong>Pago de Nómina Mensual</strong>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-blue">SUELDO</span></td>
+                                        <td>22 Oct, 2023</td>
+                                        <td class="text-right texto-primario font-bold">+$3.200.000</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
                 </section>
-
-            </section>
-        </main>
+            </main>
+        </div>
     </div>
 </body>
+
 </html>

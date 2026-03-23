@@ -1,3 +1,7 @@
+header {
+    padding: 32px 32px 0 32px;
+}
+
 /* --- Layout Principal de la Vista --- */
 .transactions-grid {
     display: grid;
