@@ -421,10 +421,11 @@ main {
 /* --- Contenido Principal --- */
 .container {
     width: 100%;
+    overflow-y: scroll;
+    scrollbar-width: none;
 }
 
 .main-content {
-    overflow-y: auto;
     padding: 32px;
 }
 
