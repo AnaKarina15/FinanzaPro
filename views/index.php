@@ -9,7 +9,7 @@
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="views/css/style.css">
 </head>
 
 <body class="theme-green bg-landing">
@@ -21,7 +21,6 @@
         </div>
         <nav class="nav-links-landing">
             <a href="#beneficios" class="link-nav">Beneficios</a>
-            <a href="./index.html" class="btn btn-primario">Iniciar Sesión</a>
         </nav>
     </header>
 
@@ -60,14 +59,15 @@
                 <article id="tarjeta-login" class="card login-card">
                     <h2 class="login-title">Bienvenido de nuevo</h2>
                     <p class="login-subtitle">Ingresa tus datos para continuar</p>
-                    <form action="./views/dashboard.html" method="GET" class="formulario login-form">
+                    
+                    <form action="index.php?action=iniciarSesion" method="POST" class="formulario login-form">
                         <div class="input-group">
                             <label for="email">Correo Electrónico</label>
-                            <input type="email" id="email" placeholder="nombre@ejemplo.com" required>
+                            <input type="email" id="email" name="email" placeholder="nombre@ejemplo.com" required>
                         </div>
                         <div class="input-group">
                             <label for="password">Contraseña</label>
-                            <input type="password" id="password" placeholder="••••••••" required>
+                            <input type="password" id="password" name="password" placeholder="••••••••" required>
                         </div>
                         <div class="login-actions">
                             <label class="checkbox-container">
@@ -77,6 +77,7 @@
                         </div>
                         <button type="submit" class="btn btn-primario w-full">Iniciar Sesión</button>
                     </form>
+
                     <footer class="login-footer">
                         <p>¿No tienes cuenta? <a href="#" id="btn-ir-registro" class="link-primario">Regístrate</a></p>
                     </footer>
@@ -85,28 +86,27 @@
                 <article id="tarjeta-registro" class="card login-card" style="display: none;">
                     <h2 class="login-title">Crea tu cuenta</h2>
                     <p class="login-subtitle">Únete a FinanzaPro y comienza a organizar tus finanzas</p>
-                    <form action="./views/dashboard.html" method="GET" class="formulario formulario-registro">
-
+                    
+                    <form action="index.php?action=registrar" method="POST" class="formulario formulario-registro">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="name">Nombre</label>
-                                <input type="text" id="name" class="input-soft" placeholder="Ej. Juan" required>
+                                <input type="text" id="name" name="nombre" class="input-soft" placeholder="Ej. Juan" required>
                             </div>
                             <div class="input-group">
                                 <label for="lastname">Apellido</label>
-                                <input type="text" id="lastname" class="input-soft" placeholder="Ej. Pérez" required>
+                                <input type="text" id="lastname" name="apellido" class="input-soft" placeholder="Ej. Pérez" required>
                             </div>
                         </div>
 
                         <div class="input-group mt-2">
                             <label for="phone">Teléfono</label>
                             <div class="telefono-row">
-                                <select class="input-soft select-codigo">
+                                <select name="codigo_pais" class="input-soft select-codigo">
                                     <option value="+57">+57</option>
                                     <option value="+1">+1</option>
                                 </select>
-                                <input type="tel" id="phone" class="input-soft input-tel" placeholder="Ej. 300 456 7890"
-                                    required>
+                                <input type="tel" id="phone" name="telefono" class="input-soft input-tel" placeholder="Ej. 300 456 7890" required>
                             </div>
                         </div>
 
@@ -114,30 +114,45 @@
                             <label for="email-soft">Correo Electrónico</label>
                             <div class="input-con-icono">
                                 <span class="material-symbols-outlined icono-izq">email</span>
-                                <input type="email" id="email-soft" class="input-soft pl-icon"
-                                    placeholder="nombre@ejemplo.com" required>
+                                <input type="email" id="email-soft" name="email" class="input-soft pl-icon" placeholder="nombre@ejemplo.com" required>
                             </div>
                         </div>
 
                         <div class="input-group mt-2">
-                            <label for="password-soft">Contraseña</label>
+                            <label for="password-registro">Contraseña</label>
                             <div class="input-con-icono">
                                 <span class="material-symbols-outlined icono-izq">lock</span>
-                                <input type="password" id="password-registro" class="input-soft pl-icon"
-                                    placeholder="••••••••" required>
-                                <span class="material-symbols-outlined icono-der">visibility</span>
+                                <input type="password" id="password-registro" name="password" class="input-soft pl-icon" placeholder="••••••••" required>
+                                <span class="material-symbols-outlined icono-der" id="toggle-password" style="cursor: pointer; user-select: none; pointer-events: auto; z-index: 10;" onclick="togglePasswordVisibility()">visibility</span>
                             </div>
-                            <p id="mensaje-error-pass" class="password-hint">Mínimo 8 caracteres, una mayúscula, una
-                                minúscula y un número</p>
+                            <p id="mensaje-error-pass" class="password-hint">Mínimo 8 caracteres, una mayúscula, una minúscula y un número</p>
                         </div>
 
-                        <div class="terminos-container">
-                            <p class="terminos-texto">
-                                Al registrarte, aceptas nuestros
-                                <a href="#" class="link-terminos">términos de servicio</a> y
-                                <a href="#" class="link-terminos">política de privacidad</a>.
-                            </p>
+                        <div class="terminos-container" style="margin-top: 16px; text-align: center;">
+                            <label style="display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="acepta-terminos" required style="display: inline-block !important; width: 14px !important; height: 14px !important; margin: 0; appearance: auto !important; opacity: 1 !important;"> 
+                                <span class="terminos-texto">
+                                    Al registrarte, aceptas nuestros 
+                                    <a href="#" class="link-terminos">términos de servicio</a> y
+                                    <a href="#" class="link-terminos">política de privacidad</a>.
+                                </span>
+                            </label>
                         </div>
+
+                        <script>
+                            function togglePasswordVisibility() {
+                                const input = document.getElementById('password-registro');
+                                const icon = document.getElementById('toggle-password');
+                                
+                                if (input.type === 'password') {
+                                    input.type = 'text';
+                                    icon.textContent = 'visibility_off';
+                                } else {
+                                    input.type = 'password';
+                                    icon.textContent = 'visibility';
+                                }
+                            }
+                        </script>
 
                         <button type="submit" class="btn btn-primario w-full" style="margin-top: 5px;">Registrarse
                             <span class="material-symbols-outlined" style="margin-left: 8px;">arrow_forward</span>
@@ -184,7 +199,26 @@
             </div>
         </section>
     </main>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.has('registro') && urlParams.get('registro') === 'exito') {
+                Swal.fire({
+                    title: '¡Cuenta Creada!',
+                    text: 'Tu registro fue exitoso. Ya puedes iniciar sesión.',
+                    icon: 'success',
+                    confirmButtonColor: '#059669',
+                    confirmButtonText: 'Genial'
+                });
+                
+                // Esto limpia la URL para que no vuelva a salir si recargan la página
+                window.history.replaceState(null, null, window.location.pathname);
+            }
+        });
+    </script>
     <footer class="footer-landing">
         <div class="logo-container-landing justify-center opacity-70">
             <div class="logo-icon scale-75"><span class="material-symbols-outlined">payments</span></div>
@@ -193,7 +227,8 @@
         <p class="copyright">© 2026 FinanzaPro. Todos los derechos reservados.</p>
     </footer>
 
-    <script src="./js/script.js"></script>
+    <script src="views/js/script.js"></script>
+
 </body>
 
 </html>

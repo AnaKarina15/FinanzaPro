@@ -1,3 +1,11 @@
+<?php
+session_start();
+// Si alguien intenta entrar sin iniciar sesión, lo devuelve al index
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: index.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,12 +13,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - FinanzaPro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 
 <body>
@@ -22,62 +28,64 @@
             </div>
 
             <nav class="navegacion">
-                <a href="dashboard.html" class="nav-link activo">
+                <a href="dashboard.php" class="nav-link activo">
                     <span class="material-symbols-outlined">grid_view</span> Dashboard
                 </a>
-                <a href="../views/transactions.html" class="nav-link">
+                <a href="#" class="nav-link">
                     <span class="material-symbols-outlined">currency_exchange</span> Ingresos y Gastos
                 </a>
-                <a href="../views/budgets-goals.html" class="nav-link">
+                <a href="#" class="nav-link">
                     <span class="material-symbols-outlined">savings</span> Presupuesto y Metas
                 </a>
-                <a href="../views/reports.html" class="nav-link">
+                <a href="#" class="nav-link">
                     <span class="material-symbols-outlined">analytics</span> Reportes y Análisis
                 </a>
-                <a href="../views/profile.html" class="profile-link">
+                <?php if ($_SESSION['rol'] === 'Admin'): ?>
+                <a href="#" class="nav-link" style="color: #059669; font-weight: bold; background-color: #ecfdf5; border-radius: 8px;">
+                    <span class="material-symbols-outlined">admin_panel_settings</span> Panel de Administrador
+                </a>
+                <?php endif; ?>
+                <a href="#" class="profile-link mt-auto">
                     <div class="avatar">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTSJTyzGtTni8ccyOIbqrFa8YmoBPV37ihdbcySGP46uAhHVMWqg3ULJbWPABrZ4B5ttc3RXBu-7nBf7ZWGFlZCe2RiEajZ_j_kIpz5h3QEmtWamvpeL_ALWcdL1rTwYIXV2tCywysPGJVWUMj3O6KlSBFWs1nMEGwVIi0QfJxlbOzFO09ddBeGkLvFS3zJZMV0cmK3en2U68k_SgJ7V_QNMVLU_VSD-lRiTx-7PGJDIMe6d6eEH1eI8h1bV6gfVkR6WUeiIEbicA"
-                            alt="Foto de perfil de Valentina" class="avatar-grande">
-                        <span class="nombre">Valentina</span>
+                        <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']); ?>&background=059669&color=fff" alt="Foto de perfil" class="avatar-grande" style="border-radius: 50%;">
+                        <span class="nombre"><?php echo htmlspecialchars($_SESSION['nombre_usuario']. ' ' . $_SESSION['apellido_usuario']); ?></span>
                     </div>
                 </a>
             </nav>
-
         </aside>
+
         <div class="container">
             <header class="header-pantalla">
                 <div>
                     <h2>Dashboard</h2>
-                    <p>Bienvenida, Valentina. Aquí tienes el resumen de hoy.</p>
+                    <p>Bienvenid@, <?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?>. Aquí tienes el resumen de hoy.</p>
                 </div>
                 <div class="header-botones">
                     <button class="btn-secundario btn-notifications">
                         <span class="material-symbols-outlined">notifications</span>
                     </button>
                     <button class="btn btn-secundario">
-                        <span class="material-symbols-outlined text-sm">calendar_today</span> Enero 2024
+                        <span class="material-symbols-outlined text-sm">calendar_today</span> <?php echo date('M Y'); ?>
                     </button>
                     <button class="btn btn-primario shadow-btn">
                         <span class="material-symbols-outlined text-sm">add</span> Nuevo Movimiento
                     </button>
                 </div>
             </header>
+
             <main class="main-content">
                 <section class="pantalla activa">
-
                     <section class="grid-tarjetas">
                         <article class="card available-card">
                             <header class="card-top">
-                                <div class="icon-box icon-primary"><span
-                                        class="material-symbols-outlined">account_balance_wallet</span></div>
+                                <div class="icon-box icon-primary"><span class="material-symbols-outlined">account_balance_wallet</span></div>
                                 <p class="card-titulo">Disponible</p>
                             </header>
                             <p class="card-valor texto-primario">$1.800.000</p>
                         </article>
                         <article class="card">
                             <header class="card-top">
-                                <div class="icon-box icon-emerald"><span
-                                        class="material-symbols-outlined">trending_up</span></div>
+                                <div class="icon-box icon-emerald"><span class="material-symbols-outlined">trending_up</span></div>
                                 <p class="card-titulo">Total de ingresos</p>
                                 <span class="badge badge-emerald">+12.5%</span>
                             </header>
@@ -85,9 +93,7 @@
                         </article>
                         <article class="card ">
                             <header class="card-top">
-                                <div class="icon-box icon-blue"><span
-                                        class="material-symbols-outlined">shopping_cart</span>
-                                </div>
+                                <div class="icon-box icon-blue"><span class="material-symbols-outlined">shopping_cart</span></div>
                                 <p class="card-titulo">Total de gastos</p>
                                 <span class="badge badge-rose">-5.2%</span>
                             </header>
@@ -138,7 +144,7 @@
                             </article>
 
                             <article class="card card-no-padding">
-                                <header class="card-header-border">
+                                <header class="card-header-border flex-between">
                                     <h3>Últimos movimientos</h3>
                                     <a href="#" class="link-primario">Ver todo</a>
                                 </header>
@@ -156,9 +162,7 @@
                                             <tr>
                                                 <td>
                                                     <div class="flex-align">
-                                                        <div class="icon-small"><span
-                                                                class="material-symbols-outlined">shopping_bag</span>
-                                                        </div>
+                                                        <div class="icon-small"><span class="material-symbols-outlined">shopping_bag</span></div>
                                                         <strong>Suscripción Netflix</strong>
                                                     </div>
                                                 </td>
@@ -202,10 +206,9 @@
                 </section>
             </main>
         </div>
-
     </div>
 
-    <script src="../js/script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 
 </html>

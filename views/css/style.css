@@ -85,13 +85,10 @@ main {
     margin-top: 16px;
 }
 
-.mt-auto {
-    margin-top: auto !important;
-}
-
 .card-no-padding {
     padding: 0;
     overflow: hidden;
+    padding: 15px;
 }
 
 /* Flexbox Reutilizable */
@@ -119,20 +116,18 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 15px;
 }
 
-.flex-align,
-.logo-container,
-.nav-link,
-.usuario-perfil>a,
-.avatar,
-.leyenda span,
-.logo-container-landing,
-.nav-links-landing,
-.card-title-icon {
+
+.card-title-icon, .avatar {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.card-title-icon {
+    padding: 15px;
 }
 
 .link-primario {
@@ -214,6 +209,7 @@ main {
 .available-card .card-top {
     justify-content: start;
     gap: 16px;
+    padding: 15px;
 }
 
 .available-card .texto-primario {
@@ -239,6 +235,7 @@ main {
 .card-header-border {
     padding: 24px;
     border-bottom: 1px solid var(--borde);
+    padding: 15px;
 }
 
 /* --- Badges e Iconos --- */
@@ -655,9 +652,15 @@ main {
     margin: 0 auto;
 }
 
-.logo-container-landing h1 {
-    font-size: 20px;
-    font-weight: 800;
+.logo-container-landing {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    h1 {
+        font-size: 20px;
+        font-weight: 800;
+    }
 }
 
 .nav-links-landing {
@@ -684,7 +687,7 @@ main {
     padding: 55px 5%;
     max-width: 1200px;
     margin: 0 auto;
-    min-height: 70vh;
+    height: 90vh;
 }
 
 #tarjeta-registro {
@@ -754,6 +757,10 @@ main {
 }
 
 .features-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 90vh;
     background-color: white;
     padding: 80px 5%;
     border-top: 1px solid var(--borde);
