@@ -1,168 +1,80 @@
-header {
-    padding: 32px 32px 0 32px;
+/* METRICS CARDS */
+.metrics-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
-/* --- Layout del Dashboard --- */
-.grid-layout-principal {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 32px;
+/* AVAILABLE, INCOMES & OUTCOMES */
+.available-card .card-value {
+  color: var(--primary);
 }
 
-.col-izquierda { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 20px;
+/* INCOMES VS OUTCOMES */
+.dashboard-chart-card {
+  grid-column: 1/3;
+  grid-row: 2/4;
+  height: 250px;
 }
 
-.col-derecha {
+/* HEALTH CARD */
+.dashboard-health-card {
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    #000000cc 100%
+  );
+  border-radius: 32px;
+  color: #ffffff;
+  position: relative;
+  box-shadow: 0 10px 25px #0000001a;
+
+  div {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-}
+    gap: 8px;
+  }
 
-@media (max-width: 1024px) {
-    .grid-layout-principal {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* --- Gráfica de Barras --- */
-.chart-full-width { margin-bottom: 32px; }
-
-.chart-bars {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    height: 120px;
-    padding-top: 10px;
-    border-bottom: 1px solid var(--borde);
-}
-
-.bar-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 60px;
-}
-
-.bar-wrapper {
-    display: flex;
-    align-items: flex-end;
-    gap: 6px;
-    height: 100px;
-    width: 100%;
-    justify-content: center;
-}
-
-.bar {
-    width: 14px;
-    border-radius: 4px 4px 0 0;
-    transition: all 0.3s ease;
-}
-
-.bar:hover {
-    filter: brightness(1.1);
-    cursor: pointer;
-    transform: scaleY(1.05);
-}
-
-.bar-ingresos { background-color: var(--color-primario); }
-.bar-gastos { background-color: #3b82f6; }
-
-.bar-label {
-    margin-top: 10px;
-    font-size: 12px;
-    color: var(--texto-secundario);
-}
-
-.legend {
-    font-size: 12px;
-    color: var(--texto-secundario);
-}
-
-.dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 10px;
-    margin-right: 4px;
-}
-
-.dot.ingresos { background-color: var(--color-primario); }
-.dot.gastos { background-color: #3b82f6; }
-
-/* --- Tarjeta Salud Financiera --- */
-.card-gradient {
-    background: linear-gradient(135deg, var(--color-primario) 0%, rgba(0, 0, 0, 0.8) 100%);
-    border-radius: 32px;
-    padding: 32px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.z-index-content {
-    position: relative;
-    z-index: 2;
-}
-
-.card-gradient h3 {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.card-gradient p {
-    font-size: 14px;
-    opacity: 0.9;
-    line-height: 1.5;
-    margin-bottom: 24px;
-}
-
-.bg-icon {
+  .bg-icon {
     position: absolute;
     bottom: -40px;
-    right: -40px;
+    right: -10px;
     font-size: 180px;
     opacity: 0.1;
-    z-index: 1;
+  }
 }
 
-/* --- Tips de Ahorro --- */
-.card-title-icon {
-    gap: 8px;
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 16px;
+/* RECENT CARD */
+.dashboard-recent-card {
+  grid-column: 1/3;
 }
 
-.tips-lista {
+/* TIPS CARD */
+.dashboard-tips-card {
+  justify-content: start;
+  grid-row: 3/5 ;
+}
+
+.tips-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     list-style: none;
 }
 
 .tip-item {
-    background-color: var(--bg-fondo);
-    padding: 12px;
+    background-color: var(--bg);
+    padding: 16px;
     border-radius: 8px;
 }
 
 .tip-tag {
-    font-size: 12px;
     font-weight: 700;
     color: #94a3b8;
     text-transform: uppercase;
-    display: block;
-    margin-bottom: 4px;
 }
 
-.tip-item p {
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
+.metrics-cards .card-top {
+  justify-content: space-evenly;
 }

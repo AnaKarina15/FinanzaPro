@@ -47,7 +47,7 @@ class ControladorUsuario {
 
     // --- VISTAS ---
     public function mostrarLogin() {
-        require 'views/index.php'; 
+        require 'views/login.php'; 
     }
 
     public function mostrarRegistro() {

@@ -1,214 +1,195 @@
-<?php
-session_start();
-// Si alguien intenta entrar sin iniciar sesión, lo devuelve al index
-if (!isset($_SESSION['id_usuario'])) {
-    header("Location: index.php");
-    exit();
-}
-?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - FinanzaPro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-</head>
-
-<body>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/global.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="./js/dashboard-charts.js"></script>
+  </head>
+  <body>
     <div class="app-container">
-        <aside class="sidebar">
-            <div class="logo-container">
-                <div class="logo-icon"><span class="material-symbols-outlined">payments</span></div>
-                <h1>FinanzaPro</h1>
-            </div>
-
-            <nav class="navegacion">
-                <a href="dashboard.php" class="nav-link activo">
-                    <span class="material-symbols-outlined">grid_view</span> Dashboard
-                </a>
-                <a href="#" class="nav-link">
-                    <span class="material-symbols-outlined">currency_exchange</span> Ingresos y Gastos
-                </a>
-                <a href="#" class="nav-link">
-                    <span class="material-symbols-outlined">savings</span> Presupuesto y Metas
-                </a>
-                <a href="#" class="nav-link">
-                    <span class="material-symbols-outlined">analytics</span> Reportes y Análisis
-                </a>
-                <?php if ($_SESSION['rol'] === 'Admin'): ?>
-                <a href="#" class="nav-link" style="color: #059669; font-weight: bold; background-color: #ecfdf5; border-radius: 8px;">
-                    <span class="material-symbols-outlined">admin_panel_settings</span> Panel de Administrador
-                </a>
-                <?php endif; ?>
-                <a href="#" class="profile-link mt-auto">
-                    <div class="avatar">
-                        <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']); ?>&background=059669&color=fff" alt="Foto de perfil" class="avatar-grande" style="border-radius: 50%;">
-                        <span class="nombre"><?php echo htmlspecialchars($_SESSION['nombre_usuario']. ' ' . $_SESSION['apellido_usuario']); ?></span>
-                    </div>
-                </a>
-            </nav>
-        </aside>
-
-        <div class="container">
-            <header class="header-pantalla">
-                <div>
-                    <h2>Dashboard</h2>
-                    <p>Bienvenid@, <?php echo htmlspecialchars($_SESSION['nombre_usuario']); ?>. Aquí tienes el resumen de hoy.</p>
-                </div>
-                <div class="header-botones">
-                    <button class="btn-secundario btn-notifications">
-                        <span class="material-symbols-outlined">notifications</span>
-                    </button>
-                    <button class="btn btn-secundario">
-                        <span class="material-symbols-outlined text-sm">calendar_today</span> <?php echo date('M Y'); ?>
-                    </button>
-                    <button class="btn btn-primario shadow-btn">
-                        <span class="material-symbols-outlined text-sm">add</span> Nuevo Movimiento
-                    </button>
-                </div>
-            </header>
-
-            <main class="main-content">
-                <section class="pantalla activa">
-                    <section class="grid-tarjetas">
-                        <article class="card available-card">
-                            <header class="card-top">
-                                <div class="icon-box icon-primary"><span class="material-symbols-outlined">account_balance_wallet</span></div>
-                                <p class="card-titulo">Disponible</p>
-                            </header>
-                            <p class="card-valor texto-primario">$1.800.000</p>
-                        </article>
-                        <article class="card">
-                            <header class="card-top">
-                                <div class="icon-box icon-emerald"><span class="material-symbols-outlined">trending_up</span></div>
-                                <p class="card-titulo">Total de ingresos</p>
-                                <span class="badge badge-emerald">+12.5%</span>
-                            </header>
-                            <p class="card-valor">$5.000.000</p>
-                        </article>
-                        <article class="card ">
-                            <header class="card-top">
-                                <div class="icon-box icon-blue"><span class="material-symbols-outlined">shopping_cart</span></div>
-                                <p class="card-titulo">Total de gastos</p>
-                                <span class="badge badge-rose">-5.2%</span>
-                            </header>
-                            <p class="card-valor">$3.200.000</p>
-                        </article>
-                    </section>
-
-                    <div class="grid-layout-principal">
-                        <section class="col-izquierda">
-                            <article class="card">
-                                <header class="card-header-border flex-between">
-                                    <h3>Gastos por mes</h3>
-                                    <div class="legend">
-                                        <span class="dot ingresos"></span> Ingresos
-                                        <span class="dot gastos"></span> Gastos
-                                    </div>
-                                </header>
-                                <div class="chart-bars">
-                                    <div class="bar-group">
-                                        <div class="bar-wrapper">
-                                            <div class="bar bar-ingresos" style="height: 60%;"></div>
-                                            <div class="bar bar-gastos" style="height: 40%;"></div>
-                                        </div>
-                                        <span class="bar-label">Ene</span>
-                                    </div>
-                                    <div class="bar-group">
-                                        <div class="bar-wrapper">
-                                            <div class="bar bar-ingresos" style="height: 80%;"></div>
-                                            <div class="bar bar-gastos" style="height: 50%;"></div>
-                                        </div>
-                                        <span class="bar-label">Feb</span>
-                                    </div>
-                                    <div class="bar-group">
-                                        <div class="bar-wrapper">
-                                            <div class="bar bar-ingresos" style="height: 90%;"></div>
-                                            <div class="bar bar-gastos" style="height: 30%;"></div>
-                                        </div>
-                                        <span class="bar-label">Mar</span>
-                                    </div>
-                                    <div class="bar-group">
-                                        <div class="bar-wrapper">
-                                            <div class="bar bar-ingresos" style="height: 45%;"></div>
-                                            <div class="bar bar-gastos" style="height: 20%;"></div>
-                                        </div>
-                                        <span class="bar-label">Abr</span>
-                                    </div>
-                                </div>
-                            </article>
-
-                            <article class="card card-no-padding">
-                                <header class="card-header-border flex-between">
-                                    <h3>Últimos movimientos</h3>
-                                    <a href="#" class="link-primario">Ver todo</a>
-                                </header>
-                                <div class="table-responsive">
-                                    <table class="tabla-moderna">
-                                        <thead>
-                                            <tr>
-                                                <th>Concepto</th>
-                                                <th>Fecha</th>
-                                                <th>Categoría</th>
-                                                <th class="text-right">Monto</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div class="flex-align">
-                                                        <div class="icon-small"><span class="material-symbols-outlined">shopping_bag</span></div>
-                                                        <strong>Suscripción Netflix</strong>
-                                                    </div>
-                                                </td>
-                                                <td>24 Ene, 2025</td>
-                                                <td><span class="badge badge-blue">Entretenimiento</span></td>
-                                                <td class="text-right text-rose font-bold">-$15.000</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </article>
-                        </section>
-
-                        <aside class="col-derecha">
-                            <article class="card-gradient">
-                                <div class="z-index-content">
-                                    <h3>Salud Financiera</h3>
-                                    <p>Vas por buen camino. Este mes has ahorrado un 15% más que el anterior.</p>
-                                </div>
-                                <span class="material-symbols-outlined bg-icon">health_and_safety</span>
-                            </article>
-
-                            <article class="card">
-                                <header class="card-title-icon">
-                                    <span class="material-symbols-outlined texto-primario">lightbulb</span>
-                                    <h4>Tips de Ahorro</h4>
-                                </header>
-                                <ul class="tips-lista">
-                                    <li class="tip-item">
-                                        <span class="tip-tag">Regla 50/30/20</span>
-                                        <p>Destina el 20% de tus ingresos hoy mismo a tu cuenta de ahorros.</p>
-                                    </li>
-                                    <li class="tip-item">
-                                        <span class="tip-tag">Gasto Hormiga</span>
-                                        <p>Reduce las suscripciones que no has usado.</p>
-                                    </li>
-                                </ul>
-                            </article>
-                        </aside>
-                    </div>
-                </section>
-            </main>
+      <aside class="navigation-sidebar">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <span class="material-symbols-outlined">payments</span>
+          </div>
+          <h1 class="logo-text">FinanzaPro</h1>
         </div>
+        <nav class="sidebar-nav">
+          <a href="dashboard.html" class="nav-link active" disabled>
+            <span class="material-symbols-outlined">grid_view</span> Dashboard
+          </a>
+          <a href="#" class="nav-link">
+            <span class="material-symbols-outlined">currency_exchange</span>
+            Ingresos y Gastos
+          </a>
+          <a href="#" class="nav-link">
+            <span class="material-symbols-outlined">savings</span> Presupuesto y
+            Metas
+          </a>
+          <a href="#" class="nav-link">
+            <span class="material-symbols-outlined">analytics</span> Reportes y
+            Análisis
+          </a>
+          <a href="#" class="nav-link nav-profile">
+            <div class="avatar">
+              <img src="" alt="Foto de perfil" />
+            </div>
+            <span class="username"> { usuario } </span>
+          </a>
+        </nav>
+      </aside>
+      <header class="app-header">
+        <div class="view-info">
+          <h2 class="view-title">Dashboard</h2>
+          <p class="view-description">
+            Bienvenid@ { usuario }. Aquí tienes el resumen de hoy.
+          </p>
+        </div>
+        <div class="view-buttons">
+          <button class="btn-secondary">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button class="btn-secondary">
+            <span class="material-symbols-outlined">calendar_today</span>
+            { fecha }
+          </button>
+          <button class="btn-primary">
+            <span class="material-symbols-outlined">add</span>
+            Nuevo Movimiento
+          </button>
+        </div>
+      </header>
+      <main class="main-content">
+        <div class="metrics-cards">
+          <article class="card available-card">
+            <div class="card-top">
+              <div class="icon-box icon-green">
+                <span class="material-symbols-outlined"
+                  >account_balance_wallet</span
+                >
+              </div>
+              <p class="card-titulo">Disponible</p>
+            </div>
+            <p class="card-value texto-primario">$1.800.000</p>
+          </article>
+
+          <article class="card incomes-card">
+            <div class="card-top">
+              <div class="icon-box icon-green">
+                <span class="material-symbols-outlined">trending_up</span>
+              </div>
+              <p class="card-titulo">Total de ingresos</p>
+              <span class="badge badge-green">+12.5%</span>
+            </div>
+            <p class="card-value">$5.000.000</p>
+          </article>
+
+          <article class="card outcomes-card">
+            <div class="card-top">
+              <div class="icon-box icon-blue">
+                <span class="material-symbols-outlined">shopping_cart</span>
+              </div>
+              <p class="card-titulo">Total de gastos</p>
+              <span class="badge badge-blue">-5.2%</span>
+            </div>
+            <p class="card-value">$3.200.000</p>
+          </article>
+          <article class="card dashboard-chart-card">
+            <h3>Ingresos vs Gastos</h3>
+            <canvas class="incomes-outcomes-chart"></canvas>
+          </article>
+          <article class="card dashboard-health-card">
+            <div>
+              <h3>Salud Financiera</h3>
+              <p>
+                Vas por buen camino. Este mes has ahorrado un 15% más que el
+                anterior.
+              </p>
+            </div>
+            <span class="material-symbols-outlined bg-icon"
+              >health_and_safety</span
+            >
+          </article>
+          <article class="card dashboard-recent-card">
+            <div class="card-top">
+              <h3>Últimos Movimientos</h3>
+              <a href="#">Ver todo</a>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>CONCEPTO</th>
+                    <th>FECHA</th>
+                    <th>CATEGORÍA</th>
+                    <th>MONTO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="table-concept">
+                        <span class="material-symbols-outlined concept-icon"
+                          >shopping_bag</span
+                        >
+                        <strong>Suscripción Netflix</strong>
+                      </div>
+                    </td>
+                    <td class="table-date">24 Ene, 2025</td>
+                    <td>
+                      <span class="table-category">Entretenimiento</span>
+                    </td>
+                    <td class="table-value">-$15.000</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="table-concept">
+                        <span class="material-symbols-outlined concept-icon"
+                          >shopping_bag</span
+                        >
+                        <strong>Suscripción Netflix</strong>
+                      </div>
+                    </td>
+                    <td class="table-date">24 Ene, 2025</td>
+                    <td>
+                      <span class="table-category">Entretenimiento</span>
+                    </td>
+                    <td class="table-value">-$15.000</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+          <article class="card dashboard-tips-card">
+            <h3>Tips Financieros</h3>
+            <ul class="tips-list">
+              <li class="tip-item">
+                <small class="tip-tag">Regla 50/30/20</small>
+                <p>
+                  Destina el 20% de tus ingresos hoy mismo a tu cuenta de
+                  ahorros.
+                </p>
+              </li>
+              <li class="tip-item">
+                <small class="tip-tag">Gasto Hormiga</small>
+                <p>Reduce las suscripciones que no has usado.</p>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </main>
     </div>
-
-    <script src="js/script.js"></script>
-</body>
-
+  </body>
 </html>

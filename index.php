@@ -1,4 +1,5 @@
 <?php
+define('BASE_URL', 'http://localhost/finanzapro/');
 require_once 'controller/usercontroller.php';
 
 $controlador = new ControladorUsuario();
