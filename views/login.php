@@ -59,7 +59,7 @@
           </div>
         </div>
         <div class="right">
-          <form class="card login-form">
+          <form class="card login-form" action="<?= BASE_URL ?>index.php?action=iniciarSesion" method="post">
             <div class="form-info">
               <h2 class="form-title">Bienvenido de nuevo</h2>
               <p class="form-subtitle">Ingresa tus datos para continuar</p>
@@ -108,8 +108,7 @@
               </p>
             </span>
           </form>
-
-          <form class="card register-form hidden">
+          <form class="card register-form hidden" action="<?= BASE_URL ?>index.php?action=registrar" method="post">
             <div class="form-info">
               <h2 class="form-title">Crea tu cuenta</h2>
               <p class="form-subtitle">
@@ -123,7 +122,7 @@
                   <input
                     type="text"
                     id="name"
-                    name="name"
+                    name="nombre"
                     placeholder="Ej. Juan"
                     required
                   />
@@ -135,7 +134,7 @@
                   <input
                     type="text"
                     id="lastname"
-                    name="lastname"
+                    name="apellido"
                     placeholder="Ej. Pérez"
                     required
                   />
@@ -155,7 +154,7 @@
                   <input
                     type="tel"
                     id="phone"
-                    name="phone"
+                    name="telefono"
                     class="input-soft input-tel"
                     placeholder="Ej. 300 456 7890"
                     required
@@ -209,7 +208,6 @@
                 <a href="#" class="switch-form">Iniciar Sesión</a>
               </p>
             </span>
-          </form>
           </form>
         </div>
       </section>
