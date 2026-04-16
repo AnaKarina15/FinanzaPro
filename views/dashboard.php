@@ -22,7 +22,7 @@ if (!isset($_SESSION['usuario'])) {
     <link rel="stylesheet" href="./css/global.css" />
     <link rel="stylesheet" href="./css/dashboard.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module" src="./js/dashboard-charts.js"></script>
+    <script type="module" src="./js/dashboard.js"></script>
   </head>
   <body>
     <div class="app-container">
