@@ -14,6 +14,7 @@
     />
     <link rel="stylesheet" href="<?= BASE_URL ?>/views/css/global.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/views/css/login.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="<?= BASE_URL ?>/views/js/login.js"></script>
   </head>
   <body>
@@ -59,7 +60,7 @@
           </div>
         </div>
         <div class="right">
-          <form class="card login-form" action="<?= BASE_URL ?>index.php?action=iniciarSesion" method="post">
+          <form class="card login-form" action="index.php?action=iniciarSesion" method="POST">
             <div class="form-info">
               <h2 class="form-title">Bienvenido de nuevo</h2>
               <p class="form-subtitle">Ingresa tus datos para continuar</p>
@@ -69,7 +70,7 @@
               <div class="input-container">
                 <input
                   type="email"
-                  id="email"
+                  id="email_login"
                   name="email"
                   autocomplete="email"
                   placeholder="nombre@ejemplo.com"
@@ -83,7 +84,7 @@
                 <input
                   type="password"
                   id="login-password"
-                  name="password"
+                  name="contrasena"
                   class="input-pw"
                   autocomplete="current-password"
                   placeholder="••••••••"
@@ -108,7 +109,7 @@
               </p>
             </span>
           </form>
-          <form class="card register-form hidden" action="<?= BASE_URL ?>index.php?action=registrar" method="post">
+          <form class="card register-form hidden" action="index.php?action=registrar" method="post">
             <div class="form-info">
               <h2 class="form-title">Crea tu cuenta</h2>
               <p class="form-subtitle">
@@ -167,7 +168,7 @@
               <div class="input-container">
                 <input
                   type="email"
-                  id="email"
+                  id="email_registro"
                   name="email"
                   autocomplete="email"
                   placeholder="nombre@ejemplo.com"
@@ -181,7 +182,7 @@
                 <input
                   type="password"
                   id="regster-password"
-                  name="password"
+                  name="contrasena"
                   class="input-pw"
                   autocomplete="current-password"
                   placeholder="••••••••"

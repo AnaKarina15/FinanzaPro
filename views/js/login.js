@@ -44,3 +44,46 @@ switchForm.forEach((link) => {
     registerForm.classList.toggle("hidden");
   });
 });
+
+/* Ventanas Emergentes */
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("login") && urlParams.get("login") === "error") {
+    Swal.fire({
+      title: "Credenciales invalidas",
+      text: "Revisa que hayas puesto bien tu correo electronico y contraseña.",
+      icon: "error",
+      confirmButtonColor: "#059669",
+      confirmButtonText: "Ok",
+    });
+
+    // Esto limpia la URL para que no vuelva a salir si recargan la página
+    window.history.replaceState(null, null, window.location.pathname);
+  }
+
+  if (urlParams.has("registro") && urlParams.get("registro") === "exito") {
+    Swal.fire({
+      title: "¡Cuenta Creada!",
+      text: "Tu registro fue exitoso. Ya puedes iniciar sesión.",
+      icon: "success",
+      confirmButtonColor: "#059669",
+      confirmButtonText: "Genial",
+    });
+
+    // Esto limpia la URL para que no vuelva a salir si recargan la página
+    window.history.replaceState(null, null, window.location.pathname);
+  }
+
+  if (urlParams.has("registro") && urlParams.get("registro") === "error") {
+    Swal.fire({
+      title: "Correo existente",
+      text: "Ya existe una cuenta con el correo ingresado.",
+      icon: "error",
+      confirmButtonColor: "#059669",
+      confirmButtonText: "Ok",
+    });
+
+    // Esto limpia la URL para que no vuelva a salir si recargan la página
+    window.history.replaceState(null, null, window.location.pathname);
+  }
+});
