@@ -13,9 +13,15 @@ class ControladorUsuario {
   }
 
   public function iniciarSesion($correo, $contrasena) {
+    $usuario = $this->modeloUsuario->obtenerPorCorreo($correo);
+
     if ($this->modeloUsuario->verificarCredenciales($correo, $contrasena)) {
       session_start();
       $_SESSION['usuario'] = $correo;
+      $_SESSION['nombre_usuario'] = $usuario['nombre'];
+      $_SESSION['apellido_usuario'] = $usuario['apellido'];
+      $_SESSION['rol'] = $usuario['nombre_rol'];
+
       header('Location: views/dashboard.php');
     } else {
       header('Location: index.php?login=error');
