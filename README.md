@@ -37,19 +37,26 @@ Para cumplir con los altos estándares de diseño y usabilidad, implementamos:
 ```text
 /FINANZASPRO
 ├── /conf
-│   └── connection.php      # Configuración y conexión a la base de datos
+│   └── config.php              # Información para conectarse a la base de datos
 ├── /controller
-│   └── usercontroller.php  # Lógica de negocio y control de usuarios
+│   └── controladorUsuario.php  # Lógica de negocio y control de usuarios
 ├── /database
-│   └── FinanzaPro.sql      # Script de la base de datos SQL
+│   └── FinanzaPro.sql          # Script de la base de datos SQL
+├── /model
+│   └── Conexion.php            # Logica de conexion a la base de datos
+│   └── Usuario.php             # Logica de acceso a datos del usuario
 ├── /views
 │   ├── /css
-│   │   └── style.css       # Hoja de estilos principal
+│   │   └── dashboard.css       # Hoja de estilos del dashboard
+│   │   └── global.css          # Hoja de estilos globales
+│   │   └── login.css           # Hoja de estilos del login
 │   ├── /js
-│   │   └── script.js       # Lógica de ruteo y validaciones del cliente
-│   └── dashboard.php       # Panel principal de usuario (Vista)
-├── index.php               # Landing Page principal (Entrada)
-└── README.md               # Documentación del proyecto
+│   │   └── dashboard.js        # Logica del frontend de la vista dashboard
+│   │   └── login.js            #  Logica del frontend de la vista login
+│   └── dashboard.php           # Panel principal de usuario (Vista)
+│   └── login.php               # Inicio de sesión (Vista)
+├── index.php                   # Landing Page principal (Entrada)
+└── README.md                   # Documentación del proyecto
 ```
 
 ## 👥 Equipo de Desarrollo
