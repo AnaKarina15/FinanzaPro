@@ -53,7 +53,7 @@ class ControladorUsuario {
       }
 
       // Requerimos el modelo de Transacción para registrar el movimiento
-      require_once __DIR__ . '/../models/Transaccion.php';
+      require_once __DIR__ . '/../model/Transaccion.php';
       $modeloTransaccion = new Transaccion();
 
       $id_usuario = $_SESSION['id_usuario'];
