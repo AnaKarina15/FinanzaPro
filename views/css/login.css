@@ -55,6 +55,7 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 
   p {
     text-align: center;
@@ -62,9 +63,6 @@ section {
 }
 
 /* LOGIN LEFT */
-#login .left {
-  padding-top: 100px;
-}
 
 /* LOGIN INFO */
 .login-title {
@@ -135,9 +133,6 @@ section {
 }
 
 /* LOGIN RIGHT */
-#login .right {
-  justify-content: center;
-}
 
 /* FORM */
 .login-form,
