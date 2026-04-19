@@ -53,7 +53,7 @@ if (!isset($_SESSION['usuario'])) {
             <div class="avatar">
               <img src="" alt="Foto de perfil" />
             </div>
-            <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
+            <span class="username"><?= $_SESSION['usuario']['nombre'] . ' ' . $_SESSION['usuario']['apellido'] ?></span>
           </a>
         </nav>
       </aside>
@@ -61,7 +61,7 @@ if (!isset($_SESSION['usuario'])) {
         <div class="view-info">
           <h2 class="view-title">Dashboard</h2>
           <p class="view-description">
-            Bienvenid@ <?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?>. Aquí tienes el resumen de hoy.
+            Bienvenid@ <?= $_SESSION['usuario']['nombre'] . ' ' . $_SESSION['usuario']['apellido'] ?>. Aquí tienes el resumen de hoy.
           </p>
         </div>
         <div class="view-buttons">

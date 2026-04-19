@@ -17,10 +17,7 @@ class ControladorUsuario {
 
     if ($this->modeloUsuario->verificarCredenciales($correo, $contrasena)) {
       session_start();
-      $_SESSION['usuario'] = $correo;
-      $_SESSION['nombre_usuario'] = $usuario['nombre'];
-      $_SESSION['apellido_usuario'] = $usuario['apellido'];
-      $_SESSION['rol'] = $usuario['nombre_rol'];
+      $_SESSION['usuario'] = $usuario;
 
       header('Location: views/dashboard.php');
     } else {
