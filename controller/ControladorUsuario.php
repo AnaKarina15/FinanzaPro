@@ -68,4 +68,30 @@ class ControladorUsuario {
           exit();
       }
   }
+
+  public function obtenerEstadisticasJson() {
+      session_start();
+      
+      // Si no hay sesión, devolvemos un error en JSON
+      if (!isset($_SESSION['id_usuario'])) {
+          echo json_encode(['error' => 'No autorizado']);
+          exit();
+      }
+
+      require_once __DIR__ . '/../model/Transaccion.php';
+      $modeloTransaccion = new Transaccion();
+      $id_usuario = $_SESSION['id_usuario'];
+
+      // Obtenemos los datos del modelo
+      $totales = $modeloTransaccion->obtenerTotales($id_usuario);
+      $categorias = $modeloTransaccion->obtenerGastosPorCategoria($id_usuario);
+
+      // Enviamos la respuesta en formato JSON
+      header('Content-Type: application/json');
+      echo json_encode([
+          'totales' => $totales,
+          'categorias' => $categorias
+      ]);
+      exit();
+  }
 }
