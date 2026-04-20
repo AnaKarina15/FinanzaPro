@@ -49,7 +49,7 @@ if (!isset($_SESSION['usuario'])) {
             <span class="material-symbols-outlined">analytics</span> Reportes y
             Análisis
           </a>
-          <a href="#" class="nav-link nav-profile">
+          <a href="perfil.php" class="nav-link nav-profile">
             <div class="avatar">
               <img src="" alt="Foto de perfil" />
             </div>
