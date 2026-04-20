@@ -87,9 +87,9 @@ if (!isset($_SESSION['usuario'])) {
                   >account_balance_wallet</span
                 >
               </div>
-              <p class="card-titulo">Disponible</p>
+              <p class="card-titulo" ">Disponible</p>
             </div>
-            <p class="card-value texto-primario">$1.800.000</p>
+            <p class="card-value texto-primario"id="monto-disponible">$0</p>
           </article>
 
           <article class="card incomes-card">
@@ -97,10 +97,10 @@ if (!isset($_SESSION['usuario'])) {
               <div class="icon-box icon-green">
                 <span class="material-symbols-outlined">trending_up</span>
               </div>
-              <p class="card-titulo">Total de ingresos</p>
-              <span class="badge badge-green">+12.5%</span>
+              <p class="card-titulo" >Total de ingresos</p>
+              <span class="badge badge-green">+0%</span>
             </div>
-            <p class="card-value">$5.000.000</p>
+            <p class="card-value"  id="monto-ingresos">$0</p>
           </article>
 
           <article class="card outcomes-card">
@@ -109,9 +109,9 @@ if (!isset($_SESSION['usuario'])) {
                 <span class="material-symbols-outlined">shopping_cart</span>
               </div>
               <p class="card-titulo">Total de gastos</p>
-              <span class="badge badge-blue">-5.2%</span>
+              <span class="badge badge-blue">-0%</span>
             </div>
-            <p class="card-value">$3.200.000</p>
+            <p class="card-value" id="monto-gastos">$0</p>
           </article>
           <article class="card dashboard-chart-card">
             <h3>Ingresos vs Gastos</h3>
