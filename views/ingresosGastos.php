@@ -112,15 +112,11 @@ if (!isset($_SESSION['usuario'])) {
             </div>
 
             <article class="card Expenses-graph-card">
-              <div class="card-top">
-                  <h3>Gastos por Categoría</h3>
-                  <a href="#">Ver detalles ></a>
-              </div>
               <div class="chart-container">
                   <canvas id="graficaCategorias"></canvas>
                   <div class="chart-center-text">
                       <span class="total-label">Total</span>
-                      <span class="total-value">$1,840</span>
+                      <span class="total-value">$0</span>
                   </div>
               </div>
             </article>
