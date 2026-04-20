@@ -17,67 +17,102 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- Lógica de la Gráfica de Gastos ---
-    const canvasCategorias = document.getElementById('graficaCategorias');
-    
-    if (canvasCategorias) {
-        const ctxCategorias = canvasCategorias.getContext('2d');
-        
-        // 1. Aquí pondremos los valores REALES que traeremos de PHP (dinero gastado)
-        const dataValores = [828000, 460000, 276000, 276500]; // Suma total: 1,840,500
-        const labelsOriginales = ['Alimentación', 'Transporte', 'Ocio', 'Otros'];
+    const formatearMoneda = (valor) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
 
-        // 2. Calculamos el Total sumando los valores
-        const totalGastos = dataValores.reduce((acc, valor) => acc + valor, 0);
+    // --- Cargar Datos Reales ---
+    fetch('../index.php?action=obtenerEstadisticas') 
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) return; 
 
-        // Formateador de moneda (Pesos Colombianos)
-        const formatearMoneda = (valor) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
+            // A. Actualizar Tarjetas de Ingresos y Gastos
+            const cardIngresos = document.querySelector('.incomesGreen-card .card-value');
+            const cardGastos = document.querySelector('.outcomes-card .card-value');
+            
+            if (cardIngresos) cardIngresos.innerText = formatearMoneda(data.totales.ingresos);
+            if (cardGastos) cardGastos.innerText = formatearMoneda(data.totales.gastos);
 
-        // 3. Actualizamos el HTML del centro de la dona automáticamente
-        const labelTotalDiv = document.querySelector('.total-value');
-        if(labelTotalDiv) labelTotalDiv.innerText = formatearMoneda(totalGastos);
+            // B. Preparar la Gráfica
+            const canvasCategorias = document.getElementById('graficaCategorias');
+            const labelTotalDiv = document.querySelector('.total-value');
+            
+            if (canvasCategorias) {
+                const ctxCategorias = canvasCategorias.getContext('2d');
+                
+                // CONDICIÓN: ¿Hay gastos registrados?
+                if (data.categorias && data.categorias.length > 0) {
+                    
+                    // --- TIENE GASTOS: Dibujamos la gráfica normal ---
+                    const labelsOriginales = data.categorias.map(cat => cat.nombre);
+                    const dataValores = data.categorias.map(cat => parseFloat(cat.total));
+                    
+                    const totalGastos = dataValores.reduce((acc, valor) => acc + valor, 0);
+                    if(labelTotalDiv) labelTotalDiv.innerText = formatearMoneda(totalGastos);
 
-        // 4. Calculamos los porcentajes para la leyenda
-        const labelsConPorcentaje = labelsOriginales.map((label, index) => {
-            let porcentaje = ((dataValores[index] / totalGastos) * 100).toFixed(0);
-            return `${label}   ${porcentaje}%`;
-        });
+                    const labelsConPorcentaje = labelsOriginales.map((label, index) => {
+                        let porcentaje = ((dataValores[index] / totalGastos) * 100).toFixed(0);
+                        return `${label}   ${porcentaje}%`;
+                    });
 
-        // 5. Dibujamos la gráfica
-        new Chart(ctxCategorias, {
-            type: 'doughnut',
-            data: {
-                labels: labelsConPorcentaje, // Usamos los textos con %
-                datasets: [{
-                    data: dataValores, // Usamos los valores en dinero real
-                    backgroundColor: ['#059669', '#10b981', '#047857', '#a7f3d0'],
-                    borderWidth: 0,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '80%',
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: { size: 13, family: "'Inter', sans-serif" }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            // 6. Al pasar el mouse, mostramos el valor formateado en plata
-                            label: function(context) {
-                                return ' Gastado: ' + formatearMoneda(context.raw);
+                    const colores = ['#059669', '#10b981', '#047857', '#a7f3d0', '#34d399', '#6ee7b7'];
+
+                    new Chart(ctxCategorias, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labelsConPorcentaje,
+                            datasets: [{
+                                data: dataValores,
+                                backgroundColor: colores.slice(0, dataValores.length),
+                                borderWidth: 0,
+                                hoverOffset: 10
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '80%',
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: { usePointStyle: true, padding: 20, font: { size: 13, family: "'Inter', sans-serif" } }
+                                },
+                                tooltip: {
+                                    callbacks: { label: function(context) { return ' Gastado: ' + formatearMoneda(context.raw); } }
+                                }
                             }
                         }
-                    }
+                    });
+
+                } else {
+                    // --- NO HAY GASTOS: Dibujamos la dona gris vacía ---
+                    if(labelTotalDiv) labelTotalDiv.innerText = "$ 0";
+
+                    new Chart(ctxCategorias, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Sin gastos registrados'],
+                            datasets: [{
+                                data: [1], // Un valor de relleno para que dibuje el círculo
+                                backgroundColor: ['#e2e8f0'], // Color gris claro de Tailwind
+                                borderWidth: 0,
+                                hoverOffset: 0 // Que no se mueva al pasar el mouse
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '80%',
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: { usePointStyle: true, padding: 20, font: { size: 13, family: "'Inter', sans-serif" } }
+                                },
+                                tooltip: { enabled: false } // Desactivamos el tooltip para que no salga
+                            }
+                        }
+                    });
                 }
             }
-        });
-    }
+        })
+        .catch(error => console.error("Error al cargar estadísticas:", error));
 });
