@@ -133,57 +133,56 @@ if (!isset($_SESSION['usuario'])) {
 
         </div>
 
-        <article class="card dashboard-recent-card">
-          <article class="card movimientos-card">
-            <div class="card-top">
-              <h3>Historial de Movimientos</h3>
-              <a href="#">Ver todo</a>
-            </div>
-            <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>CONCEPTO</th>
-                    <th>FECHA</th>
-                    <th>CATEGORÍA</th>
-                    <th>MONTO</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <div class="table-concept">
-                        <span class="material-symbols-outlined concept-icon"
-                          >shopping_bag</span
-                        >
-                        <strong>Suscripción Netflix</strong>
-                      </div>
-                    </td>
-                    <td class="table-date">24 Ene, 2025</td>
-                    <td>
-                      <span class="table-category">Entretenimiento</span>
-                    </td>
-                    <td class="table-value">-$15.000</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div class="table-concept">
-                        <span class="material-symbols-outlined concept-icon"
-                          >shopping_bag</span
-                        >
-                        <strong>Suscripción Netflix</strong>
-                      </div>
-                    </td>
-                    <td class="table-date">24 Ene, 2025</td>
-                    <td>
-                      <span class="table-category">Entretenimiento</span>
-                    </td>
-                    <td class="table-value">-$15.000</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </article>
+        <article class="card movimientos-card">
+          <div class="card-top">
+            <h3>Historial de Movimientos</h3>
+            <a href="#">Ver todo</a>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>CONCEPTO</th>
+                  <th>FECHA</th>
+                  <th>CATEGORÍA</th>
+                  <th>MONTO</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="table-concept">
+                      <span class="material-symbols-outlined concept-icon"
+                        >shopping_bag</span
+                      >
+                      <strong>Suscripción Netflix</strong>
+                    </div>
+                  </td>
+                  <td class="table-date">24 Ene, 2025</td>
+                  <td>
+                    <span class="table-category">Entretenimiento</span>
+                  </td>
+                  <td class="table-value">-$15.000</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="table-concept">
+                      <span class="material-symbols-outlined concept-icon"
+                        >shopping_bag</span
+                      >
+                      <strong>Suscripción Netflix</strong>
+                    </div>
+                  </td>
+                  <td class="table-date">24 Ene, 2025</td>
+                  <td>
+                    <span class="table-category">Entretenimiento</span>
+                  </td>
+                  <td class="table-value">-$15.000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
         </div>
       </main>
     </div>
