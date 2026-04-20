@@ -33,6 +33,10 @@ if (isset($_GET['action'])) {
         $_POST['descripcion']
       );
       break;
+
+      case 'obtenerEstadisticas':
+        $controlador->obtenerEstadisticasJson();
+        break;
     // ----------------------------------------------------
 
     default:
