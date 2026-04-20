@@ -1,0 +1,318 @@
+/* ==========================================================================
+   VISTA PERFIL - OPTIMIZADA
+   ========================================================================== */
+
+/* 1. Layout General */
+.profile-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-bottom: 50px;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+/* 2. Tarjeta de Encabezado */
+.profile-header-card {
+    padding: 0 !important;
+    overflow: hidden;
+    position: relative;
+    border: none;
+}
+
+.banner-gradient {
+    height: 140px;
+    background: linear-gradient(135deg, #dcfce7 0%, #def1ff 100%),
+                radial-gradient(#05966915 1px, transparent 1px);
+    background-size: auto, 20px 20px;
+}
+
+.profile-header-content {
+    padding: 0 32px 32px;
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    margin-top: -60px;
+}
+
+.avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-avatar-big {
+    width: 130px;
+    height: 130px;
+    border-radius: 35px;
+    border: 6px solid #ffffff;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.btn-camera {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: #059669;
+    color: white;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-summary .name-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.profile-summary h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.badge-verified {
+    background: #dcfce7;
+    color: #059669;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.user-email {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* 3. Formularios y Campos */
+.card-header-icon {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.icon-green { color: #059669; background: #ecfdf5; padding: 8px; border-radius: 10px; }
+.icon-blue { color: #2563eb; background: #eff6ff; padding: 8px; border-radius: 10px; }
+
+.form-group { margin-bottom: 20px; }
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.input-profile {
+    background: #f0f4f9;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 12px 16px;
+    width: 100%;
+    color: #334155;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.input-profile.readonly {
+    cursor: default; /* Eliminamos el fondo y color repetido porque ya los hereda */
+}
+
+/* Teléfono */
+.phone-input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.code-box {
+    background: #f0f4f9;
+    color: #334155;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 15px;
+    min-width: 65px;
+    text-align: center;
+}
+
+.phone-input-container .input-profile { flex: 1; }
+
+/* Links y Botones de Acción */
+.link-change {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #059669;
+    text-decoration: none;
+}
+
+.link-change:hover { text-decoration: underline; }
+
+.btn-change-pass {
+    margin-top: 10px;
+    background: #f0f4f9;
+    border: none;
+    border-radius: 14px; /* Unificado con los inputs */
+    padding: 10px 20px;
+    color: #1e293b;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-change-pass:hover { background: #e2e8f0; }
+
+/* 4. Preferencias y Toggles */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.setting-item:last-child { border-bottom: none; }
+
+.setting-text strong { display: block; color: #1e293b; font-size: 15px; margin-bottom: 4px; }
+.setting-text p { color: #64748b; font-size: 13px; }
+
+.select-profile {
+    background: #f0f4f9;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+}
+
+.theme-toggle {
+    background: #f0f4f9;
+    padding: 4px;
+    border-radius: 12px;
+    display: flex;
+    gap: 4px;
+}
+
+.toggle-btn {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: #64748b;
+    transition: 0.3s;
+}
+
+.toggle-btn.active {
+    background: white;
+    color: #059669;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Switch Push */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1; transition: .4s; border-radius: 34px;
+}
+.slider:before {
+    position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+    background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider { background-color: #059669; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* 5. Footer de Acciones */
+.profile-actions {
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 2px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-logout-text {
+    background: none;
+    border: none;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.group-btns { display: flex; gap: 12px; }
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #475569;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.2);
+}
+
+/* 6. Responsive */
+@media (max-width: 900px) {
+    .profile-grid { grid-template-columns: 1fr; }
+    .profile-header-content { flex-direction: column; align-items: center; text-align: center; }
+    .form-row { grid-template-columns: 1fr; }
+}
