@@ -1,19 +1,21 @@
-<?php class Conexion {
-  private $conexion;
+<?php
+class Conexion {
+    private $host = "localhost";
+    private $user = "root";
+    private $password = "";
+    private $db = "finanzaprophp";
+    private $conexion;
 
-  public function __construct() {
-    $config = require_once 'config/config.php';
-    $this->conexion = new mysqli($config['host'], $config['usuario'], $config['contrasena'], $config['base_de_datos']);
-    if ($this->conexion->connect_error) {
-      die("Conexión fallida: " . $this->conexion->connect_error);
+    public function getConexion() {
+        $this->conexion = new mysqli($this->host, $this->user, $this->password, $this->db);
+        
+        if ($this->conexion->connect_error) {
+            die("Error de conexión a MySQL: " . $this->conexion->connect_error);
+        }
+        
+        $this->conexion->set_charset("utf8mb4");
+        
+        return $this->conexion;
     }
-  }
-
-  public function getConexion() {
-    return $this->conexion;
-  }
-  
-  public function cerrarConexion() {
-    $this->conexion->close();
-  }
 }
+?>

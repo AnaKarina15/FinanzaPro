@@ -20,15 +20,30 @@ if (isset($_GET['action'])) {
         $_POST['email'],
         $_POST['codigo_pais'],
         $_POST['telefono'],
-        $_POST['contrasena'],
+        $_POST['contrasena']
       );
       break;
 
-    default:
+    case 'guardarMovimiento':
+      $controlador->guardarMovimiento(
+        $_POST['tipo_movimiento'], // Gasto o Ingreso
+        $_POST['monto'],
+        $_POST['fecha'],
+        $_POST['categoria'],
+        $_POST['descripcion']
+      );
+      break;
 
+      case 'obtenerEstadisticas':
+        $controlador->obtenerEstadisticasJson();
+        break;
+    // ----------------------------------------------------
+
+    default:
       $controlador->mostrarLogin();
       break;
   }
 } else {
   $controlador->mostrarLogin();
 }
+?>

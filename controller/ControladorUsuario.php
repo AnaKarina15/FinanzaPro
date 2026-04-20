@@ -17,7 +17,11 @@ class ControladorUsuario {
 
     if ($this->modeloUsuario->verificarCredenciales($correo, $contrasena)) {
       session_start();
-      $_SESSION['usuario'] = $usuario;
+      $_SESSION['usuario'] = $correo;
+      $_SESSION['id_usuario'] = $usuario['id_usuario'];
+      $_SESSION['nombre_usuario'] = $usuario['nombre'];
+      $_SESSION['apellido_usuario'] = $usuario['apellido'];
+      $_SESSION['rol'] = $usuario['nombre_rol'];
 
       header('Location: views/dashboard.php');
     } else {
@@ -35,5 +39,59 @@ class ControladorUsuario {
         } else {
             header("Location: index.php?registro=error");
         }
+  }
+
+  public function guardarMovimiento($tipo_movimiento, $monto, $fecha, $categoria, $descripcion) {
+      session_start();
+      
+      // Verificamos por seguridad que la sesión del usuario exista
+      if (!isset($_SESSION['id_usuario'])) {
+          header('Location: index.php');
+          exit();
+      }
+
+      // Requerimos el modelo de Transacción para registrar el movimiento
+      require_once __DIR__ . '/../model/Transaccion.php';
+      $modeloTransaccion = new Transaccion();
+
+      $id_usuario = $_SESSION['id_usuario'];
+
+      // Intentamos registrar la transacción
+      if ($modeloTransaccion->registrarTransaccion($id_usuario, $tipo_movimiento, $monto, $fecha, $categoria, $descripcion)) {
+          // Si es exitoso, redirigimos de vuelta a la vista de ingresos
+          header("Location: views/ingresosGastos.php?guardado=exito");
+          exit();
+      } else {
+          header("Location: views/ingresosGastos.php?guardado=error");
+          exit();
+      }
+  }
+
+  public function obtenerEstadisticasJson() {
+      session_start();
+      
+      // Si no hay sesión, devolvemos un error en JSON
+      if (!isset($_SESSION['id_usuario'])) {
+          echo json_encode(['error' => 'No autorizado']);
+          exit();
+      }
+
+      require_once __DIR__ . '/../model/Transaccion.php';
+      $modeloTransaccion = new Transaccion();
+      $id_usuario = $_SESSION['id_usuario'];
+
+      // Obtenemos los datos del modelo
+      $totales = $modeloTransaccion->obtenerTotales($id_usuario);
+      $categorias = $modeloTransaccion->obtenerGastosPorCategoria($id_usuario);
+      $mensual = $modeloTransaccion->obtenerIngresosGastosPorMes($id_usuario);
+
+      // Enviamos la respuesta en formato JSON
+      header('Content-Type: application/json');
+      echo json_encode([
+          'totales' => $totales,
+          'categorias' => $categorias,
+          'mensual' => $mensual
+      ]);
+      exit();
   }
 }
