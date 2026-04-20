@@ -34,10 +34,10 @@ if (!isset($_SESSION['usuario'])) {
           <h1 class="logo-text">FinanzaPro</h1>
         </div>
         <nav class="sidebar-nav">
-          <a href="dashboard.php" class="nav-link active" disabled>
+          <a href="dashboard.php" class="nav-link">
             <span class="material-symbols-outlined">grid_view</span> Dashboard
           </a>
-          <a href="ingresosGastos.php" class="nav-link">
+          <a href="ingresosGastos.php" class="nav-link active" disabled>
             <span class="material-symbols-outlined">currency_exchange</span>
             Ingresos y Gastos
           </a>
