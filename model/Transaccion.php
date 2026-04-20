@@ -81,5 +81,30 @@ class Transaccion {
         }
         return $datos;
     }
+
+    // Función para obtener ingresos y gastos agrupados por mes (para la gráfica de barras)
+    public function obtenerIngresosGastosPorMes($id_usuario) {
+        // Obtenemos el mes y sumamos ingresos y gastos del año actual
+        $query = "SELECT 
+                    MONTH(t.fecha) as mes,
+                    SUM(CASE WHEN c.tipo = 'ingreso' THEN t.monto ELSE 0 END) as total_ingresos,
+                    SUM(CASE WHEN c.tipo = 'gasto' THEN t.monto ELSE 0 END) as total_gastos
+                FROM transacciones t
+                JOIN categorias c ON t.id_categoria = c.id_categoria
+                WHERE t.id_usuario = ? AND YEAR(t.fecha) = YEAR(CURRENT_DATE())
+                GROUP BY MONTH(t.fecha)
+                ORDER BY MONTH(t.fecha)";
+                
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bind_param("i", $id_usuario);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        
+        $datos = [];
+        while($fila = $resultado->fetch_assoc()) {
+            $datos[] = $fila;
+        }
+        return $datos;
+    }
 }
 ?>
