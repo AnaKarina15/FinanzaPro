@@ -158,6 +158,8 @@
                     name="telefono"
                     class="input-soft input-tel"
                     placeholder="Ej. 300 456 7890"
+                    pattern="^\d{10,}$"
+                    title="El número debe tener 10 dígitos al menos"
                     required
                   />
                 </div>
