@@ -63,14 +63,6 @@ if (!isset($_SESSION['usuario'])) {
             <button class="btn-secondary">
                 <span class="material-symbols-outlined">notifications</span>
             </button>
-            <button class="btn-secondary">
-                <span class="material-symbols-outlined">calendar_today</span>
-                { fecha }
-            </button>
-            <button class="btn-primary" onclick="document.getElementById('modalNuevoMovimiento').classList.add('active')">
-                <span class="material-symbols-outlined">add</span>
-                Nuevo Movimiento
-            </button>
             </div>
         </header>
 
