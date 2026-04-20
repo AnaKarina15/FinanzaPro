@@ -112,6 +112,7 @@ if (!isset($_SESSION['usuario'])) {
             </div>
 
             <article class="card Expenses-graph-card">
+              <h3>Gastos por categoría</h3>
               <div class="chart-container">
                   <canvas id="graficaCategorias"></canvas>
                   <div class="chart-center-text">
