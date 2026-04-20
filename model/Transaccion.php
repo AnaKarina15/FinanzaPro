@@ -39,5 +39,47 @@ class Transaccion {
         
         return $stmtTrans->execute();
     }
+
+    // Función para obtener los totales de ingresos y gastos de las tarjetas
+    public function obtenerTotales($id_usuario) {
+        $query = "SELECT 
+                    SUM(CASE WHEN c.tipo = 'ingreso' THEN t.monto ELSE 0 END) as total_ingresos,
+                    SUM(CASE WHEN c.tipo = 'gasto' THEN t.monto ELSE 0 END) as total_gastos
+                  FROM transacciones t
+                  JOIN categorias c ON t.id_categoria = c.id_categoria
+                  WHERE t.id_usuario = ?";
+                  
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bind_param("i", $id_usuario);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        
+        // Si no hay datos, devolvemos 0
+        $fila = $resultado->fetch_assoc();
+        return [
+            'ingresos' => $fila['total_ingresos'] ?? 0,
+            'gastos' => $fila['total_gastos'] ?? 0
+        ];
+    }
+
+    // Función para obtener los datos de la gráfica de dona
+    public function obtenerGastosPorCategoria($id_usuario) {
+        $query = "SELECT c.nombre, SUM(t.monto) as total
+                  FROM transacciones t
+                  JOIN categorias c ON t.id_categoria = c.id_categoria
+                  WHERE t.id_usuario = ? AND c.tipo = 'gasto'
+                  GROUP BY c.id_categoria";
+                  
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bind_param("i", $id_usuario);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        
+        $datos = [];
+        while($fila = $resultado->fetch_assoc()) {
+            $datos[] = $fila;
+        }
+        return $datos;
+    }
 }
 ?>
