@@ -83,12 +83,14 @@ class ControladorUsuario {
       // Obtenemos los datos del modelo
       $totales = $modeloTransaccion->obtenerTotales($id_usuario);
       $categorias = $modeloTransaccion->obtenerGastosPorCategoria($id_usuario);
+      $mensual = $modeloTransaccion->obtenerIngresosGastosPorMes($id_usuario);
 
       // Enviamos la respuesta en formato JSON
       header('Content-Type: application/json');
       echo json_encode([
           'totales' => $totales,
-          'categorias' => $categorias
+          'categorias' => $categorias,
+          'mensual' => $mensual
       ]);
       exit();
   }
