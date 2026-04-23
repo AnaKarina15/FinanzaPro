@@ -188,8 +188,8 @@
                   class="input-pw"
                   autocomplete="current-password"
                   placeholder="••••••••"
-                  pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,}"
-                  title="Mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo (sin tildes ni espacios)."
+                  pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{8,64}"
+                  title="Mínimo 8 caracteres, Máximo 64, una mayúscula, una minúscula, un número y un símbolo (sin tildes ni espacios)."
                   required
                 />
                 <button type="button" class="show-pw material-symbols-outlined">
