@@ -1,33 +1,37 @@
 <?php
+// Requerimos las constantes de configuración
+require_once __DIR__ . '/../config/database.php';
+
 class Conexion {
     private $conexion;
 
     public function getConexion() {
-        // Consumimos el array de configuración
-        $config = require __DIR__ . '/../config/config.php';
-        
-        $host = $config['host'];
-        $db = $config['base_de_datos'];
-        $user = $config['usuario'];
-        $pass = $config['contrasena'];
-        $charset = 'utf8mb4';
+        if ($this->conexion == null) {
+            try {
+                // Construimos el DSN con las constantes
+                $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+                
+                // Opciones base obligatorias de nuestra arquitectura
+                $opciones = [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false
+                ];
 
-        $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-        
-        // Opciones de PDO para seguridad y manejo de errores
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
+                // Si hay un certificado SSL definido, lo inyectamos en PDO
+                if (defined('DB_SSL_CA') && !empty(DB_SSL_CA)) {
+                    $opciones[PDO::MYSQL_ATTR_SSL_CA] = DB_SSL_CA;
+                    $opciones[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+                }
 
-        try {
-            $this->conexion = new PDO($dsn, $user, $pass, $options);
-            return $this->conexion;
-        } catch (\PDOException $e) {
-            // En producción, el error debe registrarse en un log, no mostrarse al usuario.
-            die("Error de conexión a MySQL: " . $e->getMessage());
+                $this->conexion = new PDO($dsn, DB_USER, DB_PASS, $opciones);
+                
+            } catch (PDOException $e) {
+                error_log("Error de conexión a BD: " . $e->getMessage());
+                die("Error crítico: No se pudo conectar a la base de datos.");
+            }
         }
+        return $this->conexion;
     }
 }
 ?>
