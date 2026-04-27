@@ -4,6 +4,42 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: ../index.php");
     exit();
 }
+
+require_once '../model/Usuario.php';
+$usuarioModel = new Usuario();
+$usuario = $usuarioModel->obtenerPorId($_SESSION['id_usuario']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nombre = trim($_POST['nombre'] ?? '');
+    $apellido = trim($_POST['apellido'] ?? '');
+    $telefono = trim($_POST['telefono'] ?? '');
+    $moneda_principal = $_POST['moneda_principal'] ?? 'COP';
+    $tema_interfaz = (int)($_POST['tema_interfaz'] ?? 0);
+    $notificaciones_push = isset($_POST['notificaciones_push']) ? 1 : 0;
+
+    $success = $usuarioModel->actualizarPerfil($_SESSION['id_usuario'], $nombre, $apellido, $telefono, $moneda_principal, $tema_interfaz, $notificaciones_push);
+
+    if (!empty($_POST['contrasena_actual'])) {
+        if ($_POST['contrasena_nueva'] !== $_POST['confirmar_contrasena']) {
+            $mensaje = "Las contraseñas nuevas no coinciden.";
+            $success = false;
+        } elseif (!$usuarioModel->cambiarContrasena($_SESSION['id_usuario'], $_POST['contrasena_actual'], $_POST['contrasena_nueva'])) {
+            $mensaje = "Error al cambiar la contraseña. Verifica la contraseña actual.";
+            $success = false;
+        } else {
+            $mensaje = "Contraseña cambiada correctamente.";
+        }
+    }
+
+    if ($success && empty($mensaje)) {
+        $usuario = $usuarioModel->obtenerPorId($_SESSION['id_usuario']);
+        $_SESSION['nombre_usuario'] = $usuario['nombre'];
+        $_SESSION['apellido_usuario'] = $usuario['apellido'];
+        $mensaje = "Perfil actualizado correctamente.";
+    } elseif (!$success && empty($mensaje)) {
+        $mensaje = "Error al actualizar el perfil.";
+    }
+}
 ?>
 <!doctype html>
 <html lang="es">
@@ -62,6 +98,9 @@ if (!isset($_SESSION['usuario'])) {
             <p class="view-description">
                 Gestiona tu información personal y preferencias de cuenta.
             </p>
+            <?php if (isset($mensaje)): ?>
+                <p style="color: green; margin-top: 10px;"><?= htmlspecialchars($mensaje) ?></p>
+            <?php endif; ?>
             </div>
             <div class="view-buttons">
             <button class="btn-secondary">
@@ -88,28 +127,29 @@ if (!isset($_SESSION['usuario'])) {
                     </div>
             </section>
 
+            <form method="POST" action="">
             <div class="profile-grid">
                 <section class="card">
                     <div class="card-header-icon">
                         <span class="material-symbols-outlined icon-green">badge</span>
                         <h3>Datos Personales</h3>
                     </div>
-                    
+                    <form method="POST" action="">
                     <div class="profile-form">
                         <div class="form-row">
                             <div class="form-group">
                                 <label>NOMBRE</label>
-                                <input type="text" value="Ana Karina" class="input-profile readonly" readonly>
+                                <input type="text" name="nombre" value="<?= htmlspecialchars($usuario['nombre']) ?>" class="input-profile">
                             </div>
                             <div class="form-group">
                                 <label>APELLIDO</label>
-                                <input type="text" value="Rivera" class="input-profile readonly" readonly>
+                                <input type="text" name="apellido" value="<?= htmlspecialchars($usuario['apellido']) ?>" class="input-profile">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label>CORREO ELECTRÓNICO</label>
-                            <input type="email" value="akrivera@unimagdalena.edu.co" class="input-profile readonly" readonly>
+                            <input type="email" name="correo" value="<?= htmlspecialchars($usuario['correo']) ?>" class="input-profile" readonly>
                             <a href="#" class="link-change">Cambiar correo electrónico</a>
                         </div>
 
@@ -117,7 +157,7 @@ if (!isset($_SESSION['usuario'])) {
                             <label>NÚMERO DE TELÉFONO</label>
                             <div class="phone-input-container">
                                 <div class="code-box">+57</div>
-                                <input type="text" value="321 456 7890" class="input-profile readonly" readonly>
+                                <input type="text" name="telefono" value="<?= htmlspecialchars($usuario['telefono']) ?>" class="input-profile">
                             </div>
                             <a href="#" class="link-change">Cambiar número de teléfono</a>
                         </div>
@@ -126,7 +166,17 @@ if (!isset($_SESSION['usuario'])) {
                             <span class="material-symbols-outlined">restart_alt</span>
                             Cambiar contraseña
                         </button>
+
+                        <div class="form-group" id="change-pass-fields" style="display: none;">
+                            <label>CONTRASEÑA ACTUAL</label>
+                            <input type="password" name="contrasena_actual" class="input-profile">
+                            <label>NUEVA CONTRASEÑA</label>
+                            <input type="password" name="contrasena_nueva" class="input-profile">
+                            <label>CONFIRMAR CONTRASEÑA</label>
+                            <input type="password" name="confirmar_contrasena" class="input-profile">
+                        </div>
                     </div>
+                    </form>
                 </section>
 
                 <section class="card">
@@ -140,9 +190,9 @@ if (!isset($_SESSION['usuario'])) {
                                 <strong>Moneda Principal</strong>
                                 <p>Define el valor por defecto de tus reportes</p>
                             </div>
-                            <select class="select-profile">
-                                <option>COP - Peso Colombiano</option>
-                                <option>USD - Dólar Estadounidense</option>
+                            <select name="moneda_principal" class="select-profile">
+                                <option value="COP" <?= ($usuario['moneda_principal'] ?? 'COP') == 'COP' ? 'selected' : '' ?>>COP - Peso Colombiano</option>
+                                <option value="USD" <?= ($usuario['moneda_principal'] ?? 'COP') == 'USD' ? 'selected' : '' ?>>USD - Dólar Estadounidense</option>
                             </select>
                         </div>
                         <div class="setting-item">
@@ -151,8 +201,9 @@ if (!isset($_SESSION['usuario'])) {
                                 <p>Alterna entre modo claro y oscuro</p>
                             </div>
                             <div class="theme-toggle">
-                                <button class="toggle-btn active">Claro</button>
-                                <button class="toggle-btn">Oscuro</button>
+                                <button type="button" class="toggle-btn <?= ($usuario['tema_interfaz'] ?? 0) == 0 ? 'active' : '' ?>" data-value="0">Claro</button>
+                                <button type="button" class="toggle-btn <?= ($usuario['tema_interfaz'] ?? 0) == 1 ? 'active' : '' ?>" data-value="1">Oscuro</button>
+                                <input type="hidden" name="tema_interfaz" value="<?= $usuario['tema_interfaz'] ?? 0 ?>" id="tema_interfaz">
                             </div>
                         </div>
                         <div class="setting-item">
@@ -161,7 +212,7 @@ if (!isset($_SESSION['usuario'])) {
                                 <p>Alertas de gastos inusuales y metas</p>
                             </div>
                             <label class="switch">
-                                <input type="checkbox" checked>
+                                <input type="checkbox" name="notificaciones_push" <?= ($usuario['notificaciones_push'] ?? 1) ? 'checked' : '' ?>>
                                 <span class="slider"></span>
                             </label>
                         </div>
@@ -172,13 +223,29 @@ if (!isset($_SESSION['usuario'])) {
             <footer class="profile-actions">
                 <button class="btn-logout-text"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</button>
                 <div class="group-btns">
-                    <button class="btn-secondary">Descartar</button>
-                    <button class="btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn-secondary">Descartar</button>
+                    <button type="submit" class="btn-primary">Guardar Cambios</button>
                 </div>
             </footer>
+            </form>
         </div>
     </main>
 
         </div>
     </body>
+    <script>
+        document.querySelectorAll('.theme-toggle .toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.theme-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tema_interfaz').value = this.dataset.value;
+            });
+        });
+
+        document.querySelector('.btn-secondary').addEventListener('click', () => location.reload());
+
+        document.querySelector('.btn-change-pass').addEventListener('click', function() {
+            document.getElementById('change-pass-fields').style.display = 'block';
+        });
+    </script>
 </html>
