@@ -11,7 +11,16 @@
     --primariy-hover: #047857;
     --sidebar-width: 260px;
 }
+/* UTILITY CLASSES PARA TEXTO */
+.text-success {
+    color: #10b981; /* Verde esmeralda */
+    font-weight: 600;
+}
 
+.text-danger {
+    color: #ef4444; /* Rojo */
+    font-weight: 600;
+}
 /* CSS RESET */
 * {
     margin: 0;
