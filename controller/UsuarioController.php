@@ -12,7 +12,7 @@ class UsuarioController {
         require __DIR__ . '/../views/login.php';
     }
 
-    public function iniciarSesion($correo, $contrasena) {
+    public function iniciarSesion($correo, $contrasena, $esRegistroNuevo = false) {
         $usuario = $this->modeloUsuario->obtenerPorCorreo($correo);
 
         // Verificamos que el usuario exista y la contraseña coincida
@@ -25,10 +25,19 @@ class UsuarioController {
             $_SESSION['apellido_usuario'] = $usuario['apellido'];
             $_SESSION['rol'] = $usuario['nombre_rol'];
 
-            header('Location: views/dashboard.php');
+            $urlDestino = 'http://localhost/FinanzaPro/views/dashboard.php';
+
+            if ($esRegistroNuevo) {
+                // Si viene de registrarse, agregamos el parámetro
+                header("Location: " . $urlDestino . "?registro=exito");
+            } else {
+                // Si es un inicio de sesión normal
+                header("Location: " . $urlDestino);
+            }
             exit();
+            
         } else {
-            header('Location: index.php?login=error');
+            header('Location: http://localhost/FinanzaPro/index.php?login=error');
             exit();
         }
     }
@@ -37,10 +46,10 @@ class UsuarioController {
         $telefono = $codigo_pais . ' ' . $telefono_num;
 
         if ($this->modeloUsuario->registrar($nombre, $apellido, $correo, $telefono, $contrasena)) {
-            $this->iniciarSesion($correo, $contrasena);
-            exit();
+            // Esto llamará a iniciarSesion y activará el $esRegistroNuevo = true
+            $this->iniciarSesion($correo, $contrasena, true);
         } else {
-            header("Location: index.php?registro=error");
+            header("Location: http://localhost/FinanzaPro/index.php?registro=error");
             exit();
         }
     }
