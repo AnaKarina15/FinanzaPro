@@ -1,49 +1,46 @@
 <?php
 define('BASE_URL', 'http://localhost/FinanzaPro');
-require_once 'controller/ControladorUsuario.php';
 
-$controlador = new ControladorUsuario();
+// Importamos nuestros controladores segmentados
+require_once 'controller/UsuarioController.php';
+require_once 'controller/TransaccionController.php';
 
-if (isset($_GET['action'])) {
-  switch ($_GET['action']) {
+// Determinamos la acción, por defecto enviamos al login
+$action = isset($_GET['action']) ? $_GET['action'] : 'default';
+
+switch ($action) {
+    // --- RUTAS DE USUARIO ---
     case 'iniciarSesion':
-      $controlador->iniciarSesion(
-        $_POST['email'],
-        $_POST['contrasena']
-      );
-      break;
+        $controller = new UsuarioController();
+        $controller->iniciarSesion($_POST['email'], $_POST['contrasena']);
+        break;
 
     case 'registrar':
-      $controlador->registrarUsuario(
-        $_POST['nombre'],
-        $_POST['apellido'],
-        $_POST['email'],
-        $_POST['codigo_pais'],
-        $_POST['telefono'],
-        $_POST['contrasena']
-      );
-      break;
-
-    case 'guardarMovimiento':
-      $controlador->guardarMovimiento(
-        $_POST['tipo_movimiento'], // Gasto o Ingreso
-        $_POST['monto'],
-        $_POST['fecha'],
-        $_POST['categoria'],
-        $_POST['descripcion']
-      );
-      break;
-
-      case 'obtenerEstadisticas':
-        $controlador->obtenerEstadisticasJson();
+        $controller = new UsuarioController();
+        $controller->registrarUsuario(
+            $_POST['nombre'], $_POST['apellido'], $_POST['email'], 
+            $_POST['codigo_pais'], $_POST['telefono'], $_POST['contrasena']
+        );
         break;
-    // ----------------------------------------------------
 
+    // --- RUTAS DE TRANSACCIÓN ---
+    case 'guardarMovimiento':
+        $controller = new TransaccionController();
+        $controller->guardarMovimiento(
+            $_POST['tipo_movimiento'], $_POST['monto'], $_POST['fecha'], 
+            $_POST['categoria'], $_POST['descripcion']
+        );
+        break;
+
+    case 'obtenerEstadisticas':
+        $controller = new TransaccionController();
+        $controller->obtenerEstadisticasJson();
+        break;
+
+    // --- RUTA POR DEFECTO ---
     default:
-      $controlador->mostrarLogin();
-      break;
-  }
-} else {
-  $controlador->mostrarLogin();
+        $controller = new UsuarioController();
+        $controller->mostrarLogin();
+        break;
 }
 ?>
