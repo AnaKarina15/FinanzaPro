@@ -18,7 +18,7 @@ switch ($action) {
     case 'registrar':
         $controller = new UsuarioController();
         $controller->registrarUsuario(
-            $_POST['nombre'], $_POST['apellido'], $_POST['email'], 
+            $_POST['nombre'], $_POST['apellido'], $_POST['email'],
             $_POST['codigo_pais'], $_POST['telefono'], $_POST['contrasena']
         );
         break;
@@ -26,15 +26,18 @@ switch ($action) {
     // --- RUTAS DE TRANSACCIÓN ---
     case 'guardarMovimiento':
         $controller = new TransaccionController();
-        $controller->guardarMovimiento(
-            $_POST['tipo_movimiento'], $_POST['monto'], $_POST['fecha'], 
-            $_POST['categoria'], $_POST['descripcion']
-        );
+        $controller->guardarMovimiento();
         break;
 
     case 'obtenerEstadisticas':
         $controller = new TransaccionController();
         $controller->obtenerEstadisticasJson();
+        break;
+
+    case 'eliminarMovimiento':
+        // RUTA PARA ELIMINACIÓN DESDE JS
+        $controller = new TransaccionController();
+        $controller->eliminarMovimiento();
         break;
 
     // --- RUTA POR DEFECTO ---
