@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                const ultimos5 = data.movimientos.slice(0, 2);
+                const ultimos2 = data.movimientos.slice(0, 2);
 
                 ultimos2.forEach(mov => {
                     const esGasto = mov.tipo === 'gasto';
@@ -107,4 +107,42 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
         .catch(err => console.error("Error en Fetch:", err));
+
+
+    // --- LÓGICA DEL INPUT DE MONTO (Formateo automático) ---
+    const inputVisual = document.getElementById('monto_visual');
+    const inputOculto = document.getElementById('monto');
+    
+    if (inputVisual && inputOculto) {
+        inputVisual.addEventListener('input', function() {
+            let valorPuro = this.value.replace(/\D/g, '');
+            if (valorPuro === '') { this.value = ''; inputOculto.value = ''; return; }
+            this.value = `$ ${new Intl.NumberFormat('es-CO').format(valorPuro)}`;
+            inputOculto.value = valorPuro;
+        });
+    }
+
+    // --- ABRIR MODAL (Manejador basado en ID) ---
+    const btnAbrirModal = document.getElementById('btn-abrir-modal');
+    if (btnAbrirModal) {
+        btnAbrirModal.addEventListener('click', () => {
+            const form = document.getElementById('form-movimiento');
+            if(form) form.reset();
+            
+            document.getElementById('modal-titulo').innerText = "Registro de Movimientos";
+            document.getElementById('id_transaccion').value = "";
+            
+            if(inputVisual) inputVisual.value = '';
+            
+            document.getElementById('modalNuevoMovimiento').classList.add('active');
+        });
+    }
+
+    // --- CERRAR MODAL ---
+    const btnCerrarModal = document.getElementById('btn-cerrar-modal');
+    if (btnCerrarModal) {
+        btnCerrarModal.addEventListener('click', () => {
+            document.getElementById('modalNuevoMovimiento').classList.remove('active');
+        });
+    }
 });
