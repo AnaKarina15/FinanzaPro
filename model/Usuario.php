@@ -2,56 +2,98 @@
 require_once __DIR__ . '/Conexion.php';
 
 class Usuario {
-  private $db;
+  private $conexion;
 
   public function __construct() {
-    $this->db = (new Conexion())->getConexion();
+    $this->conexion = (new Conexion())->getConexion();
   }
 
   public function registrar($nombre, $apellido, $correo, $telefono, $contrasena) {
     $contrasena_hashed = password_hash($contrasena, PASSWORD_DEFAULT);
 
-    $sql = 'INSERT INTO usuarios (nombre, apellido, correo, telefono, contrasena) VALUES (:nombre, :apellido, :correo, :telefono, :contrasena)';
-    
-    try {
-      $stmt = $this->db->prepare($sql);
-      $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
-      $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
-      $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
-      $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
-      $stmt->bindParam(':contrasena', $contrasena_hashed, PDO::PARAM_STR);
+    $stmt = $this->conexion->prepare('INSERT INTO usuarios (nombre, apellido, correo, telefono, contrasena) VALUES (?, ?, ?, ?, ?)');
+    $stmt->bind_param('sssss', $nombre, $apellido, $correo, $telefono, $contrasena_hashed);
 
-      return $stmt->execute();
-    } catch (PDOException $e) {
+    try {
+      $stmt->execute();
+      return true;
+    } catch (mysqli_sql_exception) {
       return false;
     }
   }
 
   public function verificarCredenciales($correo, $contrasena) {
-    $sql = 'SELECT contrasena FROM usuarios WHERE correo = :correo';
-    $stmt = $this->db->prepare($sql);
-    $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+    $stmt = $this->conexion->prepare('SELECT contrasena FROM usuarios WHERE correo = ?');
+    $stmt->bind_param('s', $correo);
     $stmt->execute();
-    
-    $resultado = $stmt->fetch();
-    
-    if ($resultado) {
-        return password_verify($contrasena, $resultado['contrasena']);
-    }
-    return false;
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return $row ? password_verify($contrasena, $row['contrasena']) : false;
   }
 
   public function obtenerPorCorreo($correo) {
+    // Hacemos un JOIN para traer los datos del usuario + el nombre de su rol
     $query = "SELECT u.*, r.nombre_rol
               FROM usuarios u
               INNER JOIN roles r ON u.id_rol = r.id_rol
-              WHERE u.correo = :correo LIMIT 1";
+              WHERE u.correo = ? LIMIT 1";
 
-    $stmt = $this->db->prepare($query);
-    $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+    $stmt = $this->conexion->prepare($query);
+    $stmt->bind_param('s', $correo);
     $stmt->execute();
 
-    return $stmt->fetch();
+    $result = $stmt->get_result();
+    return $result->fetch_assoc();
+  }
+
+  public function obtenerPorId($id_usuario) {
+    $query = "SELECT u.*, r.nombre_rol
+              FROM usuarios u
+              INNER JOIN roles r ON u.id_rol = r.id_rol
+              WHERE u.id_usuario = ? LIMIT 1";
+
+    $stmt = $this->conexion->prepare($query);
+    $stmt->bind_param('i', $id_usuario);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    return $result->fetch_assoc();
+  }
+
+  public function actualizarPerfil($id_usuario, $nombre, $apellido, $telefono, $moneda_principal, $tema_interfaz, $notificaciones_push) {
+    $stmt = $this->conexion->prepare('UPDATE usuarios SET nombre = ?, apellido = ?, telefono = ?, moneda_principal = ?, tema_interfaz = ?, notificaciones_push = ? WHERE id_usuario = ?');
+    $stmt->bind_param('sssssii', $nombre, $apellido, $telefono, $moneda_principal, $tema_interfaz, $notificaciones_push, $id_usuario);
+
+    try {
+      $stmt->execute();
+      return true;
+    } catch (mysqli_sql_exception) {
+      return false;
+    }
+  }
+
+  public function cambiarContrasena($id_usuario, $contrasena_actual, $contrasena_nueva) {
+    $stmt = $this->conexion->prepare('SELECT contrasena FROM usuarios WHERE id_usuario = ?');
+    $stmt->bind_param('i', $id_usuario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    // Verificar que la contraseña actual es correcta
+    if (!$row || !password_verify($contrasena_actual, $row['contrasena'])) {
+      return false;
+    }
+
+    // Actualizar a la nueva contraseña
+    $contrasena_nueva_hashed = password_hash($contrasena_nueva, PASSWORD_DEFAULT);
+    $stmt_update = $this->conexion->prepare('UPDATE usuarios SET contrasena = ? WHERE id_usuario = ?');
+    $stmt_update->bind_param('si', $contrasena_nueva_hashed, $id_usuario);
+
+    try {
+      $stmt_update->execute();
+      return true;
+    } catch (mysqli_sql_exception) {
+      return false;
+    }
   }
 }
-?>
