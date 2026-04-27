@@ -23,7 +23,7 @@ class UsuarioController {
             $_SESSION['id_usuario'] = $usuario['id_usuario'];
             $_SESSION['nombre_usuario'] = $usuario['nombre'];
             $_SESSION['apellido_usuario'] = $usuario['apellido'];
-            $_SESSION['rol'] = $usuario['nombre_rol'];
+            $_SESSION['rol'] = $usuario['nombre_rol'] ?? 'Usuario';
 
             $urlDestino = 'http://localhost/FinanzaPro/views/dashboard.php';
 
@@ -77,26 +77,39 @@ class UsuarioController {
 
             if ($pinModelo->verificarPin($usuario['id_usuario'], $pin, 'registro')) {
                 
-                // Actualizamos la base de datos: cuenta_verificada a 1
                 $conexion = (new Conexion())->getConexion();
                 
+                //  Preparamos la sentencia
                 $stmt = $conexion->prepare('UPDATE usuarios SET cuenta_verificada = 1 WHERE id_usuario = :id');
                 $stmt->bindParam(':id', $usuario['id_usuario'], PDO::PARAM_INT);
-                $stmt->execute();
                 
-                if (session_status() == PHP_SESSION_NONE) {
-                    session_start();
-                }
-                //iniciamos sesion automáticamente después de activar la cuenta
-                if (session_status() == PHP_SESSION_NONE) session_start();
-                $_SESSION['usuario'] = $correo;
-                $_SESSION['id_usuario'] = $usuario['id_usuario'];
-                $_SESSION['nombre_usuario'] = $usuario['nombre'];
-                $_SESSION['apellido_usuario'] = $usuario['apellido'];
-                $_SESSION['rol'] = $usuario['nombre_rol'];
+                //  Verificamos si la ejecución fue exitosa
+                if ($stmt->execute()) {
+                    
+                    //Verificamos si se afectó alguna fila (si realmente cambió de 0 a 1)
+                    if ($stmt->rowCount() > 0) {
+                        
+                        // Iniciamos sesión (Solo una vez)
+                        if (session_status() == PHP_SESSION_NONE) session_start();
+                        
+                        $_SESSION['usuario'] = $correo;
+                        $_SESSION['id_usuario'] = $usuario['id_usuario'];
+                        $_SESSION['nombre_usuario'] = $usuario['nombre'];
+                        $_SESSION['apellido_usuario'] = $usuario['apellido'];
+                        $_SESSION['rol'] = $usuario['nombre_rol'];
 
-                echo json_encode(["status" => "success", "mensaje" => "Cuenta activada. Entrando al sistema..."]);
-                exit();
+                        echo json_encode(["status" => "success", "mensaje" => "Cuenta activada. Entrando al sistema..."]);
+                        exit();
+                    } else {
+                        echo json_encode(["status" => "error", "mensaje" => "La cuenta ya estaba activa o no se encontró el registro."]);
+                        exit();
+                    }
+                } else {
+                    // Si llegamos aquí, hay un error de sintaxis SQL o de conexión
+                    $error = $stmt->errorInfo();
+                    echo json_encode(["status" => "error", "mensaje" => "Error de base de datos: " . $error[2]]);
+                    exit();
+                }
             }
         }
         echo json_encode(["status" => "error", "mensaje" => "El código es incorrecto o ha expirado."]);
