@@ -1,0 +1,50 @@
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f1f5f9;
+}
+
+.verify-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); 
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.pin-input {
+    font-size: 2rem;
+    text-align: center;
+    letter-spacing: 0.5rem;
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-family: monospace;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.pin-input:focus {
+    border-color: #059669; /* Verde FinanzaPro al hacer clic */
+}
+
+.icon-verify {
+    font-size: 4rem;
+    color: #059669; /* Verde FinanzaPro */
+}
+
+.btn-verify {
+    width: 100%;
+}
+
+.verify-footer-text {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #64748b;
+}

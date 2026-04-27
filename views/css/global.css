@@ -538,6 +538,7 @@ select:focus-visible {
     font-size: 16px;
     font-family: inherit;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .input-container input:focus {
@@ -576,4 +577,42 @@ select:focus-visible {
     font-weight: 800;
     color: var(--text-primary);
     text-align: center;
+}
+
+/* --- ESTILOS PARA EL INPUT DEL PIN --- */
+.pin-input {
+    text-align: center;
+    font-size: 2rem;
+    letter-spacing: 1rem; /* Separa los números */
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: monospace;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+/* Cuando el usuario hace clic para escribir */
+.pin-input:focus {
+    border-color: #059669; /* Verde FinanzaPro */
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+/* Clase que le pondremos con JS si el PIN es incorrecto */
+.pin-input.input-error {
+    border-color: #ef4444; /* Rojo error */
+    background-color: #fef2f2;
+    animation: shake 0.4s ease-in-out;
+}
+
+/* Animación para que la caja tiemble */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
 }
