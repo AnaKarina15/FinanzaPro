@@ -3,55 +3,31 @@ class Conexion {
     private $conexion;
 
     public function getConexion() {
-        // Cargar configuración desde el archivo config.php
+        // Consumimos el array de configuración
         $config = require __DIR__ . '/../config/config.php';
         
-        $this->conexion = mysqli_init();
+        $host = $config['host'];
+        $db = $config['base_de_datos'];
+        $user = $config['usuario'];
+        $pass = $config['contrasena'];
+        $charset = 'utf8mb4';
+
+        $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
         
-        // Ruta del certificado SSL
-        $ca = __DIR__ . "/../config/ca.pem";
-        
-        if (!file_exists($ca)) {
-            // Para desarrollo: intentar conexión sin SSL si no hay certificado
-            // En producción, esto debería fallar
-            error_log("Advertencia: Certificado SSL no encontrado. Intentando conexión sin SSL (no recomendado para producción)");
-            
-            // Conectar sin SSL (solo para desarrollo)
-            $connected = mysqli_real_connect(
-                $this->conexion,
-                $config['host'],
-                $config['usuario'],
-                $config['contrasena'],
-                $config['base_de_datos'],
-                $config['puerto'],
-                NULL,
-                0 // Sin flags SSL
-            );
-        } else {
-            // Configurar SSL
-            mysqli_ssl_set($this->conexion, NULL, NULL, $ca, NULL, NULL);
-            
-            // Conectar con SSL
-            $connected = mysqli_real_connect(
-                $this->conexion,
-                $config['host'],
-                $config['usuario'],
-                $config['contrasena'],
-                $config['base_de_datos'],
-                $config['puerto'],
-                NULL,
-                MYSQLI_CLIENT_SSL
-            );
+        // Opciones de PDO para seguridad y manejo de errores
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
+
+        try {
+            $this->conexion = new PDO($dsn, $user, $pass, $options);
+            return $this->conexion;
+        } catch (\PDOException $e) {
+            // En producción, el error debe registrarse en un log, no mostrarse al usuario.
+            die("Error de conexión a MySQL: " . $e->getMessage());
         }
-        
-        if (!$connected) {
-            die("Error de conexión a la base de datos: " . mysqli_connect_error());
-        }
-        
-        // Establecer codificación UTF-8
-        $this->conexion->set_charset("utf8mb4");
-        
-        return $this->conexion;
     }
 }
 ?>
