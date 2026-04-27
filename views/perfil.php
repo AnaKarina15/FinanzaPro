@@ -50,7 +50,7 @@ if (!isset($_SESSION['usuario'])) {
             </a>
             <a href="perfil.php" class="nav-link nav-profile">
                 <div class="avatar">
-                <img src="" alt="Foto de perfil" />
+                <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?>&background=059669&color=fff" alt="Foto de perfil" />
                 </div>
                 <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
             </a>
@@ -76,7 +76,7 @@ if (!isset($_SESSION['usuario'])) {
                 <div class="banner-gradient"></div>
                 <div class="profile-header-content">
                     <div class="avatar-container">
-                        <img src="../assets/img/tu-avatar.jpg" alt="Foto de perfil" class="profile-avatar-big">
+                        <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?>&background=059669&color=fff&size=130" alt="Foto de perfil" class="profile-avatar-big">
                         <button class="btn-camera"><span class="material-symbols-outlined">photo_camera</span></button>
                     </div>
                     <div class="profile-summary">
