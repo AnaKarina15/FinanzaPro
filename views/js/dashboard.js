@@ -1,11 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
     const formatearMoneda = (valor) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
 
+    // --- MANEJO DE ALERTAS DE BIENVENIDA ---
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("registro") && urlParams.get("registro") === "exito") {
+        Swal.fire({
+            title: "¡Cuenta Creada!",
+            text: "Tu registro fue exitoso. Bienvenido a FinanzaPro.",
+            icon: "success",
+            confirmButtonColor: "#059669",
+            confirmButtonText: "Empezar"
+        });
+
+        // Limpiamos la URL para que no vuelva a salir la alerta si recargan la página
+        window.history.replaceState(null, null, window.location.pathname);
+    }
+
     // Intentamos traer los datos
     fetch('../index.php?action=obtenerEstadisticas')
         .then(response => response.json())
         .then(data => {
-            console.log("Datos del Dashboard:", data); // Mira esto en F12 para ver si llegan los 920.000
+            console.log("Datos del Dashboard:", data);
 
             if (data.error) {
                 console.error("Sesión no encontrada");
@@ -22,8 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // --- ACTUALIZAR GRÁFICA DE BARRAS ---
             const canvas = document.querySelector(".incomes-outcomes-chart");
-            if (canvas) {
-                // Si ya existe una gráfica en este canvas, la destruimos
+            if (canvas && data.mensual) {
                 const chartExistente = Chart.getChart(canvas);
                 if (chartExistente) { chartExistente.destroy(); }
 
@@ -53,25 +67,39 @@ document.addEventListener("DOMContentLoaded", () => {
             // --- ACTUALIZAR TABLA DE MOVIMIENTOS ---
             const tablaCuerpo = document.querySelector('.movimientos-tabla-cuerpo');
             if (tablaCuerpo && data.movimientos) {
-                tablaCuerpo.innerHTML = ''; 
-                data.movimientos.forEach(mov => {
+                tablaCuerpo.innerHTML = '';
+
+                if (data.movimientos.length === 0) {
+                    tablaCuerpo.innerHTML = `<tr><td colspan="4" class="empty-table-msg">Sin actividad reciente.</td></tr>`;
+                    return;
+                }
+
+                const ultimos5 = data.movimientos.slice(0, 2);
+
+                ultimos2.forEach(mov => {
                     const esGasto = mov.tipo === 'gasto';
+                    const colorMonto = esGasto ? 'text-danger' : 'text-success';
+                    const signo = esGasto ? '-' : '+';
+                    const iconType = esGasto ? 'shopping_bag' : 'business_center';
+                    const iconBg = esGasto ? 'icon-blue' : 'icon-green';
+
+                    const dateObj = new Date(mov.fecha + 'T00:00:00');
+                    const fechaFormato = dateObj.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
+
                     tablaCuerpo.innerHTML += `
-                        <tr style="border-bottom: 1px solid #f3f4f6;">
-                            <td style="padding: 15px;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="background: #f3f4f6; padding: 8px; border-radius: 8px;">
-                                        <span class="material-symbols-outlined" style="font-size: 20px;">
-                                            ${esGasto ? 'shopping_bag' : 'payments'}
-                                        </span>
-                                    </div>
-                                    <span style="font-weight: 500;">${mov.descripcion || 'Sin descripción'}</span>
+                        <tr>
+                            <td class="table-date">${fechaFormato}</td>
+                            <td class="table-desc">
+                                <div class="table-concept">
+                                    <span class="material-symbols-outlined concept-icon ${iconBg}">${iconType}</span>
+                                    <strong>${mov.descripcion}</strong>
                                 </div>
                             </td>
-                            <td>${mov.fecha}</td>
-                            <td><span style="background: #e1fdec; color: #059669; padding: 4px 12px; border-radius: 20px; font-size: 12px;">${mov.categoria}</span></td>
-                            <td style="font-weight: 600; color: ${esGasto ? '#ef4444' : '#10b981'}">
-                                ${esGasto ? '-' : '+'}${formatearMoneda(mov.monto)}
+                            <td>
+                                <span class="badge badge-neutral">${mov.categoria}</span>
+                            </td>
+                            <td class="${colorMonto}">
+                                ${signo}${formatearMoneda(mov.monto)}
                             </td>
                         </tr>
                     `;

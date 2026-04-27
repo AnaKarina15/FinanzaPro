@@ -21,7 +21,7 @@ if (!isset($_SESSION['usuario'])) {
   <link rel="stylesheet" href="./css/global.css" />
   <link rel="stylesheet" href="./css/dashboard.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="./js/dashboard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <script type="module" src="./js/dashboard.js"></script>
 </head>
 
 <body>
@@ -143,7 +143,7 @@ if (!isset($_SESSION['usuario'])) {
                   <th>MONTO</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody >
                 <tr>
                   <td>
                     <div class="table-concept">
