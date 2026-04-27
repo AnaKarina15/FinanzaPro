@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!canvas) return;
 
-        // 1. CORRECCIÓN CRÍTICA: Destruir la gráfica existente ANTES de evaluar si hay datos o no
         const chartExistente = Chart.getChart(canvas);
         if (chartExistente) {
             chartExistente.destroy();
@@ -71,10 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch('../index.php?action=obtenerEstadisticas') 
         .then(res => {
             if (!res.ok) throw new Error("Error de red o HTTP: " + res.status);
-            return res.text(); // PRIMERO LO LEEMOS COMO TEXTO PARA EVITAR FALLOS DE PARSEO
+            return res.text();
         })
         .then(texto => {
-            console.log("Respuesta cruda de PHP:", texto); // AQUÍ VEREMOS SI PHP ESTÁ TIRANDO UN ERROR
+            console.log("Respuesta cruda de PHP:", texto); 
             const data = JSON.parse(texto);
             
             if (data.error) {
@@ -84,7 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             console.log("Datos procesados correctamente:", data);
 
-            // A partir de aquí, es tu código normal
             const totalI = parseFloat(data.totales?.ingresos) || 0;
             const totalG = parseFloat(data.totales?.gastos) || 0;
             
@@ -131,4 +129,76 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(err => console.error("Error catastrófico en Fetch:", err));
         
+    // --- DELEGACIÓN DE EVENTOS (EDITAR / ELIMINAR) ---
+    document.addEventListener('click', (e) => {
+        // ACCIÓN ELIMINAR
+        const btnDelete = e.target.closest('.action-delete');
+        if (btnDelete) {
+            e.preventDefault();
+            const id = btnDelete.dataset.id;
+            Swal.fire({
+                title: '¿Eliminar movimiento?',
+                text: "Esta acción no se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('../index.php?action=eliminarMovimiento', {
+                        method: 'POST',
+                        body: JSON.stringify({ id_transaccion: id })
+                    }).then(res => res.json()).then(resData => {
+                        if(resData.exito) {
+                            Swal.fire({ title: '¡Eliminado!', icon: 'success', confirmButtonColor: '#059669' })
+                            .then(() => window.location.reload());
+                        }
+                    });
+                }
+            });
+        }
+
+        // ACCIÓN MODIFICAR
+        const btnEdit = e.target.closest('.action-edit');
+        if (btnEdit) {
+            e.preventDefault();
+            const d = btnEdit.dataset;
+            document.getElementById('modal-titulo').innerText = "Editar Movimiento";
+            document.getElementById('id_transaccion').value = d.id;
+            document.querySelector(`input[name="tipo_movimiento"][value="${d.tipo}"]`).checked = true;
+            document.getElementById('fecha').value = d.fecha;
+            document.getElementById('categoria').value = d.cat;
+            document.getElementById('descripcion').value = d.desc;
+            document.getElementById('monto').value = d.monto;
+            document.getElementById('monto_visual').value = `$ ${new Intl.NumberFormat('es-CO').format(d.monto)}`;
+            document.getElementById('modalNuevoMovimiento').classList.add('active');
+        }
+    });
+
+    // --- ABRIR MODAL (NUEVO MOVIMIENTO) ---
+    const btnAbrirModal = document.getElementById('btn-abrir-modal');
+    if (btnAbrirModal) {
+        btnAbrirModal.addEventListener('click', () => {
+            const form = document.getElementById('form-movimiento');
+            if(form) form.reset();
+            
+            document.getElementById('modal-titulo').innerText = "Registro de Movimientos";
+            document.getElementById('id_transaccion').value = ""; 
+            
+            const inputVisual = document.getElementById('monto_visual');
+            if(inputVisual) inputVisual.value = '';
+            
+            document.getElementById('modalNuevoMovimiento').classList.add('active');
+        });
+    }
+
+    // --- CERRAR MODAL ---
+    const btnCerrarModal = document.getElementById('btn-cerrar-modal');
+    if (btnCerrarModal) {
+        btnCerrarModal.addEventListener('click', () => {
+            document.getElementById('modalNuevoMovimiento').classList.remove('active');
+        });
+    }
 });

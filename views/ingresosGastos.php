@@ -68,7 +68,7 @@ if (!isset($_SESSION['usuario'])) {
             echo date('j') . ' ' . $meses[date('n')] . ', ' . date('Y');
             ?>
           </button>
-          <button class="btn-primary" onclick="abrirModalNuevo()">
+          <button class="btn-primary" id="btn-abrir-modal">
             <span class="material-symbols-outlined">add</span> Nuevo Movimiento
           </button>
         </div>

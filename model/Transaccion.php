@@ -8,53 +8,51 @@ class Transaccion {
         $this->db = (new Conexion())->getConexion();
     }
 
-    public function registrarTransaccion($id_usuario, $tipo_movimiento, $monto, $fecha, $nombre_categoria, $descripcion) {
+public function registrarTransaccion($id_usuario, $tipo_movimiento, $monto, $fecha, $nombre_categoria, $descripcion) {
         try {
-            // Iniciamos la transacción SQL para asegurar la atomicidad
             $this->db->beginTransaction();
-
-            // 1. Buscar si la categoría ya existe para ese usuario o es global
+            
+            // 1. Obtener o crear la categoría primero
             $queryCat = "SELECT id_categoria FROM categorias WHERE nombre = :nombre AND tipo = :tipo AND (id_usuario = :id_usuario OR id_usuario IS NULL) LIMIT 1";
             $stmtCat = $this->db->prepare($queryCat);
-            $stmtCat->bindParam(":nombre", $nombre_categoria, PDO::PARAM_STR);
-            $stmtCat->bindParam(":tipo", $tipo_movimiento, PDO::PARAM_STR);
-            $stmtCat->bindParam(":id_usuario", $id_usuario, PDO::PARAM_INT);
-            $stmtCat->execute();
+            $stmtCat->execute([
+                ':nombre' => $nombre_categoria, 
+                ':tipo' => $tipo_movimiento, 
+                ':id_usuario' => $id_usuario
+            ]);
             
             $categoria = $stmtCat->fetch();
-            
             if ($categoria) {
                 $id_categoria = $categoria['id_categoria'];
             } else {
-                // Si no existe, la creamos asociada a este usuario
+                // Si la categoría no existe, la creamos
                 $queryInsertCat = "INSERT INTO categorias (id_usuario, nombre, tipo) VALUES (:id_usuario, :nombre, :tipo)";
                 $stmtInsertCat = $this->db->prepare($queryInsertCat);
-                $stmtInsertCat->bindParam(":id_usuario", $id_usuario, PDO::PARAM_INT);
-                $stmtInsertCat->bindParam(":nombre", $nombre_categoria, PDO::PARAM_STR);
-                $stmtInsertCat->bindParam(":tipo", $tipo_movimiento, PDO::PARAM_STR);
-                $stmtInsertCat->execute();
-                
+                $stmtInsertCat->execute([
+                    ':id_usuario' => $id_usuario, 
+                    ':nombre' => $nombre_categoria, 
+                    ':tipo' => $tipo_movimiento
+                ]);
                 $id_categoria = $this->db->lastInsertId();
             }
 
-            // 2. Insertar el movimiento
+            // 2. Insertar el movimiento en transacciones
             $queryTrans = "INSERT INTO transacciones (id_usuario, id_categoria, monto, fecha, descripcion) VALUES (:id_usuario, :id_categoria, :monto, :fecha, :descripcion)";
             $stmtTrans = $this->db->prepare($queryTrans);
-            $stmtTrans->bindParam(":id_usuario", $id_usuario, PDO::PARAM_INT);
-            $stmtTrans->bindParam(":id_categoria", $id_categoria, PDO::PARAM_INT);
-            $stmtTrans->bindParam(":monto", $monto, PDO::PARAM_STR); // DECIMAL se mapea bien como STR
-            $stmtTrans->bindParam(":fecha", $fecha, PDO::PARAM_STR);
-            $stmtTrans->bindParam(":descripcion", $descripcion, PDO::PARAM_STR);
+            $stmtTrans->execute([
+                ':id_usuario' => $id_usuario,
+                ':id_categoria' => $id_categoria,
+                ':monto' => $monto,
+                ':fecha' => $fecha,
+                ':descripcion' => $descripcion
+            ]);
             
-            $stmtTrans->execute();
-            
-            // Si todo salió bien, confirmamos los cambios
             $this->db->commit();
             return true;
-
         } catch (PDOException $e) {
-            // Si hay algún error, deshacemos cualquier cambio en la BD
             $this->db->rollBack();
+            // Esto imprimirá en el archivo de errores de PHP si algo falla en la base de datos
+            error_log("Error guardando movimiento: " . $e->getMessage()); 
             return false;
         }
     }

@@ -8,7 +8,8 @@ class TransaccionController {
         $this->modeloTransaccion = new Transaccion();
     }
 
-    public function guardarMovimiento($tipo_movimiento, $monto, $fecha, $categoria, $descripcion) {
+    // --- 1. GUARDAR O ACTUALIZAR MOVIMIENTO ---
+    public function guardarMovimiento() {
         if (session_status() == PHP_SESSION_NONE) session_start();
         
         if (!isset($_SESSION['id_usuario'])) {
@@ -17,16 +18,58 @@ class TransaccionController {
         }
 
         $id_usuario = $_SESSION['id_usuario'];
+        
+        // Recibimos los datos del formulario (POST)
+        $id_transaccion = $_POST['id_transaccion'] ?? '';
+        $tipo_movimiento = $_POST['tipo_movimiento'] ?? '';
+        $monto = str_replace(['.', ',', '$', ' '], '', $_POST['monto']); // Limpieza de seguridad
+        $fecha = $_POST['fecha'] ?? '';
+        $categoria = $_POST['categoria'] ?? '';
+        $descripcion = $_POST['descripcion'] ?? '';
 
-        if ($this->modeloTransaccion->registrarTransaccion($id_usuario, $tipo_movimiento, $monto, $fecha, $categoria, $descripcion)) {
-            header("Location: views/ingresosGastos.php?guardado=exito");
-            exit();
+        // Averiguamos de qué página vino la petición
+        $pagina_anterior = $_SERVER['HTTP_REFERER'] ?? 'views/dashboard.php';
+
+        // Lógica de decisión: ¿Es nuevo o es una actualización?
+        if (!empty($id_transaccion)) {
+            $exito = $this->modeloTransaccion->actualizarTransaccion($id_transaccion, $id_usuario, $tipo_movimiento, $monto, $fecha, $categoria, $descripcion);
         } else {
-            header("Location: views/ingresosGastos.php?guardado=error");
-            exit();
+            $exito = $this->modeloTransaccion->registrarTransaccion($id_usuario, $tipo_movimiento, $monto, $fecha, $categoria, $descripcion);
         }
+
+        // Redirigimos al usuario exactamente a la página donde estaba
+        if ($exito) {
+            header("Location: " . $pagina_anterior);
+        } else {
+            // Si hay error, también lo devolvems pero podríamos agregar un parámetro ?error=1
+            header("Location: " . $pagina_anterior);
+        }
+        exit();
     }
 
+    // --- 2. ELIMINAR MOVIMIENTO
+    public function eliminarMovimiento() {
+        if (session_status() == PHP_SESSION_NONE) session_start();
+        header('Content-Type: application/json');
+
+        if (!isset($_SESSION['id_usuario'])) {
+            echo json_encode(['exito' => false, 'error' => 'No autorizado']);
+            exit();
+        }
+
+        // Leemos el JSON enviado por el Fetch de JavaScript
+        $datos = json_decode(file_get_contents("php://input"), true);
+        $id_transaccion = $datos['id_transaccion'] ?? null;
+
+        if ($id_transaccion && $this->modeloTransaccion->eliminarTransaccion($id_transaccion, $_SESSION['id_usuario'])) {
+            echo json_encode(['exito' => true]);
+        } else {
+            echo json_encode(['exito' => false, 'error' => 'No se pudo eliminar en la base de datos']);
+        }
+        exit();
+    }
+
+    // --- 3. OBTENER ESTADÍSTICAS JSON ---
     public function obtenerEstadisticasJson() {
         if (session_status() == PHP_SESSION_NONE) session_start();
         
@@ -41,7 +84,7 @@ class TransaccionController {
         $totales = $this->modeloTransaccion->obtenerTotales($id_usuario);
         $categoriasGastos = $this->modeloTransaccion->obtenerGastosPorCategoria($id_usuario);
         $categoriasIngresos = $this->modeloTransaccion->obtenerIngresosPorCategoria($id_usuario);
-        $movimientos = $this->modeloTransaccion->obtenerMovimientos($id_usuario, 15); // Traemos los últimos 15
+        $movimientos = $this->modeloTransaccion->obtenerMovimientos($id_usuario, 15); 
         $mensual = $this->modeloTransaccion->obtenerIngresosGastosPorMes($id_usuario);
 
         header('Content-Type: application/json');
@@ -53,37 +96,6 @@ class TransaccionController {
             'mensual' => $mensual
         ]);
         exit();
-    }
-
-    public function obtenerIngresosPorCategoria($id_usuario) {
-        $query = "SELECT c.nombre, SUM(t.monto) as total
-                FROM transacciones t
-                JOIN categorias c ON t.id_categoria = c.id_categoria
-                WHERE t.id_usuario = :id_usuario AND c.tipo = 'ingreso'
-                GROUP BY c.id_categoria";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(":id_usuario", $id_usuario, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        return $stmt->fetchAll();
-    }
-
-    public function obtenerMovimientos($id_usuario, $limite = 10) {
-        $query = "SELECT t.id_transaccion, t.monto, t.fecha, t.descripcion, c.nombre as categoria, c.tipo
-                FROM transacciones t
-                JOIN categorias c ON t.id_categoria = c.id_categoria
-                WHERE t.id_usuario = :id_usuario
-                ORDER BY t.fecha DESC, t.id_transaccion DESC
-                LIMIT :limite";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(":id_usuario", $id_usuario, PDO::PARAM_INT);
-        // BindValue se usa aquí porque el límite es un entero directo
-        $stmt->bindValue(":limite", (int)$limite, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        return $stmt->fetchAll();
     }
 }
 ?>
