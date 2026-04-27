@@ -1,48 +1,57 @@
 <?php
-require_once 'model/Conexion.php';
+require_once __DIR__ . '/Conexion.php';
 
 class Usuario {
-  private $conexion;
+  private $db;
 
   public function __construct() {
-    $this->conexion = (new Conexion())->getConexion();
+    $this->db = (new Conexion())->getConexion();
   }
 
   public function registrar($nombre, $apellido, $correo, $telefono, $contrasena) {
     $contrasena_hashed = password_hash($contrasena, PASSWORD_DEFAULT);
 
-    $stmt = $this->conexion->prepare('INSERT INTO usuarios (nombre, apellido, correo, telefono, contrasena) VALUES (?, ?, ?, ?, ?)');
-    $stmt->bind_param('sssss', $nombre, $apellido, $correo, $telefono, $contrasena_hashed);
-
+    $sql = 'INSERT INTO usuarios (nombre, apellido, correo, telefono, contrasena) VALUES (:nombre, :apellido, :correo, :telefono, :contrasena)';
+    
     try {
-      $stmt->execute();
-      return true;
-    } catch (mysqli_sql_exception) {
+      $stmt = $this->db->prepare($sql);
+      $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+      $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
+      $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+      $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+      $stmt->bindParam(':contrasena', $contrasena_hashed, PDO::PARAM_STR);
+
+      return $stmt->execute();
+    } catch (PDOException $e) {
       return false;
     }
   }
 
   public function verificarCredenciales($correo, $contrasena) {
-    $stmt = $this->conexion->prepare('SELECT contrasena FROM usuarios WHERE correo = ?');
-    $stmt->bind_param('s', $correo);
+    $sql = 'SELECT contrasena FROM usuarios WHERE correo = :correo';
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
     $stmt->execute();
-    $stmt->bind_result($contrasena_hashed);
-    $stmt->fetch();
-    return password_verify($contrasena, $contrasena_hashed);
+    
+    $resultado = $stmt->fetch();
+    
+    if ($resultado) {
+        return password_verify($contrasena, $resultado['contrasena']);
+    }
+    return false;
   }
 
   public function obtenerPorCorreo($correo) {
-    // Hacemos un JOIN para traer los datos del usuario + el nombre de su rol
-    $query = "SELECT u.*, r.nombre_rol 
+    $query = "SELECT u.*, r.nombre_rol
               FROM usuarios u
               INNER JOIN roles r ON u.id_rol = r.id_rol
-              WHERE u.correo = ? LIMIT 1";
+              WHERE u.correo = :correo LIMIT 1";
 
-    $stmt = $this->conexion->prepare($query);
-    $stmt->bind_param('s', $correo);
+    $stmt = $this->db->prepare($query);
+    $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
     $stmt->execute();
 
-    $result = $stmt->get_result();
-    return $result->fetch_assoc();
+    return $stmt->fetch();
   }
 }
+?>
