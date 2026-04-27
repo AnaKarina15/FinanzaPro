@@ -19,7 +19,7 @@ $correo_a_verificar = $_GET['correo'] ?? '';
     <link rel="stylesheet" href="<?= BASE_URL ?>/views/css/global.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/views/css/login.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="<?= BASE_URL ?>/views/js/login.js"></script>
+    <script type="module" src="<?= BASE_URL ?>/views/js/login.js?v=<?php echo time(); ?>"></script>
   </head>
   <body>
     <header>
