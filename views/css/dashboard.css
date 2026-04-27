@@ -21,11 +21,9 @@
 
 /* HEALTH CARD */
 .dashboard-health-card {
-  background: linear-gradient(
-    135deg,
-    var(--primary) 0%,
-    #000000cc 100%
-  );
+  background: linear-gradient(135deg,
+      var(--primary) 0%,
+      #000000cc 100%);
   border-radius: 32px;
   color: #ffffff;
   position: relative;
@@ -54,26 +52,26 @@
 /* TIPS CARD */
 .dashboard-tips-card {
   justify-content: start;
-  grid-row: 3/5 ;
+  grid-row: 3/5;
 }
 
 .tips-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
 }
 
 .tip-item {
-    background-color: var(--bg);
-    padding: 16px;
-    border-radius: 8px;
+  background-color: var(--bg);
+  padding: 16px;
+  border-radius: 8px;
 }
 
 .tip-tag {
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
 }
 
 .metrics-cards .card-top {
