@@ -23,6 +23,11 @@ switch ($action) {
         );
         break;
 
+    case 'actualizarPerfil':
+        $controller = new UsuarioController();
+        $controller->actualizarPerfil();
+        break;
+        
     // --- RUTAS DE TRANSACCIÓN ---
     case 'guardarMovimiento':
         $controller = new TransaccionController();
