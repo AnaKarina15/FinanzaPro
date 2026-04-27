@@ -1,7 +1,11 @@
 <?php
+// 1. EL INTERRUPTOR MAESTRO DE SESIONES (Debe ir estrictamente en la línea 1)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 define('BASE_URL', 'http://localhost/FinanzaPro');
 
-// Importamos nuestros controladores segmentados
 require_once 'controller/UsuarioController.php';
 require_once 'controller/TransaccionController.php';
 
@@ -22,11 +26,18 @@ switch ($action) {
             $_POST['codigo_pais'], $_POST['telefono'], $_POST['contrasena']
         );
         break;
-    
+
+    // RUTA: Donde llega el Fetch API desde Javascript
+    case 'activarCuenta':
+        $controller = new UsuarioController();
+        $controller->activarCuenta();
+        break;
+        
     case 'solicitarRecuperacion':
         $controller = new UsuarioController();
         $controller->solicitarRecuperacion();
         break;
+
     case 'restablecerContrasena':
         $controller = new UsuarioController();
         $controller->restablecerContrasena();
