@@ -1,133 +1,230 @@
-/* LAYOUT PRINCIPAL Y GRILLAS*/
-.layout-dos-columnas {
+.summary-cards-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
     margin-bottom: 24px;
 }
 
-.columna-izquierda {
+/* TARJETAS DE RESUMEN (INGRESOS/GASTOS)*/
+.combined-chart-card {
+    padding: 32px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.card-header-clean {
     display: flex;
-    flex-direction: column;
-    gap: 24px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
 }
 
-.fila-tarjetas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-}
-
-
-.Expenses-graph-card .chart-container {
-    position: relative;
-    max-height: 200px;
-    margin-top: 10px;
-}
-
-/* Contenedor del texto en el centro de la dona */
-.chart-center-text {
-    position: absolute;
-    top: 50%;
-    left: 35%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    pointer-events: none;
-}
-
-.chart-center-text .total-label {
-    display: block;
-    font-size: 12px;
+.card-header-clean .subtitle {
     color: var(--text-secondary);
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 8px;
 }
 
-.chart-center-text .total-value {
-    display: block;
-    font-size: 18px;
+.card-header-clean .total-monto {
+    font-size: 36px;
     font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.icon-up, .icon-down {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+.icon-up { background: #dcfce7; color: #059669; }
+.icon-down { background: #fee2e2; color: #ef4444; }
+
+/* Contenedor Dona + Leyenda */
+.chart-legend-container {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.chart-wrapper {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    flex-shrink: 0;
+}
+
+.chart-wrapper .chart-center-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 800;
+    font-size: 16px;
     color: var(--text-primary);
 }
 
-/* ALINEACIÓN DE LAS TARJETAS SUPERIORES */
-.fila-tarjetas .card {
-    align-items: flex-start;
+.legend-wrapper {
+    flex-grow: 1;
 }
 
-.fila-tarjetas .card-top {
-    justify-content: flex-start;
+.legend-title {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.legend-list {
+    display: flex;
+    flex-direction: column;
     gap: 12px;
-    width: 100%;
 }
 
-.fila-tarjetas .card-titulo {
-    text-align: left;
-    margin: 0;
+.legend-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text-secondary);
 }
 
-.fila-tarjetas .card-value {
+.legend-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+}
+.legend-percent {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* TABLA DE HISTORIAL DE MOVIMIENTOS */
+.movimientos-header {
+    margin-bottom: 16px;
+}
+
+.movimientos-title {
+    font-size: 18px;
+}
+
+.table-filters {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.filter-active {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.filter-dropdown {
+    cursor: pointer;
+}
+
+.filter-icon {
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+/* Ancho de Columnas */
+.col-fecha { width: 15%; }
+.col-desc { width: 35%; }
+.col-cat { width: 20%; }
+.col-monto { width: 15%; }
+.col-acciones { width: 15%; text-align: center; }
+
+/* Elementos de la Tabla */
+.empty-table-msg {
     text-align: center;
-    width: 100%;
-    margin-top: 8px;
+    padding: 20px;
+    color: var(--text-secondary);
 }
 
-/* ELEMENTOS COMUNES (ICONOS Y BADGES)*/
-.clean-icon-container {
-    background: transparent;
-    padding: 0;
-    display: flex;
-    align-items: center;
-}
-
-.badge-trend {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    gap: 4px; 
-    font-size: 11px;
-    padding: 0;
-    margin-top: 8px;
-}
-
-.badge-trend .material-symbols-outlined {
+.table-date {
+    color: var(--text-secondary);
     font-size: 14px;
 }
 
-/* TEMAS Y COLORES DE LAS TARJETAS */
-
-/* Tarjeta Ingresos (Verde) */
-.incomesGreen-card {
-    background-color: var(--primary) !important;
-    color: white;
-    border: none;
+.table-desc strong {
+    color: var(--text-primary);
 }
 
-.incomesGreen-card .card-titulo,
-.incomesGreen-card .trend-icon {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.incomesGreen-card .badge-trend {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-/* Tarjeta Gastos (Gris) */
-.outcomes-card {
-    background-color: #e2e8f0;
-    border: none;
-}
-
-.outcomes-card .card-titulo {
+.badge-neutral {
+    background: #f1f5f9;
     color: #64748b;
 }
 
-.outcomes-card .trend-icon,
-.outcomes-card .badge-trend {
-    color: #ef4444;
+/* Menú de Acciones */
+.table-actions {
+    text-align: center;
+    overflow: visible;
 }
 
-/* FORMULARIO EMERGENTE (MODAL) */
+.btn-icon-only {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: inline-flex;
+}
+
+.btn-icon-only:hover {
+    background-color: var(--bg);
+    color: var(--text-primary);
+}
+
+.dropdown-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #ffffff;
+    min-width: 120px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+    z-index: 1;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.dropdown-menu:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a {
+    color: var(--text-primary);
+    padding: 10px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+}
+
+.dropdown-content a:hover {
+    background-color: #f8fafc;
+}
+
+.dropdown-icon {
+    font-size: 16px;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+.action-delete {
+    color: #ef4444 !important;
+}
+
+/*  FORMULARIO EMERGENTE (MODAL)*/
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -229,12 +326,6 @@
 }
 
 @keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
