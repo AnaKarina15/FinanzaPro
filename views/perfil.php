@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $apellido = trim($_POST['apellido'] ?? '');
     $telefono = trim($_POST['telefono'] ?? '');
     $moneda_principal = $_POST['moneda_principal'] ?? 'COP';
-    $tema_interfaz = (int)($_POST['tema_interfaz'] ?? 0);
+    $tema_interfaz = $_POST['tema_interfaz'] ?? 'claro';
     $notificaciones_push = isset($_POST['notificaciones_push']) ? 1 : 0;
 
     $success = $usuarioModel->actualizarPerfil($_SESSION['id_usuario'], $nombre, $apellido, $telefono, $moneda_principal, $tema_interfaz, $notificaciones_push);
@@ -100,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
             <?php if (isset($mensaje)): ?>
                 <p style="color: green; margin-top: 10px;"><?= htmlspecialchars($mensaje) ?></p>
+                <script>alert('<?= addslashes($mensaje) ?>');</script>
             <?php endif; ?>
             </div>
             <div class="view-buttons">
@@ -127,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
             </section>
 
-            <form method="POST" action="">
+            <form method="POST" action="perfil.php">
             <div class="profile-grid">
                 <section class="card">
                     <div class="card-header-icon">
@@ -201,9 +202,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <p>Alterna entre modo claro y oscuro</p>
                             </div>
                             <div class="theme-toggle">
-                                <button type="button" class="toggle-btn <?= ($usuario['tema_interfaz'] ?? 0) == 0 ? 'active' : '' ?>" data-value="0">Claro</button>
-                                <button type="button" class="toggle-btn <?= ($usuario['tema_interfaz'] ?? 0) == 1 ? 'active' : '' ?>" data-value="1">Oscuro</button>
-                                <input type="hidden" name="tema_interfaz" value="<?= $usuario['tema_interfaz'] ?? 0 ?>" id="tema_interfaz">
+                                <button type="button" class="toggle-btn <?= ($usuario['tema_interfaz'] ?? 'claro') == 'claro' ? 'active' : '' ?>" data-value="claro">Claro</button>
+                                <button type="button" class="toggle-btn <?= ($usuario['tema_interfaz'] ?? 'claro') == 'oscuro' ? 'active' : '' ?>" data-value="oscuro">Oscuro</button>
+                                <input type="hidden" name="tema_interfaz" value="<?= $usuario['tema_interfaz'] ?? 'claro' ?>" id="tema_interfaz">
                             </div>
                         </div>
                         <div class="setting-item">
@@ -221,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <footer class="profile-actions">
-                <button class="btn-logout-text"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</button>
+                <button type="button" class="btn-logout-text" onclick="window.location.href='../logout.php'"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</button>
                 <div class="group-btns">
                     <button type="button" class="btn-secondary">Descartar</button>
                     <button type="submit" class="btn-primary">Guardar Cambios</button>
