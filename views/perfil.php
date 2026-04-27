@@ -103,7 +103,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                                     <label>NÚMERO DE TELÉFONO</label>
                                     <div class="phone-input-container">
                                         <div class="code-box">+57</div>
-                                        <input type="text" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" class="input-profile">
+                                        <input type="text" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" class="input-profile readonly" readonly>
                                     </div>
                                     <a href="#" class="link-change">Cambiar número de teléfono</a>
                                 </div>
@@ -114,11 +114,13 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
 
                                 <div class="form-group" id="change-pass-fields" style="display: none;">
                                     <label>CONTRASEÑA ACTUAL</label>
-                                    <input type="password" name="contrasena_actual" class="input-profile">
+                                    <input type="password" name="contrasena_actual" class="input-profile" value="" autocomplete="new-password">
+                                    
                                     <label>NUEVA CONTRASEÑA</label>
-                                    <input type="password" name="contrasena_nueva" class="input-profile">
+                                    <input type="password" name="contrasena_nueva" class="input-profile" value="" autocomplete="new-password">
+                                    
                                     <label>CONFIRMAR CONTRASEÑA</label>
-                                    <input type="password" name="confirmar_contrasena" class="input-profile">
+                                    <input type="password" name="confirmar_contrasena" class="input-profile" value="" autocomplete="new-password">
                                 </div>
                             </div>
                         </section>
