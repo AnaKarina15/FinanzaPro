@@ -51,7 +51,7 @@ if (!isset($_SESSION['usuario'])) {
           </a>
           <a href="perfil.php" class="nav-link nav-profile">
             <div class="avatar">
-              <img src="" alt="Foto de perfil" />
+              <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?>&background=059669&color=fff" alt="Foto de perfil" />
             </div>
             <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
           </a>
@@ -169,7 +169,7 @@ if (!isset($_SESSION['usuario'])) {
                     <div class="table-concept">
                       <span class="material-symbols-outlined concept-icon"
                         >shopping_bag</span
-                      >
+                      >//more_vert
                       <strong>Suscripción Netflix</strong>
                     </div>
                   </td>
