@@ -22,12 +22,21 @@ switch ($action) {
             $_POST['codigo_pais'], $_POST['telefono'], $_POST['contrasena']
         );
         break;
+    
+    case 'solicitarRecuperacion':
+        $controller = new UsuarioController();
+        $controller->solicitarRecuperacion();
+        break;
+    case 'restablecerContrasena':
+        $controller = new UsuarioController();
+        $controller->restablecerContrasena();
+        break;
 
     case 'actualizarPerfil':
         $controller = new UsuarioController();
         $controller->actualizarPerfil();
         break;
-        
+
     // --- RUTAS DE TRANSACCIÓN ---
     case 'guardarMovimiento':
         $controller = new TransaccionController();
