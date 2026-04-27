@@ -7,12 +7,10 @@ pwContainers.forEach((container) => {
       const inputPW = container.querySelector(".input-pw");
       const showPW = container.querySelector(".show-pw");
 
-      const type =
-        inputPW.getAttribute("type") === "password" ? "text" : "password";
+      const type = inputPW.getAttribute("type") === "password" ? "text" : "password";
       inputPW.setAttribute("type", type);
 
-      showPW.textContent =
-        type === "password" ? "visibility" : "visibility_off";
+      showPW.textContent = type === "password" ? "visibility" : "visibility_off";
     }
   });
 });
@@ -45,9 +43,12 @@ switchForm.forEach((link) => {
   });
 });
 
-/* Ventanas Emergentes */
+/* LÓGICA PRINCIPAL AL CARGAR LA PÁGINA (Alertas y Verificación) */
 document.addEventListener("DOMContentLoaded", () => {
+  
+  // --- 1. MANEJO DE ALERTAS POR URL ---
   const urlParams = new URLSearchParams(window.location.search);
+  
   if (urlParams.has("login") && urlParams.get("login") === "error") {
     Swal.fire({
       title: "Credenciales invalidas",
@@ -56,8 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
       confirmButtonColor: "#059669",
       confirmButtonText: "Ok",
     });
-
-    // Esto limpia la URL para que no vuelva a salir si recargan la página
     window.history.replaceState(null, null, window.location.pathname);
   }
 
@@ -69,8 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
       confirmButtonColor: "#059669",
       confirmButtonText: "Genial",
     });
-
-    // Esto limpia la URL para que no vuelva a salir si recargan la página
     window.history.replaceState(null, null, window.location.pathname);
   }
 
@@ -82,8 +79,63 @@ document.addEventListener("DOMContentLoaded", () => {
       confirmButtonColor: "#059669",
       confirmButtonText: "Ok",
     });
-
-    // Esto limpia la URL para que no vuelva a salir si recargan la página
     window.history.replaceState(null, null, window.location.pathname);
+  }
+  
+  // --- 2. LÓGICA DE VERIFICACIÓN DE CUENTA ---
+  const formVerificar = document.getElementById('form-verificar');
+  const inputPin = document.getElementById('codigo_pin');
+
+  // Evitar que escriban letras (Solo números)
+  if (inputPin) {
+    inputPin.addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      this.classList.remove('input-error');
+    });
+  }
+
+  // Atrapar el evento de enviar el PIN
+  if (formVerificar) {
+      formVerificar.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const correo = document.getElementById('correo_verificacion').value;
+          const pin = inputPin.value;
+
+          if (pin.length < 6) {
+              inputPin.classList.add('input-error');
+              Swal.fire('Atención', 'El código debe tener 6 dígitos.', 'warning');
+              return;
+          }
+
+          fetch('index.php?action=activarCuenta', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ correo: correo, pin: pin })
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.status === 'success') {
+                  Swal.fire({
+                      title: '¡Bienvenido a FinanzaPro!',
+                      text: data.mensaje,
+                      icon: 'success',
+                      timer: 2000,
+                      showConfirmButton: false
+                  }).then(() => {
+                      window.location.href = 'views/dashboard.php';
+                  });
+              } else {
+                  inputPin.classList.add('input-error');
+                  inputPin.value = '';
+                  inputPin.focus();
+                  Swal.fire('Error', data.mensaje, 'error');
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              Swal.fire('Error crítico', 'No se pudo contactar con el servidor.', 'error');
+          });
+      });
   }
 });

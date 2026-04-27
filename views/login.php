@@ -1,3 +1,7 @@
+<?php
+$modo_verificacion = isset($_GET['verificar']) && $_GET['verificar'] == 'true';
+$correo_a_verificar = $_GET['correo'] ?? '';
+?>
 <!doctype html>
 <html lang="es">
   <head>
@@ -60,13 +64,14 @@
           </div>
         </div>
         <div class="right">
-          <form class="card login-form" action="index.php?action=iniciarSesion" method="POST">
+          
+          <form class="card login-form <?= $modo_verificacion ? 'hidden' : '' ?>" action="index.php?action=iniciarSesion" method="POST">
             <div class="form-info">
               <h2 class="form-title">Bienvenido de nuevo</h2>
               <p class="form-subtitle">Ingresa tus datos para continuar</p>
             </div>
             <div class="input-group">
-              <label for="email">Correo Electrónico</label>
+              <label for="email_login">Correo Electrónico</label>
               <div class="input-container">
                 <input
                   type="email"
@@ -79,7 +84,7 @@
               </div>
             </div>
             <div class="input-group">
-              <label for="password">Contraseña</label>
+              <label for="login-password">Contraseña</label>
               <div class="input-container pw-container">
                 <input
                   type="password"
@@ -109,6 +114,7 @@
               </p>
             </span>
           </form>
+
           <form class="card register-form hidden" action="index.php?action=registrar" method="post">
             <div class="form-info">
               <h2 class="form-title">Crea tu cuenta</h2>
@@ -166,7 +172,7 @@
               </div>
             </div>
             <div class="input-group">
-              <label for="email">Correo Electrónico</label>
+              <label for="email_registro">Correo Electrónico</label>
               <div class="input-container">
                 <input
                   type="email"
@@ -179,7 +185,7 @@
               </div>
             </div>
             <div class="input-group">
-              <label for="password">Contraseña</label>
+              <label for="regster-password">Contraseña</label>
               <div class="input-container pw-container">
                 <input
                   type="password"
@@ -207,11 +213,41 @@
             <button type="submit" class="btn-primary">Regístrate</button>
             <span class="login-footer">
               <p>
-                ¿No tienes cuenta?
+                ¿Ya tienes cuenta?
                 <a href="#" class="switch-form">Iniciar Sesión</a>
               </p>
             </span>
           </form>
+
+          <form class="card verify-form <?= $modo_verificacion ? '' : 'hidden' ?>" id="form-verificar">
+            <div class="form-info" style="text-align: center;">
+              <span class="material-symbols-outlined" style="font-size: 3rem; color: #059669;">mark_email_read</span>
+              <h2 class="form-title">Verifica tu cuenta</h2>
+              <p class="form-subtitle">Hemos generado un código para <br><strong><?= htmlspecialchars($correo_a_verificar) ?></strong></p>
+            </div>
+            
+            <div class="input-group" style="margin-top: 20px;">
+              <label for="codigo_pin" style="text-align: center; display: block;">Código de 6 dígitos</label>
+              <div class="input-container">
+                <input type="hidden" id="correo_verificacion" value="<?= htmlspecialchars($correo_a_verificar) ?>">
+                <input
+                  type="text"
+                  id="codigo_pin"
+                  class="pin-input"
+                  maxlength="6"
+                  required
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="margin-top: 20px;">Activar</button>
+            
+            <span class="login-footer">
+              <p style="color: #64748b; text-align: center;">¿Revisaste tu base de datos para ver el PIN?</p>
+            </span>
+          </form>
+
         </div>
       </section>
       <section id="benefits">

@@ -1,5 +1,10 @@
 <?php
-session_start();
+// Validamos una sola vez
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Si la llave 'usuario' no existe, lo sacamos
 if (!isset($_SESSION['usuario'])) {
   header("Location: ../index.php");
   exit();
