@@ -126,10 +126,20 @@ if (!isset($_SESSION['usuario'])) {
         <div class="card-top movimientos-header">
           <h3 class="movimientos-title">Historial de Transacciones</h3>
           <div class="table-filters">
-            <span class="filter-active">Todos</span>
-            <span>Ingresos</span>
-            <span>Gastos</span>
-            <span class="filter-dropdown">Este Mes <span class="material-symbols-outlined filter-icon">expand_more</span></span>
+            <span class="filter-option filter-active" data-filter="todos">Todos</span>
+            <span class="filter-option" data-filter="ingreso">Ingresos</span>
+            <span class="filter-option" data-filter="gasto">Gastos</span>
+            <span class="filter-clear" id="clear-filters">Limpiar filtros</span>
+            <div class="filter-dropdown" id="filter-time-dropdown">
+              <span id="filter-time-label">Este Mes</span>
+              <span class="material-symbols-outlined filter-icon">expand_more</span>
+              <div class="filter-time-menu" id="filter-time-menu">
+                <span class="filter-time-option" data-time="hoy">Hoy</span>
+                <span class="filter-time-option" data-time="estaSemana">Esta Semana</span>
+                <span class="filter-time-option filter-time-active" data-time="esteMes">Este Mes</span>
+                <span class="filter-time-option" data-time="esteAño">Este Año</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="table-container">

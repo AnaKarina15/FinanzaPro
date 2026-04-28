@@ -1,7 +1,7 @@
 <?php
 // Validamos una sola vez
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+  session_start();
 }
 
 // Si la llave 'usuario' no existe, lo sacamos
@@ -23,12 +23,12 @@ if (!isset($_SESSION['usuario'])) {
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-    
+
   <link rel="stylesheet" href="./css/global.css?v=<?php echo time(); ?>" />
   <link rel="stylesheet" href="./css/dashboard.css?v=<?php echo time(); ?>" />
-  
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script type="module" src="./js/dashboard.js?v=<?php echo time(); ?>"></script>
 </head>
 
@@ -84,8 +84,8 @@ if (!isset($_SESSION['usuario'])) {
           ?>
         </button>
         <button class="btn-primary" id="btn-abrir-modal">
-  <span class="material-symbols-outlined">add</span> Nuevo Movimiento
-</button>
+          <span class="material-symbols-outlined">add</span> Nuevo Movimiento
+        </button>
       </div>
     </header>
     <main class="main-content">
@@ -96,8 +96,8 @@ if (!isset($_SESSION['usuario'])) {
               <span class="material-symbols-outlined">account_balance_wallet</span>
             </div>
             <p class="card-titulo">Disponible</p>
-            </div>
-            <p class="card-value texto-primario" id="monto-disponible">$0</p>
+          </div>
+          <p class="card-value texto-primario" id="monto-disponible">$0</p>
         </article>
 
         <article class="card incomes-card">
@@ -108,7 +108,7 @@ if (!isset($_SESSION['usuario'])) {
             <p class="card-titulo">Total de ingresos</p>
             <span class="badge badge-green">+0%</span>
           </div>
-          <p class="card-value" id="monto-ingresos">$0</p>
+          <p class="card-value text-success" id="monto-ingresos">$0</p>
         </article>
 
         <article class="card outcomes-card">
@@ -119,7 +119,7 @@ if (!isset($_SESSION['usuario'])) {
             <p class="card-titulo">Total de gastos</p>
             <span class="badge badge-blue">-0%</span>
           </div>
-          <p class="card-value" id="monto-gastos">$0</p>
+          <p class="card-value text-danger" id="monto-gastos">$0</p>
         </article>
         <article class="card dashboard-chart-card">
           <h3>Ingresos vs Gastos</h3>
@@ -151,7 +151,7 @@ if (!isset($_SESSION['usuario'])) {
                 </tr>
               </thead>
               <tbody class="movimientos-tabla-cuerpo">
-                </tbody>
+              </tbody>
             </table>
           </div>
         </article>
@@ -176,68 +176,68 @@ if (!isset($_SESSION['usuario'])) {
   </div>
 
   <div class="modal-overlay" id="modalNuevoMovimiento">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="modal-titulo">Registro de Movimientos</h3>
-          <button class="btn-close" id="btn-cerrar-modal">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <form action="../index.php?action=guardarMovimiento" method="POST" class="formulario" id="form-movimiento">
-          <input type="hidden" id="id_transaccion" name="id_transaccion" value="">
-          
-          <div class="modal-form-group type-selector">
-            <label class="radio-label">
-              <input type="radio" name="tipo_movimiento" value="ingreso" checked> 
-              <span>Ingreso</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="tipo_movimiento" value="gasto"> 
-              <span>Gasto</span>
-            </label>
-          </div>
-
-          <div class="modal-form-group">
-            <label for="monto_visual">Monto</label>
-            <div class="input-container">
-              <input type="text" id="monto_visual" placeholder="$ 0" required autocomplete="off">
-              <input type="hidden" id="monto" name="monto" required>
-            </div>
-          </div>
-          
-          <div class="input-row modal-form-group">
-            <div class="input-group">
-              <label for="fecha">Fecha</label>
-              <div class="input-container">
-                  <input type="date" id="fecha" name="fecha" required>
-              </div>
-            </div>
-            <div class="input-group">
-              <label for="categoria">Categoría</label>
-              <div class="input-container">
-                <input list="lista-categorias" id="categoria" name="categoria" placeholder="Escribe..." autocomplete="off" required>
-                <datalist id="lista-categorias">
-                  <option value="Alimentación"></option>
-                  <option value="Transporte"></option>
-                  <option value="Ocio"></option>
-                  <option value="Servicios Públicos"></option>
-                  <option value="Salario"></option>
-                </datalist>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-form-group">
-            <label for="descripcion">Descripción</label>
-            <div class="input-container">
-                <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Compra de víveres">
-            </div>
-          </div>
-
-          <button type="submit" class="btn-modal-submit">Guardar Transacción</button>
-        </form>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-titulo">Registro de Movimientos</h3>
+        <button class="btn-close" id="btn-cerrar-modal">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
+      <form action="../index.php?action=guardarMovimiento" method="POST" class="formulario" id="form-movimiento">
+        <input type="hidden" id="id_transaccion" name="id_transaccion" value="">
+
+        <div class="modal-form-group type-selector">
+          <label class="radio-label">
+            <input type="radio" name="tipo_movimiento" value="ingreso" checked>
+            <span>Ingreso</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="tipo_movimiento" value="gasto">
+            <span>Gasto</span>
+          </label>
+        </div>
+
+        <div class="modal-form-group">
+          <label for="monto_visual">Monto</label>
+          <div class="input-container">
+            <input type="text" id="monto_visual" placeholder="$ 0" required autocomplete="off">
+            <input type="hidden" id="monto" name="monto" required>
+          </div>
+        </div>
+
+        <div class="input-row modal-form-group">
+          <div class="input-group">
+            <label for="fecha">Fecha</label>
+            <div class="input-container">
+              <input type="date" id="fecha" name="fecha" required>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="categoria">Categoría</label>
+            <div class="input-container">
+              <input list="lista-categorias" id="categoria" name="categoria" placeholder="Escribe..." autocomplete="off" required>
+              <datalist id="lista-categorias">
+                <option value="Alimentación"></option>
+                <option value="Transporte"></option>
+                <option value="Ocio"></option>
+                <option value="Servicios Públicos"></option>
+                <option value="Salario"></option>
+              </datalist>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label for="descripcion">Descripción</label>
+          <div class="input-container">
+            <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Compra de víveres">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-modal-submit">Guardar Transacción</button>
+      </form>
     </div>
+  </div>
 </body>
 
 </html>
