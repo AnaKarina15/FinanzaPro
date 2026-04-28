@@ -117,7 +117,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                                 <div class="form-group" id="change-pass-fields" style="display: none;">
                                     <label>CONTRASEÑA ACTUAL</label>
                                     <div class="input-container">
-                                        <input type="password" name="contrasena_actual" class="input-profile input-pw" value="" autocomplete="current-password">
+                                        <input type="password" name="contrasena_actual" class="input-profile input-pw" value="">
                                         <span class="material-symbols-outlined show-pw">visibility</span>
                                     </div>
 
