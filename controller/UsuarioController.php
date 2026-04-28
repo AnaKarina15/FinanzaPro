@@ -25,8 +25,14 @@ class UsuarioController {
             $_SESSION['nombre_usuario'] = $usuario['nombre'];
             $_SESSION['apellido_usuario'] = $usuario['apellido'];
             $_SESSION['rol'] = $usuario['nombre_rol'] ?? 'Usuario';
+            $_SESSION['id_rol'] = $usuario['id_rol'] ?? 2;
 
-            $urlDestino = 'http://localhost/FinanzaPro/views/dashboard.php';
+            // Si es admin, redirigir al panel de administración
+            if ($usuario['id_rol'] == 1) {
+                $urlDestino = 'http://localhost/FinanzaPro/views/admin.php';
+            } else {
+                $urlDestino = 'http://localhost/FinanzaPro/views/dashboard.php';
+            }
 
             if ($esRegistroNuevo) {
                 // Si viene de registrarse, agregamos el parámetro
@@ -101,6 +107,7 @@ class UsuarioController {
                         $_SESSION['nombre_usuario'] = $usuario['nombre'];
                         $_SESSION['apellido_usuario'] = $usuario['apellido'];
                         $_SESSION['rol'] = $usuario['nombre_rol'];
+                        $_SESSION['id_rol'] = $usuario['id_rol'] ?? 2;
 
                         echo json_encode(["status" => "success", "mensaje" => "Cuenta activada. Entrando al sistema..."]);
                         exit();
@@ -309,89 +316,5 @@ class UsuarioController {
 
         echo json_encode(["status" => "error", "mensaje" => "El PIN es incorrecto o ha expirado."]);
         exit();
-    }
-
-    public function cambiarFotoPerfil() {
-        header('Content-Type: application/json; charset=utf-8');
-
-        // Validar que el usuario esté autenticado
-        if (!isset($_SESSION['id_usuario'])) {
-            echo json_encode(["status" => "error", "mensaje" => "Debes iniciar sesión para cambiar tu foto de perfil."]);
-            exit();
-        }
-
-        $id_usuario = $_SESSION['id_usuario'];
-
-        // Validar que se haya enviado un archivo
-        if (!isset($_FILES['foto_perfil']) || $_FILES['foto_perfil']['error'] !== UPLOAD_ERR_OK) {
-            echo json_encode(["status" => "error", "mensaje" => "No se ha seleccionado ninguna imagen."]);
-            exit();
-        }
-
-        $archivo = $_FILES['foto_perfil'];
-        $nombre_original = $archivo['name'];
-        $tipo_mime = $archivo['type'];
-        $tamano = $archivo['size'];
-        $tmp_name = $archivo['tmp_name'];
-
-        // Validar tipo de imagen (solo png, jpg, jpeg, webp)
-        $extensiones_permitidas = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-        if (!in_array($tipo_mime, $extensiones_permitidas)) {
-            echo json_encode(["status" => "error", "mensaje" => "El formato de imagen no es válido. Solo se permiten archivos PNG, JPG y WEBP."]);
-            exit();
-        }
-
-        // Validar tamaño máximo (2MB)
-        $tamano_maximo = 2 * 1024 * 1024;
-        if ($tamano > $tamano_maximo) {
-            echo json_encode(["status" => "error", "mensaje" => "La imagen no puede superar los 2MB."]);
-            exit();
-        }
-
-        // Obtener extensión del archivo
-        $extension = pathinfo($nombre_original, PATHINFO_EXTENSION);
-        
-        // Generar nombre único para la imagen
-        $nombre_archivo = 'perfil_' . $id_usuario . '_' . time() . '.' . $extension;
-        
-        // Ruta destino en views/pictures/
-        $ruta_carpeta = __DIR__ . '/../views/pictures/';
-        
-        // Verificar que la carpeta exista
-        if (!is_dir($ruta_carpeta)) {
-            if (!mkdir($ruta_carpeta, 0755, true)) {
-                echo json_encode(["status" => "error", "mensaje" => "Error al crear la carpeta de imágenes."]);
-                exit();
-            }
-        }
-
-        $ruta_destino = $ruta_carpeta . $nombre_archivo;
-
-        // Mover el archivo subido
-        if (!move_uploaded_file($tmp_name, $ruta_destino)) {
-            echo json_encode(["status" => "error", "mensaje" => "Error al guardar la imagen."]);
-            exit();
-        }
-
-        // Ruta relativa para guardar en la base de datos
-        $ruta_relativa = 'views/pictures/' . $nombre_archivo;
-
-        // Actualizar en la base de datos
-        if ($this->modeloUsuario->actualizarFotoPerfil($id_usuario, $ruta_relativa)) {
-            // Actualizar la sesión con la nueva foto
-            $_SESSION['foto_perfil'] = $ruta_relativa;
-            
-            echo json_encode([
-                "status" => "success", 
-                "mensaje" => "Foto de perfil actualizada correctamente.",
-                "ruta_foto" => $ruta_relativa
-            ]);
-            exit();
-        } else {
-            // Si falla la BD, eliminar la imagen subida
-            unlink($ruta_destino);
-            echo json_encode(["status" => "error", "mensaje" => "Error al actualizar la foto en la base de datos."]);
-            exit();
-        }
     }
 }
