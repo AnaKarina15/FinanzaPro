@@ -57,6 +57,11 @@ switch ($action) {
         $controller->cambiarCorreo();
         break;
 
+    case 'cambiarFotoPerfil':
+        $controller = new UsuarioController();
+        $controller->cambiarFotoPerfil();
+        break;
+
     case 'cerrarSesion':
         $controller = new UsuarioController();
         $controller->cerrarSesion();
