@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../model/Usuario.php';
+require_once __DIR__ . '/../model/Conexion.php';
 
 class UsuarioController {
     private $modeloUsuario;
@@ -18,7 +19,7 @@ class UsuarioController {
         // Verificamos que el usuario exista y la contraseña coincida
         if ($usuario && $this->modeloUsuario->verificarCredenciales($correo, $contrasena)) {
             if (session_status() == PHP_SESSION_NONE) session_start();
-            
+
             $_SESSION['usuario'] = $correo;
             $_SESSION['id_usuario'] = $usuario['id_usuario'];
             $_SESSION['nombre_usuario'] = $usuario['nombre'];
@@ -35,7 +36,6 @@ class UsuarioController {
                 header("Location: " . $urlDestino);
             }
             exit();
-            
         } else {
             header('Location: http://localhost/FinanzaPro/index.php?login=error');
             exit();
@@ -48,11 +48,14 @@ class UsuarioController {
 
         if ($this->modeloUsuario->registrar($nombre, $apellido, $correo, $telefono, $contrasena)) {
             $usuario = $this->modeloUsuario->obtenerPorCorreo($correo);
-            
+
             require_once 'model/PinSeguridad.php';
             $pinModelo = new PinSeguridad();
             $codigo_pin = sprintf("%06d", mt_rand(1, 999999));
             $pinModelo->crearPin($usuario['id_usuario'], $codigo_pin, 'registro');
+
+            if (session_status() == PHP_SESSION_NONE) session_start();
+            $_SESSION['pin_desarrollo'] = $codigo_pin;
 
             // Redirigimos al index activando la vista del PIN
             header("Location: /FinanzaPro/index.php?verificar=true&correo=" . urlencode($correo));
@@ -65,6 +68,7 @@ class UsuarioController {
 
     //  Valida, actualiza a 1 e inicia sesión
     public function activarCuenta() {
+        header('Content-Type: application/json; charset=utf-8');
         $datos = json_decode(file_get_contents('php://input'), true);
         $correo = $datos['correo'] ?? '';
         $pin = $datos['pin'] ?? '';
@@ -72,26 +76,26 @@ class UsuarioController {
         $usuario = $this->modeloUsuario->obtenerPorCorreo($correo);
 
         if ($usuario) {
-            require_once 'model/PinSeguridad.php';
+            require_once __DIR__ . '/../model/PinSeguridad.php';
             $pinModelo = new PinSeguridad();
 
             if ($pinModelo->verificarPin($usuario['id_usuario'], $pin, 'registro')) {
-                
+
                 $conexion = (new Conexion())->getConexion();
-                
+
                 //  Preparamos la sentencia
                 $stmt = $conexion->prepare('UPDATE usuarios SET cuenta_verificada = 1 WHERE id_usuario = :id');
                 $stmt->bindParam(':id', $usuario['id_usuario'], PDO::PARAM_INT);
-                
+
                 //  Verificamos si la ejecución fue exitosa
                 if ($stmt->execute()) {
-                    
+
                     //Verificamos si se afectó alguna fila (si realmente cambió de 0 a 1)
                     if ($stmt->rowCount() > 0) {
-                        
+
                         // Iniciamos sesión (Solo una vez)
                         if (session_status() == PHP_SESSION_NONE) session_start();
-                        
+
                         $_SESSION['usuario'] = $correo;
                         $_SESSION['id_usuario'] = $usuario['id_usuario'];
                         $_SESSION['nombre_usuario'] = $usuario['nombre'];
@@ -144,7 +148,7 @@ class UsuarioController {
         // Lógica de contraseña
         if (!empty($_POST['contrasena_actual'])) {
             $nueva = $_POST['contrasena_nueva'];
-            
+
             if (strlen($nueva) < 8) {
                 $exito = false;
                 $mensaje = "La nueva contraseña debe tener al menos 8 caracteres.";
@@ -169,17 +173,87 @@ class UsuarioController {
         exit();
     }
 
+    public function cambiarCorreo() {
+        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['id_usuario'])) {
+            header("Location: index.php");
+            exit();
+        }
+
+        $id_usuario = $_SESSION['id_usuario'];
+        $nuevo_correo = trim($_POST['nuevo_correo'] ?? '');
+        $contrasena_actual = $_POST['contrasena_correo'] ?? '';
+
+        if (empty($nuevo_correo) || empty($contrasena_actual)) {
+            header("Location: views/perfil.php?status=error&msg=" . urlencode("Debes completar el nuevo correo y la contraseña."));
+            exit();
+        }
+
+        if (!filter_var($nuevo_correo, FILTER_VALIDATE_EMAIL)) {
+            header("Location: views/perfil.php?status=error&msg=" . urlencode("El correo no tiene un formato válido."));
+            exit();
+        }
+
+        $usuario = $this->modeloUsuario->obtenerPorId($id_usuario);
+        if (!$usuario || !$this->modeloUsuario->verificarCredenciales($usuario['correo'], $contrasena_actual)) {
+            header("Location: views/perfil.php?status=error&msg=" . urlencode("Contraseña incorrecta. No se pudo cambiar el correo."));
+            exit();
+        }
+
+        if ($nuevo_correo === $usuario['correo']) {
+            header("Location: views/perfil.php?status=error&msg=" . urlencode("El nuevo correo debe ser diferente al actual."));
+            exit();
+        }
+
+        if ($this->modeloUsuario->existeCorreo($nuevo_correo)) {
+            header("Location: views/perfil.php?status=error&msg=" . urlencode("El correo ya está en uso por otra cuenta."));
+            exit();
+        }
+
+        if ($this->modeloUsuario->cambiarCorreo($id_usuario, $nuevo_correo)) {
+            $_SESSION['usuario'] = $nuevo_correo;
+            header("Location: views/perfil.php?status=success&msg=" . urlencode("Correo actualizado correctamente."));
+        } else {
+            header("Location: views/perfil.php?status=error&msg=" . urlencode("No se pudo actualizar el correo. Intenta de nuevo."));
+        }
+        exit();
+    }
+
+    public function cerrarSesion() {
+        if (session_status() == PHP_SESSION_NONE) session_start();
+
+        // Limpiamos todos los datos de sesión y destruimos la sesión activa
+        $_SESSION = [];
+
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
+            );
+        }
+
+        session_destroy();
+        header("Location: " . BASE_URL . "/index.php?logout=success");
+        exit();
+    }
+
     public function solicitarRecuperacion() {
         // Leemos el JSON enviado por Fetch API
         $datos = json_decode(file_get_contents('php://input'), true);
         $correo = $datos['correo'] ?? '';
 
         $usuario = $this->modeloUsuario->obtenerPorCorreo($correo);
-        
+
         if ($usuario) {
             require_once 'model/PinSeguridad.php';
             $pinModelo = new PinSeguridad();
-            
+
             // Generamos un PIN aleatorio de 6 dígitos
             $codigo_pin = sprintf("%06d", mt_rand(1, 999999));
             $pinModelo->crearPin($usuario['id_usuario'], $codigo_pin, 'recuperacion');
@@ -187,7 +261,7 @@ class UsuarioController {
             // AQUÍ: En producción, usarías la función mail() de PHP o PHPMailer para enviar el $codigo_pin al correo.
             // Por ahora, para que puedan desarrollar en XAMPP sin configurar un servidor SMTP, 
             // devolveremos el PIN en el JSON (¡Solo para desarrollo!).
-            
+
             echo json_encode([
                 "status" => "success",
                 "mensaje" => "Se ha enviado un PIN a tu correo.",
@@ -216,11 +290,11 @@ class UsuarioController {
         if ($usuario) {
             require_once 'model/PinSeguridad.php';
             $pinModelo = new PinSeguridad();
-            
+
             if ($pinModelo->verificarPin($usuario['id_usuario'], $pin, 'recuperacion')) {
                 // Si el PIN es correcto, forzamos el cambio de contraseña
                 $contrasena_hashed = password_hash($nueva_contrasena, PASSWORD_DEFAULT);
-                
+
                 // Actualizamos directamente en la BD (Usamos un bloque de código rápido aquí)
                 $conexion = (new Conexion())->getConexion();
                 $stmt = $conexion->prepare('UPDATE usuarios SET contrasena = :pass WHERE id_usuario = :id');
@@ -232,9 +306,8 @@ class UsuarioController {
                 exit();
             }
         }
-        
+
         echo json_encode(["status" => "error", "mensaje" => "El PIN es incorrecto o ha expirado."]);
         exit();
     }
 }
-?>

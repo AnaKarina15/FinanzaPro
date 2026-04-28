@@ -11,21 +11,21 @@ class TransaccionController {
     // --- 1. GUARDAR O ACTUALIZAR MOVIMIENTO ---
     public function guardarMovimiento() {
         if (session_status() == PHP_SESSION_NONE) session_start();
-        
+
         if (!isset($_SESSION['id_usuario'])) {
             header('Location: index.php');
             exit();
         }
 
         $id_usuario = $_SESSION['id_usuario'];
-        
+
         // Recibimos los datos del formulario (POST)
         $id_transaccion = $_POST['id_transaccion'] ?? '';
         $tipo_movimiento = $_POST['tipo_movimiento'] ?? '';
         $monto = str_replace(['.', ',', '$', ' '], '', $_POST['monto']); // Limpieza de seguridad
         $fecha = $_POST['fecha'] ?? '';
         $categoria = $_POST['categoria'] ?? '';
-        $descripcion = $_POST['descripcion'] ?? '';
+        $descripcion = mb_substr(trim($_POST['descripcion'] ?? ''), 0, 120);
 
         // Averiguamos de qué página vino la petición
         $pagina_anterior = $_SERVER['HTTP_REFERER'] ?? 'views/dashboard.php';
@@ -72,7 +72,7 @@ class TransaccionController {
     // --- 3. OBTENER ESTADÍSTICAS JSON ---
     public function obtenerEstadisticasJson() {
         if (session_status() == PHP_SESSION_NONE) session_start();
-        
+
         if (!isset($_SESSION['id_usuario'])) {
             header('Content-Type: application/json');
             echo json_encode(['error' => 'No autorizado']);
@@ -84,7 +84,7 @@ class TransaccionController {
         $totales = $this->modeloTransaccion->obtenerTotales($id_usuario);
         $categoriasGastos = $this->modeloTransaccion->obtenerGastosPorCategoria($id_usuario);
         $categoriasIngresos = $this->modeloTransaccion->obtenerIngresosPorCategoria($id_usuario);
-        $movimientos = $this->modeloTransaccion->obtenerMovimientos($id_usuario, 15); 
+        $movimientos = $this->modeloTransaccion->obtenerMovimientos($id_usuario, 15);
         $mensual = $this->modeloTransaccion->obtenerIngresosGastosPorMes($id_usuario);
 
         header('Content-Type: application/json');
@@ -98,4 +98,3 @@ class TransaccionController {
         exit();
     }
 }
-?>

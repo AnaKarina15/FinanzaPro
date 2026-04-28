@@ -22,8 +22,12 @@ switch ($action) {
     case 'registrar':
         $controller = new UsuarioController();
         $controller->registrarUsuario(
-            $_POST['nombre'], $_POST['apellido'], $_POST['email'],
-            $_POST['codigo_pais'], $_POST['telefono'], $_POST['contrasena']
+            $_POST['nombre'],
+            $_POST['apellido'],
+            $_POST['email'],
+            $_POST['codigo_pais'],
+            $_POST['telefono'],
+            $_POST['contrasena']
         );
         break;
 
@@ -32,7 +36,7 @@ switch ($action) {
         $controller = new UsuarioController();
         $controller->activarCuenta();
         break;
-        
+
     case 'solicitarRecuperacion':
         $controller = new UsuarioController();
         $controller->solicitarRecuperacion();
@@ -46,6 +50,16 @@ switch ($action) {
     case 'actualizarPerfil':
         $controller = new UsuarioController();
         $controller->actualizarPerfil();
+        break;
+
+    case 'cambiarCorreo':
+        $controller = new UsuarioController();
+        $controller->cambiarCorreo();
+        break;
+
+    case 'cerrarSesion':
+        $controller = new UsuarioController();
+        $controller->cerrarSesion();
         break;
 
     // --- RUTAS DE TRANSACCIÓN ---
@@ -71,4 +85,3 @@ switch ($action) {
         $controller->mostrarLogin();
         break;
 }
-?>

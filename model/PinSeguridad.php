@@ -11,22 +11,22 @@ class PinSeguridad {
     public function crearPin($id_usuario, $codigo_pin, $tipo_operacion) {
         // El PIN expira en 15 minutos exactos
         $fecha_expiracion = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-        
+
         $query = "INSERT INTO pines_seguridad (id_usuario, codigo_pin, fecha_expiracion, fue_usado, tipo_operacion) 
                   VALUES (:id_usuario, :codigo_pin, :fecha_expiracion, 0, :tipo_operacion)";
-                  
+
         $stmt = $this->conexion->prepare($query);
         $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
         $stmt->bindParam(':codigo_pin', $codigo_pin, PDO::PARAM_STR);
         $stmt->bindParam(':fecha_expiracion', $fecha_expiracion, PDO::PARAM_STR);
         $stmt->bindParam(':tipo_operacion', $tipo_operacion, PDO::PARAM_STR);
-        
+
         return $stmt->execute();
     }
 
     public function verificarPin($id_usuario, $codigo_pin, $tipo_operacion) {
         $query = "SELECT id_pin FROM pines_seguridad
-                WHERE id_usuario = :id_usuari
+                WHERE id_usuario = :id_usuario
                 AND codigo_pin = :codigo_pin
                 AND tipo_operacion = :tipo_operacion
                 AND fue_usado = 0
@@ -38,7 +38,7 @@ class PinSeguridad {
         $stmt->bindParam(':codigo_pin', $codigo_pin, PDO::PARAM_STR);
         $stmt->bindParam(':tipo_operacion', $tipo_operacion, PDO::PARAM_STR);
         $stmt->execute();
-        
+
         $pin = $stmt->fetch();
 
         if ($pin) {
@@ -52,4 +52,3 @@ class PinSeguridad {
         return false;
     }
 }
-?>

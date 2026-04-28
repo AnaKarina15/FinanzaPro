@@ -17,7 +17,7 @@ CREATE TABLE usuarios (
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
     correo VARCHAR(150) UNIQUE NOT NULL,
-    telefono VARCHAR(20),
+    telefono VARCHAR(20) UNIQUE NOT NULL,
     contrasena VARCHAR(255) NOT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     cuenta_verificada BOOLEAN DEFAULT FALSE,

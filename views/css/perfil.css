@@ -290,13 +290,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .group-btns { display: flex; gap: 12px; }
 
 .btn-secondary {
-    background: #e2e8f0;
-    color: #475569;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
+    width: 100%;
 }
 
 .btn-primary {
@@ -304,7 +298,6 @@ input:checked + .slider:before { transform: translateX(20px); }
     color: white;
     border: none;
     padding: 12px 24px;
-    border-radius: 12px;
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(5, 150, 105, 0.2);

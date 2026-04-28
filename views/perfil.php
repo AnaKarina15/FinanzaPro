@@ -12,6 +12,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
 ?>
 <!doctype html>
 <html lang="es">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,6 +25,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module" src="./js/perfil.js?v=<?= time() ?>"></script>
 </head>
+
 <body>
     <div class="app-container">
         <aside class="navigation-sidebar">
@@ -96,7 +98,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                                 <div class="form-group">
                                     <label>CORREO ELECTRÓNICO</label>
                                     <input type="email" name="correo" value="<?= htmlspecialchars($usuario['correo'] ?? '') ?>" class="input-profile" readonly>
-                                    <a href="#" class="link-change">Cambiar correo electrónico</a>
+                                    <a href="#" id="btn-cambiar-correo" class="link-change">Cambiar correo electrónico</a>
                                 </div>
 
                                 <div class="form-group">
@@ -105,7 +107,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                                         <div class="code-box">+57</div>
                                         <input type="text" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" class="input-profile readonly" readonly>
                                     </div>
-                                    <a href="#" class="link-change">Cambiar número de teléfono</a>
+                                    <a href="#" class="link-change coming-soon">Cambiar número de teléfono</a>
                                 </div>
 
                                 <button type="button" class="btn-change-pass" id="btn-mostrar-pass">
@@ -114,13 +116,22 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
 
                                 <div class="form-group" id="change-pass-fields" style="display: none;">
                                     <label>CONTRASEÑA ACTUAL</label>
-                                    <input type="password" name="contrasena_actual" class="input-profile" value="" autocomplete="new-password">
-                                    
+                                    <div class="input-container">
+                                        <input type="password" name="contrasena_actual" class="input-profile input-pw" value="" autocomplete="current-password">
+                                        <span class="material-symbols-outlined show-pw">visibility</span>
+                                    </div>
+
                                     <label>NUEVA CONTRASEÑA</label>
-                                    <input type="password" name="contrasena_nueva" class="input-profile" value="" autocomplete="new-password">
-                                    
+                                    <div class="input-container">
+                                        <input type="password" name="contrasena_nueva" class="input-profile input-pw" value="" autocomplete="new-password">
+                                        <span class="material-symbols-outlined show-pw">visibility</span>
+                                    </div>
+
                                     <label>CONFIRMAR CONTRASEÑA</label>
-                                    <input type="password" name="confirmar_contrasena" class="input-profile" value="" autocomplete="new-password">
+                                    <div class="input-container">
+                                        <input type="password" name="confirmar_contrasena" class="input-profile input-pw" value="" autocomplete="new-password">
+                                        <span class="material-symbols-outlined show-pw">visibility</span>
+                                    </div>
                                 </div>
                             </div>
                         </section>
@@ -174,8 +185,34 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                         </div>
                     </footer>
                 </form>
+
+                <div class="modal-overlay" id="modal-cambiar-correo">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Cambiar correo electrónico</h3>
+                            <button class="btn-close" type="button" id="btn-cerrar-modal-correo">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <form id="form-cambiar-correo" method="POST" action="../index.php?action=cambiarCorreo">
+                            <div class="modal-form-group">
+                                <label>NUEVO CORREO ELECTRÓNICO</label>
+                                <input type="email" name="nuevo_correo" class="input-profile" placeholder="nuevo@correo.com" required>
+                            </div>
+                            <div class="modal-form-group">
+                                <label>CONTRASEÑA ACTUAL</label>
+                                <input type="password" name="contrasena_correo" class="input-profile" autocomplete="current-password" required>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn-secondary" id="btn-cancelar-cambiar-correo">Cancelar</button>
+                                <button type="submit" class="btn-primary btn-modal-submit">Guardar correo</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 </body>
+
 </html>

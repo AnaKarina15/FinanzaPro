@@ -14,7 +14,7 @@ class Usuario {
         // PDO usa parámetros nombrados (:nombre)
         $query = 'INSERT INTO usuarios (nombre, apellido, correo, telefono, contrasena, id_rol)
                   VALUES (:nombre, :apellido, :correo, :telefono, :contrasena, 2)'; // 2 = Rol Usuario por defecto
-        
+
         $stmt = $this->conexion->prepare($query);
         $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
         $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
@@ -35,10 +35,10 @@ class Usuario {
         $stmt = $this->conexion->prepare($query);
         $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
         $stmt->execute();
-        
+
         // PDO devuelve arreglos asociativos automáticamente
         $row = $stmt->fetch();
-        
+
         return $row ? password_verify($contrasena, $row['contrasena']) : false;
     }
 
@@ -72,7 +72,7 @@ class Usuario {
         $query = 'UPDATE usuarios SET nombre = :nombre, apellido = :apellido, telefono = :telefono, 
                   moneda_principal = :moneda, tema_interfaz = :tema, notificaciones_push = :notificaciones 
                   WHERE id_usuario = :id_usuario';
-                  
+
         $stmt = $this->conexion->prepare($query);
         $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
         $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
@@ -117,5 +117,28 @@ class Usuario {
             return false;
         }
     }
+
+    public function existeCorreo($correo) {
+        $query = 'SELECT COUNT(*) as total FROM usuarios WHERE correo = :correo';
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+        $stmt->execute();
+        $row = $stmt->fetch();
+
+        return $row ? (int)$row['total'] > 0 : false;
+    }
+
+    public function cambiarCorreo($id_usuario, $nuevo_correo) {
+        $query = 'UPDATE usuarios SET correo = :correo WHERE id_usuario = :id_usuario';
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':correo', $nuevo_correo, PDO::PARAM_STR);
+        $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error cambiando correo: " . $e->getMessage());
+            return false;
+        }
+    }
 }
-?>

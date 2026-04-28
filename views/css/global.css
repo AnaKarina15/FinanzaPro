@@ -382,6 +382,8 @@ small {
 }
 
 .show-pw {
+    cursor: pointer;
+    padding: 10px;
     position: absolute;
     right: 0;
     background-color: transparent;
@@ -562,16 +564,7 @@ select:focus-visible {
 
 .btn-modal-submit {
     width: 100%;
-    padding: 16px;
-    background: #059669;
-    color: white;
-    border: none;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
     margin-top: 10px;
-    transition: background 0.2s;
 }
 
 .btn-modal-submit:hover {
