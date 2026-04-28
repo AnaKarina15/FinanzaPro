@@ -141,4 +141,18 @@ class Usuario {
             return false;
         }
     }
+
+    public function actualizarFotoPerfil($id_usuario, $ruta_foto) {
+        $query = 'UPDATE usuarios SET foto_perfil = :ruta_foto WHERE id_usuario = :id_usuario';
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':ruta_foto', $ruta_foto, PDO::PARAM_STR);
+        $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error actualizando foto de perfil: " . $e->getMessage());
+            return false;
+        }
+    }
 }

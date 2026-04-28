@@ -63,8 +63,13 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                     <div class="banner-gradient"></div>
                     <div class="profile-header-content">
                         <div class="avatar-container">
-                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?>&background=059669&color=fff&size=130" alt="Foto de perfil" class="profile-avatar-big">
-                            <button class="btn-camera"><span class="material-symbols-outlined">photo_camera</span></button>
+                            <?php 
+                            $foto_perfil = $_SESSION['foto_perfil'] ?? null;
+                            $ruta_foto = $foto_perfil ? '../' . htmlspecialchars($foto_perfil) : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff&size=130';
+                            ?>
+                            <img src="<?= $ruta_foto ?>" alt="Foto de perfil" class="profile-avatar-big" id="avatar-perfil">
+                            <input type="file" id="input-foto-perfil" name="foto_perfil" accept="image/png,image/jpeg,image/jpg,image/webp" style="display: none;">
+                            <button type="button" class="btn-camera" id="btn-cambiar-foto" title="Cambiar foto de perfil"><span class="material-symbols-outlined">photo_camera</span></button>
                         </div>
                         <div class="profile-summary">
                             <div class="name-row">
