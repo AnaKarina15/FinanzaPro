@@ -165,6 +165,10 @@
     overflow: visible;
 }
 
+.table-container {
+    overflow: visible;
+}
+
 .btn-icon-only {
     background: none;
     border: none;

@@ -548,11 +548,6 @@ select:focus-visible {
     box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
 }
 
-.input-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
 
 .btn-modal-submit {
     width: 100%;
