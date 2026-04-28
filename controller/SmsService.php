@@ -23,11 +23,11 @@ class SmsService {
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($datos));
         curl_setopt($ch, CURLOPT_USERPWD, $this->account_sid . ':' . $this->auth_token);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
         
         // Ejecutamos y capturamos la respuesta (útil para debug)
         $respuesta = curl_exec($ch);
         $error = curl_error($ch);
-        curl_close($ch);
         
         if ($error) {
             error_log("Error enviando SMS: " . $error);
