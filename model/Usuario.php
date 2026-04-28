@@ -141,4 +141,162 @@ class Usuario {
             return false;
         }
     }
+
+    // ========== MÉTODOS DE ADMINISTRACIÓN ==========
+
+    /**
+     * Lista todos los usuarios con paginación y búsqueda
+     */
+    public function listarTodos($pagina = 1, $porPagina = 10, $busqueda = '') {
+        $offset = ($pagina - 1) * $porPagina;
+
+        $where = '';
+        $params = [];
+
+        if (!empty($busqueda)) {
+            $where = " WHERE u.nombre LIKE :busqueda OR u.apellido LIKE :busqueda2 OR u.correo LIKE :busqueda3";
+            $params[':busqueda'] = "%$busqueda%";
+            $params[':busqueda2'] = "%$busqueda%";
+            $params[':busqueda3'] = "%$busqueda%";
+        }
+
+        $query = "SELECT u.id_usuario, u.nombre, u.apellido, u.correo, u.telefono, u.id_rol, 
+                         u.cuenta_verificada, u.fecha_registro, r.nombre_rol
+                  FROM usuarios u
+                  INNER JOIN roles r ON u.id_rol = r.id_rol
+                  $where
+                  ORDER BY u.fecha_registro DESC
+                  LIMIT :limite OFFSET :offset";
+
+        $stmt = $this->conexion->prepare($query);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limite', (int)$porPagina, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Cuenta el total de usuarios (para paginación)
+     */
+    public function contarUsuarios($busqueda = '') {
+        $where = '';
+        $params = [];
+
+        if (!empty($busqueda)) {
+            $where = " WHERE u.nombre LIKE :busqueda OR u.apellido LIKE :busqueda2 OR u.correo LIKE :busqueda3";
+            $params[':busqueda'] = "%$busqueda%";
+            $params[':busqueda2'] = "%$busqueda%";
+            $params[':busqueda3'] = "%$busqueda%";
+        }
+
+        $query = "SELECT COUNT(*) as total FROM usuarios u $where";
+        $stmt = $this->conexion->prepare($query);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
+        }
+        $stmt->execute();
+        $row = $stmt->fetch();
+        return (int)$row['total'];
+    }
+
+    /**
+     * Cuenta usuarios con cuenta_verificada = 1
+     */
+    public function contarUsuariosActivos() {
+        $query = "SELECT COUNT(*) as total FROM usuarios WHERE cuenta_verificada = 1";
+        $stmt = $this->conexion->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch();
+        return (int)$row['total'];
+    }
+
+    /**
+     * Cuenta usuarios registrados en los últimos 7 días
+     */
+    public function contarUsuariosNuevosSemana() {
+        $query = "SELECT COUNT(*) as total FROM usuarios WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        $stmt = $this->conexion->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch();
+        return (int)$row['total'];
+    }
+
+    /**
+     * Crea un usuario desde el panel de admin (con rol personalizable)
+     */
+    public function crearUsuarioAdmin($nombre, $apellido, $correo, $telefono, $contrasena, $id_rol) {
+        $contrasena_hashed = password_hash($contrasena, PASSWORD_DEFAULT);
+
+        $query = 'INSERT INTO usuarios (nombre, apellido, correo, telefono, contrasena, id_rol, cuenta_verificada)
+                  VALUES (:nombre, :apellido, :correo, :telefono, :contrasena, :id_rol, 1)';
+
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+        $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
+        $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+        $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+        $stmt->bindParam(':contrasena', $contrasena_hashed, PDO::PARAM_STR);
+        $stmt->bindParam(':id_rol', $id_rol, PDO::PARAM_INT);
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error al crear usuario (admin): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualiza un usuario desde el panel de admin (incluye rol)
+     */
+    public function actualizarUsuarioAdmin($id_usuario, $nombre, $apellido, $correo, $telefono, $id_rol) {
+        $query = 'UPDATE usuarios SET nombre = :nombre, apellido = :apellido, correo = :correo, 
+                  telefono = :telefono, id_rol = :id_rol 
+                  WHERE id_usuario = :id_usuario';
+
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+        $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
+        $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+        $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+        $stmt->bindParam(':id_rol', $id_rol, PDO::PARAM_INT);
+        $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error actualizando usuario (admin): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Elimina un usuario por su ID
+     */
+    public function eliminarUsuario($id_usuario) {
+        $query = 'DELETE FROM usuarios WHERE id_usuario = :id_usuario';
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error eliminando usuario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtiene todos los roles disponibles
+     */
+    public function obtenerRoles() {
+        $query = 'SELECT * FROM roles ORDER BY id_rol ASC';
+        $stmt = $this->conexion->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }

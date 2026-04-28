@@ -79,6 +79,37 @@ switch ($action) {
         $controller->eliminarMovimiento();
         break;
 
+    // --- RUTAS DE ADMINISTRACIÓN ---
+    case 'adminListarUsuarios':
+        $controller = new UsuarioController();
+        $controller->listarUsuariosAdmin();
+        break;
+
+    case 'adminCrearUsuario':
+        $controller = new UsuarioController();
+        $controller->crearUsuarioAdmin();
+        break;
+
+    case 'adminActualizarUsuario':
+        $controller = new UsuarioController();
+        $controller->actualizarUsuarioAdmin();
+        break;
+
+    case 'adminEliminarUsuario':
+        $controller = new UsuarioController();
+        $controller->eliminarUsuarioAdmin();
+        break;
+
+    case 'adminObtenerUsuario':
+        $controller = new UsuarioController();
+        $controller->obtenerUsuarioAdmin();
+        break;
+
+    case 'adminEstadisticas':
+        $controller = new UsuarioController();
+        $controller->estadisticasAdmin();
+        break;
+
     // --- RUTA POR DEFECTO ---
     default:
         $controller = new UsuarioController();

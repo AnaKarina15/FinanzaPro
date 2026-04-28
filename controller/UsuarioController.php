@@ -25,8 +25,14 @@ class UsuarioController {
             $_SESSION['nombre_usuario'] = $usuario['nombre'];
             $_SESSION['apellido_usuario'] = $usuario['apellido'];
             $_SESSION['rol'] = $usuario['nombre_rol'] ?? 'Usuario';
+            $_SESSION['id_rol'] = $usuario['id_rol'] ?? 2;
 
-            $urlDestino = 'http://localhost/FinanzaPro/views/dashboard.php';
+            // Si es admin, redirigir al panel de administración
+            if ($usuario['id_rol'] == 1) {
+                $urlDestino = 'http://localhost/FinanzaPro/views/admin.php';
+            } else {
+                $urlDestino = 'http://localhost/FinanzaPro/views/dashboard.php';
+            }
 
             if ($esRegistroNuevo) {
                 // Si viene de registrarse, agregamos el parámetro
@@ -101,6 +107,7 @@ class UsuarioController {
                         $_SESSION['nombre_usuario'] = $usuario['nombre'];
                         $_SESSION['apellido_usuario'] = $usuario['apellido'];
                         $_SESSION['rol'] = $usuario['nombre_rol'];
+                        $_SESSION['id_rol'] = $usuario['id_rol'] ?? 2;
 
                         echo json_encode(["status" => "success", "mensaje" => "Cuenta activada. Entrando al sistema..."]);
                         exit();
@@ -308,6 +315,191 @@ class UsuarioController {
         }
 
         echo json_encode(["status" => "error", "mensaje" => "El PIN es incorrecto o ha expirado."]);
+        exit();
+    }
+
+    // ========== MÉTODOS DE ADMINISTRACIÓN ==========
+
+    /**
+     * Verifica que el usuario actual sea admin (id_rol = 1)
+     */
+    private function verificarAdmin() {
+        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['id_usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['status' => 'error', 'mensaje' => 'Acceso denegado. Se requieren permisos de administrador.']);
+            exit();
+        }
+    }
+
+    /**
+     * Lista usuarios con paginación y búsqueda (JSON)
+     */
+    public function listarUsuariosAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+        $porPagina = isset($_GET['porPagina']) ? (int)$_GET['porPagina'] : 10;
+        $busqueda = isset($_GET['busqueda']) ? trim($_GET['busqueda']) : '';
+
+        $usuarios = $this->modeloUsuario->listarTodos($pagina, $porPagina, $busqueda);
+        $total = $this->modeloUsuario->contarUsuarios($busqueda);
+
+        echo json_encode([
+            'status' => 'success',
+            'usuarios' => $usuarios,
+            'total' => $total,
+            'pagina' => $pagina,
+            'porPagina' => $porPagina,
+            'totalPaginas' => ceil($total / $porPagina)
+        ]);
+        exit();
+    }
+
+    /**
+     * Obtiene un usuario por ID (JSON)
+     */
+    public function obtenerUsuarioAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $usuario = $this->modeloUsuario->obtenerPorId($id);
+
+        if ($usuario) {
+            echo json_encode(['status' => 'success', 'usuario' => $usuario]);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Usuario no encontrado.']);
+        }
+        exit();
+    }
+
+    /**
+     * Crea un usuario desde el panel admin (JSON)
+     */
+    public function crearUsuarioAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $datos = json_decode(file_get_contents('php://input'), true);
+
+        $nombre = trim($datos['nombre'] ?? '');
+        $apellido = trim($datos['apellido'] ?? '');
+        $correo = trim($datos['correo'] ?? '');
+        $telefono = trim($datos['telefono'] ?? '');
+        $contrasena = $datos['contrasena'] ?? '';
+        $id_rol = (int)($datos['id_rol'] ?? 2);
+
+        // Validaciones
+        if (empty($nombre) || empty($apellido) || empty($correo) || empty($contrasena)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Todos los campos obligatorios deben estar completos.']);
+            exit();
+        }
+
+        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'El correo no tiene un formato válido.']);
+            exit();
+        }
+
+        if (strlen($contrasena) < 8) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'La contraseña debe tener al menos 8 caracteres.']);
+            exit();
+        }
+
+        if ($this->modeloUsuario->existeCorreo($correo)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'El correo ya está registrado.']);
+            exit();
+        }
+
+        if ($this->modeloUsuario->crearUsuarioAdmin($nombre, $apellido, $correo, $telefono, $contrasena, $id_rol)) {
+            echo json_encode(['status' => 'success', 'mensaje' => 'Usuario creado exitosamente.']);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Error al crear el usuario.']);
+        }
+        exit();
+    }
+
+    /**
+     * Actualiza un usuario desde el panel admin (JSON)
+     */
+    public function actualizarUsuarioAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $datos = json_decode(file_get_contents('php://input'), true);
+
+        $id_usuario = (int)($datos['id_usuario'] ?? 0);
+        $nombre = trim($datos['nombre'] ?? '');
+        $apellido = trim($datos['apellido'] ?? '');
+        $correo = trim($datos['correo'] ?? '');
+        $telefono = trim($datos['telefono'] ?? '');
+        $id_rol = (int)($datos['id_rol'] ?? 2);
+
+        if ($id_usuario === 0 || empty($nombre) || empty($apellido) || empty($correo)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Faltan campos obligatorios.']);
+            exit();
+        }
+
+        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'El correo no tiene un formato válido.']);
+            exit();
+        }
+
+        if ($this->modeloUsuario->actualizarUsuarioAdmin($id_usuario, $nombre, $apellido, $correo, $telefono, $id_rol)) {
+            echo json_encode(['status' => 'success', 'mensaje' => 'Usuario actualizado exitosamente.']);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Error al actualizar el usuario.']);
+        }
+        exit();
+    }
+
+    /**
+     * Elimina un usuario desde el panel admin (JSON)
+     */
+    public function eliminarUsuarioAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $datos = json_decode(file_get_contents('php://input'), true);
+        $id_usuario = (int)($datos['id_usuario'] ?? 0);
+
+        if ($id_usuario === 0) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'ID de usuario inválido.']);
+            exit();
+        }
+
+        // No permitir eliminarse a sí mismo
+        if ($id_usuario === (int)$_SESSION['id_usuario']) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No puedes eliminar tu propia cuenta.']);
+            exit();
+        }
+
+        if ($this->modeloUsuario->eliminarUsuario($id_usuario)) {
+            echo json_encode(['status' => 'success', 'mensaje' => 'Usuario eliminado exitosamente.']);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Error al eliminar el usuario.']);
+        }
+        exit();
+    }
+
+    /**
+     * Obtiene estadísticas generales para el dashboard admin (JSON)
+     */
+    public function estadisticasAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $totalUsuarios = $this->modeloUsuario->contarUsuarios();
+        $activos = $this->modeloUsuario->contarUsuariosActivos();
+        $nuevosSemana = $this->modeloUsuario->contarUsuariosNuevosSemana();
+
+        echo json_encode([
+            'status' => 'success',
+            'totalUsuarios' => $totalUsuarios,
+            'activos' => $activos,
+            'nuevosSemana' => $nuevosSemana
+        ]);
         exit();
     }
 }
