@@ -138,7 +138,7 @@ if (!isset($_SESSION['usuario'])) {
         <article class="card dashboard-recent-card">
           <div class="card-top">
             <h3>Últimos Movimientos</h3>
-            <a href="#">Ver todo</a>
+            <a href="ingresosGastos.php">Ver todo</a>
           </div>
           <div class="table-container">
             <table>
