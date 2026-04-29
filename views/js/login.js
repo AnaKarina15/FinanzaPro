@@ -12,6 +12,7 @@ import {
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { crearNotificacion } from "./notificaciones.js";
 
 // Idioma de Firebase en Español
 auth.languageCode = 'es';
@@ -150,6 +151,14 @@ if (registerForm) {
 
       // 3. Enviar correo de verificación y cerrar sesión temporal
       await sendEmailVerification(user);
+
+      // 4. Crear notificación de bienvenida en Firestore (antes de cerrar sesión)
+      await crearNotificacion(user.uid, {
+        titulo: `¡Bienvenid@ ${nombre} a FinanzaPro! 🎉`,
+        mensaje: `Es bacano tenerte aquí. Empieza registrando tus ingresos y gastos para tomar control de tus finanzas.`,
+        tipo: 'meta'
+      });
+
       await signOut(auth);
 
       await Swal.fire({
