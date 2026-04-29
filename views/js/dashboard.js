@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- CONTROL DE SESIÓN CON FIREBASE ---
     let currentUid = null;
+    let _nombreUsuario = 'Usuario'; // Nombre para notificación de bienvenida
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUid = user.uid;
@@ -31,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     const nombreCompleto = `${userData.nombre} ${userData.apellido}`.trim();
+                    _nombreUsuario = nombreCompleto; // guardarlo para usarlo fuera del try
                     
                     // Actualizar nombre en la barra lateral
                     const sideName = document.querySelector(".nav-profile .username");
@@ -53,9 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             
             initNotificaciones(user.uid);
-            // Enviar bienvenida si es la primera vez que entra (usuarios nuevos Y existentes)
-            const _nombre = document.querySelector(".nav-profile .username")?.textContent || 'Usuario';
-            enviarBienvenidaSiNecesario(user.uid, _nombre);
+            // Nombre ya viene de Firestore, no del DOM
+            enviarBienvenidaSiNecesario(user.uid, _nombreUsuario);
             cargarCategoriasDePresupuestos();
             cargarEstadisticasFirestore(user.uid);
         } else {

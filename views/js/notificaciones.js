@@ -14,12 +14,13 @@ let unsubscribeNotif = null;
 export function initNotificaciones(uid) {
     currentUid = uid;
     _escucharNotificaciones();
+    // Verificar presupuestos excedidos en cada carga de vista
+    verificarPresupuestosAlCargar(uid);
 
     // Garantizar que el DOM esté listo antes de bindear botones
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', _bindBellButton);
     } else {
-        // DOM ya está listo (caso normal cuando onAuthStateChanged dispara tarde)
         _bindBellButton();
     }
 }
@@ -68,23 +69,149 @@ export async function enviarBienvenidaSiNecesario(uid, nombre) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// TRIGGER: META DE AHORRO — al 50% y al 100%
+// ═══════════════════════════════════════════════════════════
+export async function verificarProgresoMeta(uid, meta) {
+    if (!uid || !meta) return;
+    try {
+        const actual  = parseFloat(meta.monto_actual)  || 0;
+        const objetivo = parseFloat(meta.monto_objetivo) || 0;
+        if (objetivo <= 0) return;
+
+        const porcentaje = (actual / objetivo) * 100;
+        const nombre = meta.nombre || 'tu meta';
+
+        // Evitar duplicados: revisar títulos existentes
+        const snapCheck = await getDocs(query(collection(db, "notificaciones"), where("usuario_id", "==", uid)));
+        const titulos = snapCheck.docs.map(d => d.data().titulo);
+
+        if (porcentaje >= 100 && !titulos.some(t => t.includes('¡Lograste tu meta') && t.includes(nombre))) {
+            await crearNotificacion(uid, {
+                titulo: `🏆 ¡Lograste tu meta: ${nombre}!`,
+                mensaje: `Has alcanzado el 100% de tu meta de ahorro. ¡Felicitaciones, es un gran logro!`,
+                tipo: 'meta'
+            });
+        } else if (porcentaje >= 50 && porcentaje < 100 && !titulos.some(t => t.includes('Vas a la mitad') && t.includes(nombre))) {
+            await crearNotificacion(uid, {
+                titulo: `🎯 Vas a la mitad: ${nombre}`,
+                mensaje: `Ya llevas el ${Math.round(porcentaje)}% de "${nombre}". ¡Sigue así, vas muy bien!`,
+                tipo: 'meta'
+            });
+        }
+    } catch (e) {
+        console.error("Error verificando progreso de meta:", e);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TRIGGER: GASTO INUSUAL — si supera 2× el promedio de la categoría
+// ═══════════════════════════════════════════════════════════
+export async function verificarGastoInusual(uid, { monto, categoria }) {
+    if (!uid || !monto || !categoria) return;
+    try {
+        const snap = await getDocs(query(collection(db, "transacciones"), where("usuario_id", "==", uid)));
+        const gastosCat = snap.docs.map(d => d.data()).filter(t => t.tipo === 'gasto' && t.categoria === categoria);
+
+        if (gastosCat.length < 3) return; // sin historial suficiente
+
+        const promedio = gastosCat.reduce((a, t) => a + (parseFloat(t.monto) || 0), 0) / gastosCat.length;
+        const montoNum = parseFloat(monto);
+
+        if (montoNum >= promedio * 2) {
+            await crearNotificacion(uid, {
+                titulo: `⚠️ Gasto inusual en ${categoria}`,
+                mensaje: `Registraste $${montoNum.toLocaleString('es-CO')} en ${categoria}, que es ${(montoNum / promedio).toFixed(1)}× tu promedio habitual ($${Math.round(promedio).toLocaleString('es-CO')}). ¿Todo bien?`,
+                tipo: 'alerta'
+            });
+        }
+    } catch (e) {
+        console.error("Error verificando gasto inusual:", e);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TRIGGER: VERIFICAR PRESUPUESTOS AL INICIAR SESIÓN
+// Para presupuestos que ya estaban excedidos antes del sistema de notificaciones
+// ═══════════════════════════════════════════════════════════
+export async function verificarPresupuestosAlCargar(uid) {
+    if (!uid) return;
+    try {
+        const now = new Date();
+        const mesPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        // Obtener presupuestos y transacciones del usuario
+        const [snapPres, snapTrans, snapNotif] = await Promise.all([
+            getDocs(query(collection(db, "presupuestos"), where("id_usuario", "==", uid))),
+            getDocs(query(collection(db, "transacciones"), where("usuario_id", "==", uid))),
+            getDocs(query(collection(db, "notificaciones"), where("usuario_id", "==", uid)))
+        ]);
+
+        const titulosExistentes = snapNotif.docs.map(d => d.data().titulo);
+
+        // Calcular gasto mensual por categoría
+        const gastoPorCat = {};
+        snapTrans.docs.forEach(d => {
+            const t = d.data();
+            if (t.tipo !== 'gasto' || !String(t.fecha).startsWith(mesPrefix)) return;
+            const cat = t.categoria || 'Otros';
+            gastoPorCat[cat] = (gastoPorCat[cat] || 0) + (parseFloat(t.monto) || 0);
+        });
+
+        // Verificar cada presupuesto
+        for (const pDoc of snapPres.docs) {
+            const p = pDoc.data();
+            const limite = parseFloat(p.monto_limite || p.limite || p.valor_limite) || 0;
+            if (limite <= 0) continue;
+
+            // El campo que identifica la categoría puede ser 'nombre' o 'categoria'
+            const categoria = p.nombre || p.categoria || '';
+            const gasto = gastoPorCat[categoria] || 0;
+            const pct = (gasto / limite) * 100;
+
+            const titulo100 = `🔴 ¡Límite superado! — ${categoria}`;
+            const titulo80  = `⚠️ Alerta 80% — ${categoria}`;
+
+            if (pct >= 100 && !titulosExistentes.includes(titulo100)) {
+                await crearNotificacion(uid, {
+                    titulo: titulo100,
+                    mensaje: `Has superado el límite de tu presupuesto de ${categoria} (${Math.round(pct)}% consumido). Considera reducir tus gastos.`,
+                    tipo: 'alerta'
+                });
+            } else if (pct >= 80 && pct < 100 && !titulosExistentes.includes(titulo80)) {
+                await crearNotificacion(uid, {
+                    titulo: titulo80,
+                    mensaje: `Llevas el ${Math.round(pct)}% de tu presupuesto de ${categoria}. ¡Cuidado con los gastos!`,
+                    tipo: 'alerta'
+                });
+            }
+        }
+    } catch (e) {
+        console.error("Error verificando presupuestos al cargar:", e);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
 // ESCUCHAR NOTIFICACIONES EN TIEMPO REAL
 // ═══════════════════════════════════════════════════════════
 function _escucharNotificaciones() {
     if (!currentUid) return;
     if (unsubscribeNotif) unsubscribeNotif();
 
-    // Solo filtramos por usuario_id para evitar el requisito de índice compuesto
     const q = query(
         collection(db, "notificaciones"),
         where("usuario_id", "==", currentUid)
     );
 
     unsubscribeNotif = onSnapshot(q, (snapshot) => {
-        // Filtramos leida=false en el cliente
         const noLeidas = snapshot.docs.filter(d => d.data().leida === false);
         _actualizarBadge(noLeidas.length);
-        _renderPanel(noLeidas);
+        // Mostrar TODAS las notificaciones en el panel, ordenadas por fecha desc
+        const todas = [...snapshot.docs].sort((a, b) => {
+            const fa = a.data().fecha_creacion?.toMillis?.() || 0;
+            const fb = b.data().fecha_creacion?.toMillis?.() || 0;
+            return fb - fa;
+        });
+        _renderPanel(todas);
     }, (error) => {
         console.error("Error escuchando notificaciones:", error);
     });
@@ -125,12 +252,14 @@ function _renderPanel(docs) {
 
     docs.forEach(docSnap => {
         const data = docSnap.data();
+        const leida = data.leida === true;
         const fecha = data.fecha_creacion?.toDate
             ? data.fecha_creacion.toDate().toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })
             : 'Ahora';
 
         const item = document.createElement('div');
-        item.className = 'notif-item';
+        // Notificaciones leídas se muestran más tenues
+        item.className = `notif-item${leida ? ' notif-leida' : ''}`;
         item.innerHTML = `
             <div class="notif-icon-wrap" style="background:${colores[data.tipo] || colores.info}22; color:${colores[data.tipo] || colores.info}">
                 <span class="material-symbols-outlined">${iconos[data.tipo] || 'info'}</span>
@@ -140,9 +269,15 @@ function _renderPanel(docs) {
                 <p class="notif-mensaje">${data.mensaje}</p>
                 <span class="notif-fecha">${fecha}</span>
             </div>
-            <button class="notif-mark-read" data-id="${docSnap.id}" title="Marcar como leída">
-                <span class="material-symbols-outlined">check_circle</span>
-            </button>
+            <div class="notif-actions">
+                ${!leida ? `
+                <button class="notif-mark-read" data-id="${docSnap.id}" title="Marcar como leída">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </button>` : '<span class="notif-leida-icon" title="Leída"><span class="material-symbols-outlined">done_all</span></span>'}
+                <button class="notif-delete" data-id="${docSnap.id}" title="Eliminar">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
         `;
         lista.appendChild(item);
     });
@@ -151,8 +286,16 @@ function _renderPanel(docs) {
     lista.querySelectorAll('.notif-mark-read').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            const id = btn.dataset.id;
-            await updateDoc(doc(db, "notificaciones", id), { leida: true });
+            await updateDoc(doc(db, "notificaciones", btn.dataset.id), { leida: true });
+        });
+    });
+
+    // Eliminar notificación
+    lista.querySelectorAll('.notif-delete').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const { deleteDoc: delDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
+            await delDoc(doc(db, "notificaciones", btn.dataset.id));
         });
     });
 }

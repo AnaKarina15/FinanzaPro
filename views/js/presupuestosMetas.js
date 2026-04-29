@@ -1,7 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { initNotificaciones } from "./notificaciones.js";
+import { initNotificaciones, verificarProgresoMeta } from "./notificaciones.js";
 
 let currentUid = null;
 
@@ -805,6 +805,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     await updateDoc(metaRef, {
                         monto_actual: nuevoMonto,
                         historial: historial
+                    });
+                    // Verificar si alcanzó el 50% o 100% de la meta
+                    await verificarProgresoMeta(currentUid, {
+                        nombre: metaData.nombre,
+                        monto_actual: nuevoMonto,
+                        monto_objetivo: metaData.monto_objetivo
                     });
                     Swal.fire('¡Éxito!', 'Dinero transferido a la meta', 'success');
                     document.getElementById('modalAbonoMeta').classList.remove('active');
