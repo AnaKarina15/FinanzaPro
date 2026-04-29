@@ -657,11 +657,36 @@ window.abrirModalAbonoMeta = async function(id_meta, nombre_meta, event) {
     document.getElementById('modalAbonoMeta').classList.add('active');
 };
 
-window.abrirModalGastoPresupuesto = function(categoria, event) {
+window.abrirModalGastoPresupuesto = async function(categoria, event) {
     if (event && event.target.closest('.kebab-menu')) return;
     document.getElementById('categoria_gasto').value = categoria;
     document.getElementById('nombre-categoria-presupuesto').innerText = categoria;
     document.getElementById('form-gasto-presupuesto').reset();
+
+    // Calcular el saldo disponible general (ingresos - gastos - ahorros)
+    const disponibleGeneral = await calcularDisponible();
+
+    let hiddenDisp = document.getElementById('disponible_presupuesto');
+    if (!hiddenDisp) {
+        hiddenDisp = document.createElement('input');
+        hiddenDisp.type = 'hidden';
+        hiddenDisp.id = 'disponible_presupuesto';
+        document.getElementById('form-gasto-presupuesto').appendChild(hiddenDisp);
+    }
+    hiddenDisp.value = disponibleGeneral;
+
+    const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+    let infoEl = document.getElementById('info-disponible-presupuesto');
+    if (infoEl) {
+        if (disponibleGeneral <= 0) {
+            infoEl.innerText = `Balance insuficiente: ${formatter.format(disponibleGeneral)}. No puedes registrar gastos.`;
+            infoEl.style.color = '#ef4444';
+        } else {
+            infoEl.innerText = `Saldo disponible: ${formatter.format(disponibleGeneral)}`;
+            infoEl.style.color = '#059669';
+        }
+    }
+
     document.getElementById('modalGastoPresupuesto').classList.add('active');
 };
 
@@ -839,6 +864,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const inputGasto = document.getElementById('monto_gasto').value;
             const montoGasto = parseFloat(inputGasto.replace(/,/g, ''));
             const descripcion = document.getElementById('descripcion_gasto').value;
+            const disponible = parseFloat(document.getElementById('disponible_presupuesto')?.value || 0);
+
+            // Validar solo contra el saldo disponible general (puede exceder el límite del presupuesto)
+            if (!montoGasto || montoGasto <= 0) {
+                Swal.fire('Monto inválido', 'Ingresa un monto mayor a cero.', 'warning');
+                btnSubmit.disabled = false;
+                return;
+            }
+            if (disponible <= 0) {
+                Swal.fire('Saldo insuficiente', 'Tu balance general está en negativo. No puedes registrar más gastos.', 'warning');
+                btnSubmit.disabled = false;
+                return;
+            }
+            if (montoGasto > disponible) {
+                const fmt = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Saldo insuficiente',
+                    html: `Solo tienes <strong>${fmt.format(disponible)}</strong> disponibles. No puedes gastar <strong>${fmt.format(montoGasto)}</strong>.`,
+                    confirmButtonColor: '#059669'
+                });
+                btnSubmit.disabled = false;
+                return;
+            }
 
             // Obtener fecha local actual (formato YYYY-MM-DD)
             const hoy = new Date();
