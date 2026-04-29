@@ -423,8 +423,13 @@ function renderHeatmap(transacciones) {
         const gridDiv = document.createElement('div');
         gridDiv.className = 'heatmap-grid';
         
-        // Simular un calendario estilizado de 20 cuadritos por mes (como en el diseño 4x5)
-        for (let i = 1; i <= 20; i++) {
+        // Obtener la cantidad real de días de este mes
+        const year = parseInt(monthPrefix.split('-')[0]);
+        const month = parseInt(monthPrefix.split('-')[1]);
+        const daysInMonth = new Date(year, month, 0).getDate();
+        
+        // Renderizar un cuadrito por cada día del mes
+        for (let i = 1; i <= daysInMonth; i++) {
             const dayStr = String(i).padStart(2, '0');
             const fecha = `${monthPrefix}-${dayStr}`;
             const gasto = gastosDiarios[fecha] || 0;
