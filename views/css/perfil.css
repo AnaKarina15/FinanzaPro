@@ -331,7 +331,49 @@ input:checked + .slider:before { transform: translateX(20px); }
     box-shadow: 0 4px 14px rgba(5, 150, 105, 0.2);
 }
 
-/* 6. Responsive */
+/* 6. Dark Theme (Solo Perfil) */
+body.dark-theme {
+    --bg: #0f172a;
+    --bg-cards: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    background-color: var(--bg);
+}
+
+body.dark-theme .app-header .view-title { color: var(--text-primary); }
+body.dark-theme .profile-summary h2 { color: var(--text-primary); }
+body.dark-theme .setting-text strong { color: var(--text-primary); }
+body.dark-theme .card-header-icon h3 { color: var(--text-primary); }
+body.dark-theme .modal-header h3 { color: var(--text-primary); }
+
+body.dark-theme .input-profile,
+body.dark-theme .code-box,
+body.dark-theme .select-profile,
+body.dark-theme .theme-toggle,
+body.dark-theme .btn-change-pass {
+    background: #0f172a;
+    color: var(--text-primary);
+    border-color: #334155;
+}
+
+body.dark-theme .btn-change-pass:hover {
+    background: #334155;
+}
+
+body.dark-theme .toggle-btn.active {
+    background: #1e293b;
+    color: #10b981;
+}
+
+body.dark-theme .profile-actions { border-top-color: #334155; }
+body.dark-theme .setting-item { border-bottom-color: #334155; }
+
+body.dark-theme .modal-content { background: #1e293b; }
+body.dark-theme .btn-close { background: #334155; color: #cbd5e1; }
+body.dark-theme .btn-logout-text:hover { color: #ef4444; }
+
+/* 7. Responsive */
 @media (max-width: 900px) {
     .profile-grid { grid-template-columns: 1fr; }
     .profile-header-content { flex-direction: column; align-items: center; text-align: center; }

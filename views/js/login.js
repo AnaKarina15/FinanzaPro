@@ -108,9 +108,25 @@ if (loginForm) {
           Swal.fire("Cuenta eliminada", "Tu cuenta ha sido eliminada permanentemente porque pasaron los 10 días.", "error");
           return;
         } else {
-          // Aún no pasan los 10 días, cancelar eliminación
-          await updateDoc(userDocRef, { fecha_eliminacion: deleteField() });
-          Swal.fire("Eliminación cancelada", "Al iniciar sesión, hemos cancelado la eliminación de tu cuenta.", "success");
+          // Aún no pasan los 10 días, preguntar al usuario
+          const result = await Swal.fire({
+            title: "¿Cancelar eliminación?",
+            text: "Tu cuenta está programada para eliminarse. Si inicias sesión, se cancelará la eliminación de tu cuenta. ¿Deseas continuar?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#059669",
+            cancelButtonColor: "#64748b",
+            confirmButtonText: "Sí, iniciar sesión",
+            cancelButtonText: "No, salir"
+          });
+          
+          if (result.isConfirmed) {
+            await updateDoc(userDocRef, { fecha_eliminacion: deleteField() });
+            // Se canceló la eliminación
+          } else {
+            await signOut(auth);
+            return;
+          }
         }
       }
 
@@ -250,7 +266,11 @@ const handleGoogleSignIn = async () => {
           return;
         } else {
           await updateDoc(userDocRef, { fecha_eliminacion: deleteField() });
-          Swal.fire("Eliminación cancelada", "Al iniciar sesión, hemos cancelado la eliminación de tu cuenta.", "success");
+          await crearNotificacion(user.uid, {
+            titulo: "Eliminación de cuenta cancelada",
+            mensaje: "Has iniciado sesión a tiempo y tu cuenta ha sido restaurada con éxito.",
+            tipo: "alerta"
+          });
         }
     }
 
