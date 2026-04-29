@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- FILTROS LOGIC ---
     window.movimientosGlobales = [];
     window.filtroTipoSeleccionado = 'todos';
-    window.filtroTiempoSeleccionado = 'esteMes';
+    window.filtroTiempoSeleccionado = 'todos';
     window.terminoBusqueda = '';
 
     const obtenerRangoTiempo = (tipo) => {
@@ -114,6 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const fin = new Date(hoy);
 
         switch (tipo) {
+            case 'todos':
+                return { desde: new Date('2000-01-01'), hasta: new Date('2100-12-31') };
             case 'hoy':
                 inicio.setHours(0, 0, 0, 0);
                 fin.setHours(23, 59, 59, 999);
