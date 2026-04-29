@@ -4,6 +4,46 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/f
 
 let currentUid = null;
 
+// --- SEMESTRE HELPERS ---
+function getSemestreActual() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth(); // 0-11
+    // Semestre 1: Ene(0)-Jun(5), Semestre 2: Jul(6)-Dic(11)
+    const semestre = month <= 5 ? 1 : 2;
+    const startMonth = semestre === 1 ? 0 : 6; // 0=Ene, 6=Jul
+    const mesesNombresCortos = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+    const mesesNombresLargos = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const labels = [];
+    const prefixes = [];
+    const labelsLargos = [];
+    for (let i = 0; i < 6; i++) {
+        const m = startMonth + i;
+        labels.push(mesesNombresCortos[m]);
+        labelsLargos.push(mesesNombresLargos[m]);
+        prefixes.push(`${year}-${String(m + 1).padStart(2, '0')}`);
+    }
+    return { semestre, year, labels, prefixes, labelsLargos, startMonth };
+}
+
+function getSemestreAnterior() {
+    const actual = getSemestreActual();
+    const mesesNombresCortos = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+    let year, startMonth;
+    if (actual.semestre === 1) {
+        year = actual.year - 1;
+        startMonth = 6; // Jul del año anterior
+    } else {
+        year = actual.year;
+        startMonth = 0; // Ene del mismo año
+    }
+    const prefixes = [];
+    for (let i = 0; i < 6; i++) {
+        prefixes.push(`${year}-${String(startMonth + i + 1).padStart(2, '0')}`);
+    }
+    return { year, startMonth, prefixes };
+}
+
 const catColors = {
     "Alimentación": { bg: "#fecaca", text: "#b91c1c", fill: "#ef4444" },
     "Transporte": { bg: "#bfdbfe", text: "#1d4ed8", fill: "#3b82f6" },
@@ -50,6 +90,89 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = '../index.php';
         }
     });
+
+    const btnExportar = document.getElementById('btn-exportar');
+    if (btnExportar) {
+        btnExportar.addEventListener('click', async () => {
+            try {
+                // Cambiar estado del botón para dar feedback al usuario
+                const originalHtml = btnExportar.innerHTML;
+                btnExportar.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Generando...';
+                btnExportar.disabled = true;
+
+                const contenedorReporte = document.querySelector('.reportes-grid');
+                
+                // Configurar html2canvas
+                const canvas = await html2canvas(contenedorReporte, {
+                    scale: 2, // Mejor calidad
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                
+                // 1. Configurar dimensiones base en px basadas en el tamaño real de la vista
+                const { jsPDF } = window.jspdf;
+                const xOffset = 80; // Mayor margen lateral
+                let yOffset = 80; // Mayor margen superior
+                
+                // 2. Capturar el logo de la navbar
+                let logoPrintHeight = 0;
+                let logoPrintWidth = 0;
+                let logoImgData = null;
+                const logoContainer = document.querySelector('.logo-container');
+                if (logoContainer) {
+                    const logoCanvas = await html2canvas(logoContainer, { scale: 2, backgroundColor: null });
+                    logoImgData = logoCanvas.toDataURL('image/png');
+                    // Ampliamos el tamaño del logo para que destaque como encabezado principal
+                    logoPrintWidth = logoCanvas.width * 1.6;
+                    logoPrintHeight = logoCanvas.height * 1.6;
+                }
+
+                const fontSizePx = 100; // Título mucho más grande y legible
+                const gap = 50; // Mayor espaciado entre el encabezado y el contenido
+                
+                const logoSpace = logoPrintHeight > 0 ? (logoPrintHeight + gap) : 0;
+                const titleSpace = fontSizePx + gap;
+                
+                // Calcular el ancho y alto exactos de la página PDF
+                const pdfWidth = canvas.width + (xOffset * 2);
+                const pdfHeight = yOffset + logoSpace + titleSpace + canvas.height + yOffset;
+                
+                // Inicializar jsPDF con dimensiones y orientación dinámicas para evitar recortes
+                const orientation = pdfWidth > pdfHeight ? 'l' : 'p';
+                const pdf = new jsPDF(orientation, 'px', [pdfWidth, pdfHeight]);
+                const sem = getSemestreActual();
+
+                // 3. Dibujar elementos en el PDF
+                if (logoImgData) {
+                    pdf.addImage(logoImgData, 'PNG', xOffset, yOffset, logoPrintWidth, logoPrintHeight);
+                    yOffset += logoSpace;
+                }
+
+                pdf.setFontSize(fontSizePx);
+                pdf.setFont(undefined, 'bold');
+                pdf.setTextColor('#475569'); // Equivalente a var(--text-secondary)
+                const tituloTexto = `Reporte Financiero - ${sem.semestre === 1 ? '1er' : '2do'} Semestre ${sem.year}`;
+                // En jsPDF el eje Y del texto es la línea base (bottom), sumamos el font size
+                pdf.text(tituloTexto, xOffset, yOffset + (fontSizePx * 0.8));
+                yOffset += titleSpace;
+
+                pdf.addImage(imgData, 'JPEG', xOffset, yOffset, canvas.width, canvas.height);
+                
+                // Descargar el archivo
+                pdf.save(`Reporte_FinanzaPro_Semestre${sem.semestre}_${sem.year}.pdf`);
+
+            } catch (error) {
+                console.error('Error al exportar PDF:', error);
+                alert('Hubo un error al generar el PDF. Por favor intenta de nuevo.');
+            } finally {
+                // Restaurar el botón original
+                btnExportar.innerHTML = '<span class="material-symbols-outlined">download</span> Exportar';
+                btnExportar.disabled = false;
+            }
+        });
+    }
 });
 
 async function cargarReportes() {
@@ -74,61 +197,53 @@ async function cargarReportes() {
 }
 
 function renderMetrics(transacciones, metas) {
-    const now = new Date();
-    const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-    const currentYear = String(now.getFullYear());
-    const currentMonthPrefix = `${currentYear}-${currentMonth}`;
+    const semActual = getSemestreActual();
+    const semAnterior = getSemestreAnterior();
 
-    let ingresosTotales = 0;
-    let gastosTotales = 0;
-    let ingresosMes = 0;
-    let gastosMes = 0;
-    let ingresosMesAnterior = 0;
-    let gastosMesAnterior = 0;
-
-    const previousDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const previousMonthPrefix = `${previousDate.getFullYear()}-${String(previousDate.getMonth() + 1).padStart(2, '0')}`;
+    let ingresosTotales = 0, gastosTotales = 0;
+    let ingresosSem = 0, gastosSem = 0;
+    let ingresosSemAnterior = 0, gastosSemAnterior = 0;
 
     transacciones.forEach(t => {
         if (!t || !t.fecha) return;
         const monto = parseFloat(t.monto) || 0;
-        const isCurrentMonth = String(t.fecha).startsWith(currentMonthPrefix);
-        const isPrevMonth = String(t.fecha).startsWith(previousMonthPrefix);
+        const mesPrefix = String(t.fecha).substring(0, 7);
+        const enSemActual = semActual.prefixes.includes(mesPrefix);
+        const enSemAnterior = semAnterior.prefixes.includes(mesPrefix);
 
         if (t.tipo === 'ingreso') {
             ingresosTotales += monto;
-            if (isCurrentMonth) ingresosMes += monto;
-            if (isPrevMonth) ingresosMesAnterior += monto;
+            if (enSemActual) ingresosSem += monto;
+            if (enSemAnterior) ingresosSemAnterior += monto;
         } else {
             gastosTotales += monto;
-            if (isCurrentMonth) gastosMes += monto;
-            if (isPrevMonth) gastosMesAnterior += monto;
+            if (enSemActual) gastosSem += monto;
+            if (enSemAnterior) gastosSemAnterior += monto;
         }
     });
 
     const balanceTotal = ingresosTotales - gastosTotales;
     document.getElementById('balance-total').innerText = '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(balanceTotal);
-    document.getElementById('gasto-mensual').innerText = '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(gastosMes);
+    document.getElementById('gasto-mensual').innerText = '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(gastosSem);
 
-    // Calcular tendencias vs mes anterior
-    const balanceMesAnterior = ingresosTotales - gastosTotales - (ingresosMes - gastosMes); // Rough estimation if we only look at global vs monthly. Better: compare current month balance vs previous month balance.
-    const balanceMensualActual = ingresosMes - gastosMes;
-    const balanceMensualPrev = ingresosMesAnterior - gastosMesAnterior;
+    // Calcular tendencias vs semestre anterior
+    const balanceSemActual = ingresosSem - gastosSem;
+    const balanceSemAnterior = ingresosSemAnterior - gastosSemAnterior;
     
     let balanceTrend = 0;
-    if (balanceMensualPrev !== 0) {
-        balanceTrend = ((balanceMensualActual - balanceMensualPrev) / Math.abs(balanceMensualPrev)) * 100;
+    if (balanceSemAnterior !== 0) {
+        balanceTrend = ((balanceSemActual - balanceSemAnterior) / Math.abs(balanceSemAnterior)) * 100;
     }
 
     let gastoTrend = 0;
-    if (gastosMesAnterior !== 0) {
-        gastoTrend = ((gastosMes - gastosMesAnterior) / gastosMesAnterior) * 100;
+    if (gastosSemAnterior !== 0) {
+        gastoTrend = ((gastosSem - gastosSemAnterior) / gastosSemAnterior) * 100;
     }
 
-    let tasaAhorroActual = ingresosMes > 0 ? ((ingresosMes - gastosMes) / ingresosMes) * 100 : 0;
+    let tasaAhorroActual = ingresosSem > 0 ? ((ingresosSem - gastosSem) / ingresosSem) * 100 : 0;
     if (tasaAhorroActual < 0) tasaAhorroActual = 0;
 
-    let tasaAhorroPrev = ingresosMesAnterior > 0 ? ((ingresosMesAnterior - gastosMesAnterior) / ingresosMesAnterior) * 100 : 0;
+    let tasaAhorroPrev = ingresosSemAnterior > 0 ? ((ingresosSemAnterior - gastosSemAnterior) / ingresosSemAnterior) * 100 : 0;
     if (tasaAhorroPrev < 0) tasaAhorroPrev = 0;
 
     let tasaTrend = tasaAhorroActual - tasaAhorroPrev;
@@ -243,17 +358,10 @@ function renderProgresoMetas(metas) {
 }
 
 function renderCharts(transacciones, metas) {
-    // Generar labels de los últimos 6 meses
-    const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
-    const now = new Date();
-    const last6Months = [];
-    const last6Prefixes = [];
-    
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        last6Months.push(meses[d.getMonth()]);
-        last6Prefixes.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    }
+    // Usar los meses del semestre actual
+    const sem = getSemestreActual();
+    const last6Months = sem.labels;
+    const last6Prefixes = sem.prefixes;
 
     // Datos Flujo
     const ingFijos = [0, 0, 0, 0, 0, 0];
@@ -389,31 +497,73 @@ function renderHeatmap(transacciones) {
     if (!container) return;
     container.innerHTML = '';
 
-    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const now = new Date();
-    const last6Prefixes = [];
-    const last6Names = [];
-    
-    // Obtener los últimos 6 meses cronológicamente
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        last6Names.push(meses[d.getMonth()]);
-        last6Prefixes.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    }
+    // Usar los meses del semestre actual
+    const sem = getSemestreActual();
+    const last6Prefixes = sem.prefixes;
+    const last6Names = sem.labelsLargos;
 
-    // Agrupar gastos por día
+    // Agrupar gastos por día Y por categoría
+    // gastosDiarios[fecha] = { categoria: monto, ... }
     const gastosDiarios = {};
-    let maxGasto = 0;
+    const categoriasUsadas = new Set();
 
     transacciones.forEach(t => {
         if (!t || !t.fecha || t.tipo !== 'gasto') return;
-        gastosDiarios[t.fecha] = (gastosDiarios[t.fecha] || 0) + parseFloat(t.monto);
-        if (gastosDiarios[t.fecha] > maxGasto) {
-            maxGasto = gastosDiarios[t.fecha];
-        }
+        const monto = parseFloat(t.monto) || 0;
+        const cat = t.categoria || 'Otros';
+        categoriasUsadas.add(cat);
+
+        if (!gastosDiarios[t.fecha]) gastosDiarios[t.fecha] = {};
+        gastosDiarios[t.fecha][cat] = (gastosDiarios[t.fecha][cat] || 0) + monto;
+    });
+
+    // Obtener la categoría con mayor gasto por día
+    const topCategoriaDia = {};
+    const totalDia = {};
+    let maxGasto = 0;
+
+    Object.entries(gastosDiarios).forEach(([fecha, cats]) => {
+        let topCat = null;
+        let topMonto = 0;
+        let total = 0;
+        Object.entries(cats).forEach(([cat, monto]) => {
+            total += monto;
+            if (monto > topMonto) {
+                topMonto = monto;
+                topCat = cat;
+            }
+        });
+        topCategoriaDia[fecha] = topCat;
+        totalDia[fecha] = total;
+        if (total > maxGasto) maxGasto = total;
     });
 
     if (maxGasto === 0) maxGasto = 1;
+
+    // Renderizar la leyenda dinámica de categorías
+    const legendContainer = document.getElementById('heatmap-legend-container');
+    if (legendContainer) {
+        legendContainer.innerHTML = '';
+        const catsArray = Array.from(categoriasUsadas);
+        if (catsArray.length === 0) {
+            legendContainer.innerHTML = '<span style="color: var(--text-secondary); font-size: 12px;">Sin gastos</span>';
+        } else {
+            catsArray.forEach(cat => {
+                const c = catColors[cat] || defaultCatColor;
+                legendContainer.innerHTML += `
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span class="heatmap-box" style="background-color: ${c.fill}; width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0;"></span>
+                        <span style="font-size: 12px; white-space: nowrap;">${cat}</span>
+                    </div>`;
+            });
+            // Agregar indicador de "sin gasto"
+            legendContainer.innerHTML += `
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="heatmap-box color-1" style="width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0;"></span>
+                    <span style="font-size: 12px; white-space: nowrap;">Sin gasto</span>
+                </div>`;
+        }
+    }
 
     last6Prefixes.forEach((monthPrefix, index) => {
         const monthDiv = document.createElement('div');
@@ -423,30 +573,56 @@ function renderHeatmap(transacciones) {
         const gridDiv = document.createElement('div');
         gridDiv.className = 'heatmap-grid';
         
-        // Obtener la cantidad real de días de este mes
         const year = parseInt(monthPrefix.split('-')[0]);
         const month = parseInt(monthPrefix.split('-')[1]);
         const daysInMonth = new Date(year, month, 0).getDate();
         
-        // Renderizar un cuadrito por cada día del mes
+        // Agregar encabezados de días de la semana
+        const diasSemana = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+        diasSemana.forEach(d => {
+            const header = document.createElement('div');
+            header.className = 'heatmap-day-header';
+            header.innerText = d;
+            gridDiv.appendChild(header);
+        });
+
+        // Offset para el primer día del mes
+        let primerDia = new Date(year, month - 1, 1).getDay();
+        primerDia = primerDia === 0 ? 6 : primerDia - 1;
+
+        for (let i = 0; i < primerDia; i++) {
+            const emptyBox = document.createElement('div');
+            emptyBox.className = 'heatmap-box heatmap-empty';
+            gridDiv.appendChild(emptyBox);
+        }
+        
         for (let i = 1; i <= daysInMonth; i++) {
             const dayStr = String(i).padStart(2, '0');
             const fecha = `${monthPrefix}-${dayStr}`;
-            const gasto = gastosDiarios[fecha] || 0;
-            
-            let colorClass = 'color-1';
-            if (gasto > 0) {
-                const pct = gasto / maxGasto;
-                if (pct <= 0.1) colorClass = 'color-2';
-                else if (pct <= 0.3) colorClass = 'color-3';
-                else if (pct <= 0.6) colorClass = 'color-4';
-                else colorClass = 'color-5';
+            const total = totalDia[fecha] || 0;
+            const topCat = topCategoriaDia[fecha] || null;
+
+            const box = document.createElement('div');
+            box.className = 'heatmap-box';
+
+            if (total > 0 && topCat) {
+                const c = catColors[topCat] || defaultCatColor;
+                // Opacity basada en la intensidad del gasto relativa al máximo
+                const intensity = Math.max(0.35, total / maxGasto);
+                box.style.backgroundColor = c.fill;
+                box.style.opacity = intensity;
+                const fmt = '$' + new Intl.NumberFormat('en-US').format(total);
+                box.title = `${fecha}: ${fmt} (${topCat})`;
+            } else {
+                box.classList.add('color-1');
+                box.title = `${fecha}: Sin gastos`;
             }
-            
-            gridDiv.innerHTML += `<div class="heatmap-box ${colorClass}" title="${fecha}: $${gasto}"></div>`;
+
+            gridDiv.appendChild(box);
         }
         
         monthDiv.appendChild(gridDiv);
         container.appendChild(monthDiv);
     });
 }
+

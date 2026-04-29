@@ -38,6 +38,8 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
   <link rel="stylesheet" href="./css/global.css?v=<?php echo time(); ?>" />
   <link rel="stylesheet" href="./css/reportes.css?v=<?php echo time(); ?>" />
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="./js/reportes.js?v=<?php echo time(); ?>"></script>
 </head>
@@ -88,8 +90,17 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
       </div>
       <div class="view-buttons">
         <button class="btn-secondary">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button class="btn-secondary" id="btn-semestre-actual">
           <span class="material-symbols-outlined">calendar_today</span>
-          Semestre Actual
+          <span id="label-semestre">
+            <?php
+              $mesActual = (int) date('n');
+              $anioActual = date('Y');
+              echo ($mesActual <= 6) ? "1er Semestre $anioActual" : "2do Semestre $anioActual";
+            ?>
+          </span>
         </button>
         <button class="btn-primary" id="btn-exportar">
           <span class="material-symbols-outlined">download</span> Exportar
@@ -181,18 +192,10 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
             <div class="heatmap-header">
               <div>
                 <h3>Mapa de Calor de Gastos</h3>
-                <p>Intensidad de gasto diario por mes</p>
+                <p>Categoría principal de gasto por día</p>
               </div>
-              <div class="heatmap-legend">
-                <span>Menos gasto</span>
-                <div class="legend-boxes">
-                  <span class="heatmap-box color-1"></span>
-                  <span class="heatmap-box color-2"></span>
-                  <span class="heatmap-box color-3"></span>
-                  <span class="heatmap-box color-4"></span>
-                  <span class="heatmap-box color-5"></span>
-                </div>
-                <span>Más gasto</span>
+              <div class="heatmap-legend" id="heatmap-legend-container">
+                <!-- Se genera dinámicamente por JS -->
               </div>
             </div>
             <div id="heatmap-container" class="heatmap-months">

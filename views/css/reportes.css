@@ -246,11 +246,12 @@
 .heatmap-legend {
     display: flex;
     align-items: center;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 12px;
     font-size: 11px;
     color: var(--text-secondary);
     background: white;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 20px;
     border: 1px solid #e2e8f0;
 }
@@ -277,8 +278,19 @@
 }
 .heatmap-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     gap: 4px;
+}
+.heatmap-day-header {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    width: 12px;
+    line-height: 12px;
+}
+.heatmap-empty {
+    background-color: transparent !important;
 }
 .heatmap-box {
     width: 12px;
