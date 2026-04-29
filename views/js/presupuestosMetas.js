@@ -467,7 +467,7 @@ function renderPresupuestos(presupuestos) {
         
         const card = document.createElement('article');
         card.className = `card budget-card ${estadoClass} cursor-pointer`;
-        card.setAttribute('onclick', `abrirModalGastoPresupuesto('${p.nombre.replace(/'/g, "\\'")}', ${Math.max(0, p.monto_limite - p.monto_consumido)}, event)`);
+        card.setAttribute('onclick', `abrirModalGastoPresupuesto('${p.nombre.replace(/'/g, "\\'")}', event)`);
         card.innerHTML = `
             <div class="budget-header">
               <div class="budget-icon">
@@ -657,13 +657,15 @@ window.abrirModalAbonoMeta = async function(id_meta, nombre_meta, event) {
     document.getElementById('modalAbonoMeta').classList.add('active');
 };
 
-window.abrirModalGastoPresupuesto = function(categoria, disponible, event) {
+window.abrirModalGastoPresupuesto = async function(categoria, event) {
     if (event && event.target.closest('.kebab-menu')) return;
     document.getElementById('categoria_gasto').value = categoria;
     document.getElementById('nombre-categoria-presupuesto').innerText = categoria;
     document.getElementById('form-gasto-presupuesto').reset();
 
-    // Guardar disponible en un campo oculto para validar al submit
+    // Calcular el saldo disponible general (ingresos - gastos - ahorros)
+    const disponibleGeneral = await calcularDisponible();
+
     let hiddenDisp = document.getElementById('disponible_presupuesto');
     if (!hiddenDisp) {
         hiddenDisp = document.createElement('input');
@@ -671,17 +673,16 @@ window.abrirModalGastoPresupuesto = function(categoria, disponible, event) {
         hiddenDisp.id = 'disponible_presupuesto';
         document.getElementById('form-gasto-presupuesto').appendChild(hiddenDisp);
     }
-    hiddenDisp.value = disponible || 0;
+    hiddenDisp.value = disponibleGeneral;
 
-    // Mostrar cuánto queda disponible en el modal
-    const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
     let infoEl = document.getElementById('info-disponible-presupuesto');
     if (infoEl) {
-        if (disponible <= 0) {
-            infoEl.innerText = 'Presupuesto agotado — no puedes registrar más gastos en esta categoría.';
+        if (disponibleGeneral <= 0) {
+            infoEl.innerText = `Balance insuficiente: ${formatter.format(disponibleGeneral)}. No puedes registrar gastos.`;
             infoEl.style.color = '#ef4444';
         } else {
-            infoEl.innerText = `Disponible en este presupuesto: ${formatter.format(disponible)}`;
+            infoEl.innerText = `Saldo disponible: ${formatter.format(disponibleGeneral)}`;
             infoEl.style.color = '#059669';
         }
     }
@@ -865,23 +866,23 @@ document.addEventListener("DOMContentLoaded", () => {
             const descripcion = document.getElementById('descripcion_gasto').value;
             const disponible = parseFloat(document.getElementById('disponible_presupuesto')?.value || 0);
 
-            // Validar que el monto no exceda el disponible
+            // Validar solo contra el saldo disponible general (puede exceder el límite del presupuesto)
             if (!montoGasto || montoGasto <= 0) {
                 Swal.fire('Monto inválido', 'Ingresa un monto mayor a cero.', 'warning');
                 btnSubmit.disabled = false;
                 return;
             }
             if (disponible <= 0) {
-                Swal.fire('Presupuesto agotado', 'No tienes saldo disponible en este presupuesto.', 'warning');
+                Swal.fire('Saldo insuficiente', 'Tu balance general está en negativo. No puedes registrar más gastos.', 'warning');
                 btnSubmit.disabled = false;
                 return;
             }
             if (montoGasto > disponible) {
-                const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                const fmt = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Monto excede el disponible',
-                    html: `Solo tienes <strong>${fmt.format(disponible)}</strong> disponible en este presupuesto. No puedes registrar <strong>${fmt.format(montoGasto)}</strong>.`,
+                    title: 'Saldo insuficiente',
+                    html: `Solo tienes <strong>${fmt.format(disponible)}</strong> disponibles. No puedes gastar <strong>${fmt.format(montoGasto)}</strong>.`,
                     confirmButtonColor: '#059669'
                 });
                 btnSubmit.disabled = false;
