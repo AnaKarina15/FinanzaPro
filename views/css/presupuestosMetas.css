@@ -1,0 +1,611 @@
+/* ARCHIVO: vistas/css/presupuestosMetas.css */
+
+/* GENERAL LAYOUT METAS Y PRESUPUESTOS */
+.metas-section, .presupuestos-section {
+    margin-top: 32px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.section-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.link-ver-todas {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+/* GOAL CARD */
+.goal-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+}
+
+.goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.goal-percentage {
+    font-size: 32px;
+    font-weight: 800;
+    margin-top: 4px;
+}
+
+.goal-body {
+    margin-top: 16px;
+    margin-bottom: 24px;
+}
+
+.goal-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.goal-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background-color: #f1f5f9;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.goal-amounts {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* BUDGET CARD */
+.budget-card {
+    min-height: 200px;
+    justify-content: space-between;
+    border: none;
+}
+
+.budget-card.critical {
+    background-color: #fee2e2; /* Rojo pastel */
+}
+
+.budget-card.alert {
+    background-color: #eff6ff; /* Azul pastel */
+}
+
+.budget-card.stable {
+    background-color: var(--bg-cards);
+}
+
+.budget-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.budget-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.budget-card.critical .budget-icon { background-color: #ffffff; color: #ef4444; }
+.budget-card.alert .budget-icon { background-color: #ffffff; color: #3b82f6; }
+.budget-card.stable .budget-icon { background-color: #d1fae5; color: #059669; }
+
+.budget-info {
+    flex-grow: 1;
+}
+
+.budget-name {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.budget-status-text {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.budget-card.critical .budget-status-text { color: #991b1b; }
+.budget-card.alert .budget-status-text { color: #1e40af; }
+.budget-card.stable .budget-status-text { color: var(--text-secondary); }
+
+.budget-badge-container {
+    margin-right: 8px;
+}
+
+.budget-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.budget-card.critical .budget-badge { background-color: #ef4444; color: white; }
+.budget-card.alert .budget-badge { background-color: #bfdbfe; color: #1e3a8a; }
+.budget-card.stable .budget-badge { background-color: #6ee7b7; color: #064e3b; }
+
+.budget-amounts {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 32px;
+}
+
+.amount-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.amount-group.right {
+    text-align: right;
+}
+
+.amount-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.budget-card.critical .amount-label { color: #991b1b; }
+.budget-card.alert .amount-label { color: #1e40af; }
+.budget-card.stable .amount-label { color: var(--text-secondary); }
+
+.amount-value {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.budget-card.critical .amount-value { color: #7f1d1d; }
+.budget-card.alert .amount-value { color: #1e3a8a; }
+.budget-card.stable .amount-value { color: var(--text-primary); }
+
+.amount-limit {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.budget-card.critical .amount-limit { color: #991b1b; }
+.budget-card.alert .amount-limit { color: #1e40af; }
+.budget-card.stable .amount-limit { color: var(--text-secondary); }
+
+/* NUEVA META / NUEVO PRESUPUESTO CARD */
+.new-card {
+    background-color: transparent;
+    border: 2px dashed #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    min-height: 200px;
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+
+.new-card:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-color: #94a3b8;
+    color: var(--text-primary);
+}
+
+.new-card .icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-card p {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* KEBAB MENU */
+.kebab-menu {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+}
+
+.kebab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.kebab-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+.kebab-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    display: none;
+    flex-direction: column;
+    min-width: 140px;
+    z-index: 50;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.kebab-dropdown.show {
+    display: flex;
+}
+
+.kebab-dropdown button {
+    background: none;
+    border: none;
+    padding: 12px 16px;
+    text-align: left;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 0;
+    color: var(--text-primary);
+    transition: background-color 0.2s;
+    justify-content: flex-start;
+}
+
+.kebab-dropdown button:hover {
+    background-color: #f1f5f9;
+}
+
+.kebab-dropdown .dropdown-danger {
+    color: #ef4444;
+}
+
+.kebab-dropdown .dropdown-danger:hover {
+    background-color: #fef2f2;
+}
+
+/* TOGGLE BUTTON (Mensual / Anual) */
+.toggle-switch {
+    display: flex;
+    background-color: var(--bg-cards);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 2px;
+}
+
+.toggle-btn {
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: none;
+    transition: all 0.2s;
+}
+
+.toggle-btn.active {
+    background-color: var(--bg);
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* HEADER SEARCH */
+.app-header-search .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #f1f5f9;
+    padding: 10px 16px;
+    border-radius: 9999px;
+    width: 320px;
+    gap: 8px;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.app-header-search .search-bar:focus-within {
+    border-color: var(--primary);
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.search-bar input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+    width: 100%;
+    color: var(--text-primary);
+}
+
+.search-bar input::placeholder {
+    color: #94a3b8;
+}
+
+/* MODALES PRESUPUESTOS Y METAS */
+.modal-sm {
+    max-width: 400px;
+    padding: 32px;
+}
+
+.modal-header-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.modal-icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.icon-green-bg {
+    background-color: #a7f3d0; /* Verde menta claro */
+    color: #064e3b;
+}
+
+.modal-icon-circle .material-symbols-outlined {
+    font-size: 28px;
+}
+
+.modal-title-centered {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.modal-subtitle-centered {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.btn-close-abs {
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.btn-close-abs:hover {
+    background: rgba(0,0,0,0.05);
+    color: var(--text-primary);
+}
+
+.modal-form-group {
+    margin-bottom: 16px;
+}
+
+.input-blue {
+    width: 100%;
+    background-color: #e0e7ff; /* Azul muy claro */
+    border: none;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+    transition: box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.input-blue:focus {
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+}
+
+.input-container-blue {
+    display: flex;
+    align-items: center;
+    background-color: #e0e7ff;
+    border-radius: 12px;
+    padding: 0 16px;
+    transition: box-shadow 0.2s;
+}
+
+.input-container-blue:focus-within {
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+}
+
+.input-container-blue .prefix {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 8px;
+}
+
+.input-container-blue .prefix-icon {
+    color: #059669;
+    margin-right: 8px;
+}
+
+.input-transparent {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 14px 0;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.input-row {
+    display: flex;
+    gap: 16px;
+}
+
+.input-row .modal-form-group {
+    flex: 1;
+}
+
+.icon-selector-row {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.icon-selector-row .icon-option {
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background-color: #e0e7ff;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    transition: all 0.2s;
+    margin-bottom: 0 !important; /* Override .modal-form-group label */
+}
+
+.icon-selector-row .icon-option .material-symbols-outlined {
+    font-size: 24px !important;
+    margin: 0;
+    text-transform: none; /* Override uppercase */
+}
+
+/* Ocultar la flecha del datalist para que solo sugiera al escribir */
+input[list]::-webkit-calendar-picker-indicator {
+    display: none !important;
+}
+
+.icon-selector-row .icon-option.active {
+    background-color: #059669;
+    color: white;
+}
+
+.notification-toggle-box {
+    display: flex;
+    align-items: center;
+    background-color: #f8fafc;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+    gap: 12px;
+}
+
+.icon-box-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-texts {
+    flex: 1;
+}
+
+.toggle-texts strong {
+    font-size: 13px;
+    color: var(--text-primary);
+    display: block;
+}
+
+.toggle-texts p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.mt-4 {
+    margin-top: 24px;
+}
+
+.btn-text-cancel {
+    background: transparent;
+    border: none;
+    color: #059669;
+    font-weight: 600;
+    font-size: 14px;
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 8px;
+}
+
+.btn-text-cancel:hover {
+    background: rgba(5, 150, 105, 0.05);
+}
