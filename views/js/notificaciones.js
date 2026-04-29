@@ -68,6 +68,67 @@ export async function enviarBienvenidaSiNecesario(uid, nombre) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// TRIGGER: META DE AHORRO — al 50% y al 100%
+// ═══════════════════════════════════════════════════════════
+export async function verificarProgresoMeta(uid, meta) {
+    if (!uid || !meta) return;
+    try {
+        const actual  = parseFloat(meta.monto_actual)  || 0;
+        const objetivo = parseFloat(meta.monto_objetivo) || 0;
+        if (objetivo <= 0) return;
+
+        const porcentaje = (actual / objetivo) * 100;
+        const nombre = meta.nombre || 'tu meta';
+
+        // Evitar duplicados: revisar títulos existentes
+        const snapCheck = await getDocs(query(collection(db, "notificaciones"), where("usuario_id", "==", uid)));
+        const titulos = snapCheck.docs.map(d => d.data().titulo);
+
+        if (porcentaje >= 100 && !titulos.some(t => t.includes('¡Lograste tu meta') && t.includes(nombre))) {
+            await crearNotificacion(uid, {
+                titulo: `🏆 ¡Lograste tu meta: ${nombre}!`,
+                mensaje: `Has alcanzado el 100% de tu meta de ahorro. ¡Felicitaciones, es un gran logro!`,
+                tipo: 'meta'
+            });
+        } else if (porcentaje >= 50 && porcentaje < 100 && !titulos.some(t => t.includes('Vas a la mitad') && t.includes(nombre))) {
+            await crearNotificacion(uid, {
+                titulo: `🎯 Vas a la mitad: ${nombre}`,
+                mensaje: `Ya llevas el ${Math.round(porcentaje)}% de "${nombre}". ¡Sigue así, vas muy bien!`,
+                tipo: 'meta'
+            });
+        }
+    } catch (e) {
+        console.error("Error verificando progreso de meta:", e);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TRIGGER: GASTO INUSUAL — si supera 2× el promedio de la categoría
+// ═══════════════════════════════════════════════════════════
+export async function verificarGastoInusual(uid, { monto, categoria }) {
+    if (!uid || !monto || !categoria) return;
+    try {
+        const snap = await getDocs(query(collection(db, "transacciones"), where("usuario_id", "==", uid)));
+        const gastosCat = snap.docs.map(d => d.data()).filter(t => t.tipo === 'gasto' && t.categoria === categoria);
+
+        if (gastosCat.length < 3) return; // sin historial suficiente
+
+        const promedio = gastosCat.reduce((a, t) => a + (parseFloat(t.monto) || 0), 0) / gastosCat.length;
+        const montoNum = parseFloat(monto);
+
+        if (montoNum >= promedio * 2) {
+            await crearNotificacion(uid, {
+                titulo: `⚠️ Gasto inusual en ${categoria}`,
+                mensaje: `Registraste $${montoNum.toLocaleString('es-CO')} en ${categoria}, que es ${(montoNum / promedio).toFixed(1)}× tu promedio habitual ($${Math.round(promedio).toLocaleString('es-CO')}). ¿Todo bien?`,
+                tipo: 'alerta'
+            });
+        }
+    } catch (e) {
+        console.error("Error verificando gasto inusual:", e);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
 // ESCUCHAR NOTIFICACIONES EN TIEMPO REAL
 // ═══════════════════════════════════════════════════════════
 function _escucharNotificaciones() {

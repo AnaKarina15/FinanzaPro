@@ -1,7 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { initNotificaciones, crearNotificacion } from "./notificaciones.js";
+import { initNotificaciones, crearNotificacion, verificarGastoInusual } from "./notificaciones.js";
 
 let currentUid = null;
 let domListo = false;
@@ -452,8 +452,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('modalNuevoMovimiento').classList.remove('active');
                 formMovimiento.reset();
                 window.cargarDatosFirestore();
-                // Verificar alertas de presupuesto tras guardar
-                if (tipo === 'gasto') _verificarAlertasPresupuesto(currentUid, categoria);
+                // Verificar alertas de presupuesto y gasto inusual tras guardar
+                if (tipo === 'gasto') {
+                    _verificarAlertasPresupuesto(currentUid, categoria);
+                    verificarGastoInusual(currentUid, { monto, categoria });
+                }
             } catch (error) {
                 console.error("Error guardando:", error);
                 Swal.fire("Error", "Ocurrió un problema", "error");
