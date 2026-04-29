@@ -606,11 +606,50 @@ window.editarPresupuesto = function(id) {
 };
 
 // --- LOGICA DE NUEVOS MODALES ---
-window.abrirModalAbonoMeta = function(id_meta, nombre_meta, event) {
+
+// Calcula el saldo disponible del usuario (ingresos - gastos - ahorro en metas)
+async function calcularDisponible() {
+    if (!currentUid) return 0;
+    try {
+        const qTrans = query(collection(db, "transacciones"), where("usuario_id", "==", currentUid));
+        const snapshotTrans = await getDocs(qTrans);
+        let ingresos = 0, gastos = 0;
+        snapshotTrans.docs.forEach(d => {
+            const t = d.data();
+            if (t.tipo === 'ingreso') ingresos += parseFloat(t.monto) || 0;
+            if (t.tipo === 'gasto') gastos += parseFloat(t.monto) || 0;
+        });
+
+        const qMetas = query(collection(db, "metas"), where("id_usuario", "==", currentUid));
+        const snapshotMetas = await getDocs(qMetas);
+        let ahorroEnMetas = 0;
+        snapshotMetas.docs.forEach(d => {
+            ahorroEnMetas += parseFloat(d.data().monto_actual) || 0;
+        });
+
+        return (ingresos - gastos) - ahorroEnMetas;
+    } catch (e) {
+        console.error('Error calculando disponible:', e);
+        return 0;
+    }
+}
+
+window.abrirModalAbonoMeta = async function(id_meta, nombre_meta, event) {
     if (event && event.target.closest('.kebab-menu')) return;
     document.getElementById('id_meta_abono').value = id_meta;
     document.getElementById('nombre-meta-abono').innerText = nombre_meta;
     document.getElementById('form-abono-meta').reset();
+
+    // Mostrar saldo disponible en el modal
+    const disponible = await calcularDisponible();
+    const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    const infoDisponible = document.getElementById('info-disponible-abono');
+    if (infoDisponible) {
+        infoDisponible.innerText = `Saldo disponible: ${formatter.format(Math.max(0, disponible))}`;
+        infoDisponible.dataset.disponible = disponible;
+        infoDisponible.style.color = disponible <= 0 ? '#ef4444' : '#059669';
+    }
+
     document.getElementById('modalAbonoMeta').classList.add('active');
 };
 
@@ -691,16 +730,64 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const btnSubmit = document.getElementById('btn-submit-abono-meta');
             btnSubmit.disabled = true;
+            btnSubmit.innerText = 'Verificando...';
 
             const id_meta = document.getElementById('id_meta_abono').value;
             const inputAbono = document.getElementById('monto_abono').value;
             const montoAbono = parseFloat(inputAbono.replace(/,/g, ''));
 
+            if (!montoAbono || montoAbono <= 0) {
+                Swal.fire('Error', 'Ingresa un monto válido mayor a 0.', 'error');
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = 'Transferir';
+                return;
+            }
+
             try {
-                // Actualizar monto actual de la meta
+                // Calcular el saldo disponible en tiempo real
+                const disponible = await calcularDisponible();
+                const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+                if (montoAbono > disponible) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Saldo insuficiente',
+                        html: `No puedes transferir <strong>${formatter.format(montoAbono)}</strong> porque tu saldo disponible es de <strong>${formatter.format(Math.max(0, disponible))}</strong>.`,
+                        confirmButtonColor: '#059669'
+                    });
+                    // Actualizar el indicador en el modal
+                    const infoDisponible = document.getElementById('info-disponible-abono');
+                    if (infoDisponible) {
+                        infoDisponible.innerText = `Saldo disponible: ${formatter.format(Math.max(0, disponible))}`;
+                        infoDisponible.style.color = '#ef4444';
+                    }
+                    return;
+                }
+
+                // Verificar que no exceda el objetivo de la meta
                 const metaData = window.metasGlobales.find(m => m.id_meta === id_meta);
                 if (metaData) {
-                    const nuevoMonto = (parseFloat(metaData.monto_actual) || 0) + montoAbono;
+                    const actual = parseFloat(metaData.monto_actual) || 0;
+                    const objetivo = parseFloat(metaData.monto_objetivo) || 0;
+                    const faltante = objetivo - actual;
+
+                    if (faltante <= 0) {
+                        Swal.fire('Meta completa', 'Esta meta ya alcanzó su objetivo.', 'info');
+                        return;
+                    }
+
+                    if (montoAbono > faltante) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Monto excede el objetivo',
+                            html: `Solo necesitas <strong>${formatter.format(faltante)}</strong> para completar esta meta.`,
+                            confirmButtonColor: '#059669'
+                        });
+                        return;
+                    }
+
+                    btnSubmit.innerText = 'Transfiriendo...';
+                    const nuevoMonto = actual + montoAbono;
                     await updateDoc(doc(db, "metas", id_meta), {
                         monto_actual: nuevoMonto
                     });
@@ -713,6 +800,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 Swal.fire('Error', 'No se pudo abonar a la meta', 'error');
             } finally {
                 btnSubmit.disabled = false;
+                btnSubmit.innerText = 'Transferir';
             }
         });
     }

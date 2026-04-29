@@ -296,7 +296,13 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const inputVisual = document.getElementById('monto_visual');
             if(inputVisual) inputVisual.value = '';
-            
+
+            // Poner fecha de hoy por defecto
+            const hoy = new Date();
+            const fechaHoy = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+            const inputFechaModal = document.getElementById('fecha');
+            if (inputFechaModal) inputFechaModal.value = fechaHoy;
+
             actualizarContadorDescripcion();
             document.getElementById('modalNuevoMovimiento').classList.add('active');
         });

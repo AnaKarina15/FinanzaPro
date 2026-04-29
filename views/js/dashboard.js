@@ -336,6 +336,12 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if(inputVisual) inputVisual.value = '';
             
+            // Poner fecha de hoy por defecto
+            const hoy = new Date();
+            const fechaHoy = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+            const inputFechaModal = document.getElementById('fecha');
+            if (inputFechaModal) inputFechaModal.value = fechaHoy;
+
             // Limpiar estilos de error residuales
             document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
             document.querySelectorAll('.error-text').forEach(el => el.style.display = 'none');
@@ -417,9 +423,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 await addDoc(collection(db, "transacciones"), {
                     usuario_id: user.uid,
                     tipo: tipo,
-                    monto: monto,
-                    fecha: fecha,
-                    categoria: categoria,
+                    monto: montoVal,
+                    fecha: fechaVal,
+                    categoria: categoriaVal,
                     descripcion: descripcion,
                     fecha_creacion: new Date()
                 });
