@@ -1,5 +1,6 @@
 /* GENERAL LAYOUT METAS Y PRESUPUESTOS */
-.metas-section, .presupuestos-section {
+.metas-section,
+.presupuestos-section {
     margin-top: 32px;
 }
 
@@ -99,11 +100,13 @@
 }
 
 .budget-card.critical {
-    background-color: #fee2e2; /* Rojo pastel */
+    background-color: #fee2e2;
+    /* Rojo pastel */
 }
 
 .budget-card.alert {
-    background-color: #eff6ff; /* Azul pastel */
+    background-color: #eff6ff;
+    /* Azul pastel */
 }
 
 .budget-card.stable {
@@ -126,9 +129,20 @@
     justify-content: center;
 }
 
-.budget-card.critical .budget-icon { background-color: #ffffff; color: #ef4444; }
-.budget-card.alert .budget-icon { background-color: #ffffff; color: #3b82f6; }
-.budget-card.stable .budget-icon { background-color: #d1fae5; color: #059669; }
+.budget-card.critical .budget-icon {
+    background-color: #ffffff;
+    color: #ef4444;
+}
+
+.budget-card.alert .budget-icon {
+    background-color: #ffffff;
+    color: #3b82f6;
+}
+
+.budget-card.stable .budget-icon {
+    background-color: #d1fae5;
+    color: #059669;
+}
 
 .budget-info {
     flex-grow: 1;
@@ -146,9 +160,17 @@
     font-weight: 700;
 }
 
-.budget-card.critical .budget-status-text { color: #991b1b; }
-.budget-card.alert .budget-status-text { color: #1e40af; }
-.budget-card.stable .budget-status-text { color: var(--text-secondary); }
+.budget-card.critical .budget-status-text {
+    color: #991b1b;
+}
+
+.budget-card.alert .budget-status-text {
+    color: #1e40af;
+}
+
+.budget-card.stable .budget-status-text {
+    color: var(--text-secondary);
+}
 
 .budget-badge-container {
     margin-right: 8px;
@@ -162,9 +184,20 @@
     letter-spacing: 0.5px;
 }
 
-.budget-card.critical .budget-badge { background-color: #ef4444; color: white; }
-.budget-card.alert .budget-badge { background-color: #bfdbfe; color: #1e3a8a; }
-.budget-card.stable .budget-badge { background-color: #6ee7b7; color: #064e3b; }
+.budget-card.critical .budget-badge {
+    background-color: #ef4444;
+    color: white;
+}
+
+.budget-card.alert .budget-badge {
+    background-color: #bfdbfe;
+    color: #1e3a8a;
+}
+
+.budget-card.stable .budget-badge {
+    background-color: #6ee7b7;
+    color: #064e3b;
+}
 
 .budget-amounts {
     display: flex;
@@ -189,27 +222,51 @@
     margin-bottom: 4px;
 }
 
-.budget-card.critical .amount-label { color: #991b1b; }
-.budget-card.alert .amount-label { color: #1e40af; }
-.budget-card.stable .amount-label { color: var(--text-secondary); }
+.budget-card.critical .amount-label {
+    color: #991b1b;
+}
+
+.budget-card.alert .amount-label {
+    color: #1e40af;
+}
+
+.budget-card.stable .amount-label {
+    color: var(--text-secondary);
+}
 
 .amount-value {
-    font-size: 28px;
+    font-size: 25px;
     font-weight: 800;
 }
 
-.budget-card.critical .amount-value { color: #7f1d1d; }
-.budget-card.alert .amount-value { color: #1e3a8a; }
-.budget-card.stable .amount-value { color: var(--text-primary); }
+.budget-card.critical .amount-value {
+    color: #7f1d1d;
+}
+
+.budget-card.alert .amount-value {
+    color: #1e3a8a;
+}
+
+.budget-card.stable .amount-value {
+    color: var(--text-primary);
+}
 
 .amount-limit {
     font-size: 18px;
     font-weight: 700;
 }
 
-.budget-card.critical .amount-limit { color: #991b1b; }
-.budget-card.alert .amount-limit { color: #1e40af; }
-.budget-card.stable .amount-limit { color: var(--text-secondary); }
+.budget-card.critical .amount-limit {
+    color: #991b1b;
+}
+
+.budget-card.alert .amount-limit {
+    color: #1e40af;
+}
+
+.budget-card.stable .amount-limit {
+    color: var(--text-secondary);
+}
 
 /* NUEVA META / NUEVO PRESUPUESTO CARD */
 .new-card {
@@ -344,7 +401,7 @@
 .toggle-btn.active {
     background-color: var(--bg);
     color: var(--text-primary);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 
@@ -375,7 +432,8 @@
 }
 
 .icon-green-bg {
-    background-color: #a7f3d0; /* Verde menta claro */
+    background-color: #a7f3d0;
+    /* Verde menta claro */
     color: #064e3b;
 }
 
@@ -413,7 +471,7 @@
 }
 
 .btn-close-abs:hover {
-    background: rgba(0,0,0,0.05);
+    background: rgba(0, 0, 0, 0.05);
     color: var(--text-primary);
 }
 
@@ -423,7 +481,8 @@
 
 .input-blue {
     width: 100%;
-    background-color: #e0e7ff; /* Azul muy claro */
+    background-color: #e0e7ff;
+    /* Azul muy claro */
     border: none;
     padding: 14px 16px;
     border-radius: 12px;
@@ -501,13 +560,15 @@
     justify-content: center;
     color: #475569;
     transition: all 0.2s;
-    margin-bottom: 0 !important; /* Override .modal-form-group label */
+    margin-bottom: 0 !important;
+    /* Override .modal-form-group label */
 }
 
 .icon-selector-row .icon-option .material-symbols-outlined {
     font-size: 24px !important;
     margin: 0;
-    text-transform: none; /* Override uppercase */
+    text-transform: none;
+    /* Override uppercase */
 }
 
 /* Ocultar la flecha del datalist para que solo sugiera al escribir */
