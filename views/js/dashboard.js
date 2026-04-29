@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (tablaCuerpo) {
                 tablaCuerpo.innerHTML = '';
                 if (movimientos.length === 0) {
-                    tablaCuerpo.innerHTML = `<tr><td colspan="4" class="empty-table-msg">Aún no tienes movimientos en Firebase.</td></tr>`;
+                    tablaCuerpo.innerHTML = `<tr><td colspan="4" class="empty-table-msg">Aún no tienes ningún movimiento.</td></tr>`;
                 } else {
                     const ultimos2 = movimientos.slice(0, 2);
                     ultimos2.forEach(mov => {
