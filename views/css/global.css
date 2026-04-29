@@ -166,6 +166,25 @@ body {
     gap: 8px;
 }
 
+.btn-logout-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ef4444;
+    background: #fee2e2;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-logout-text:hover {
+    background: #fecaca;
+}
+
 /* MAIN CONTENT*/
 
 .main-content {

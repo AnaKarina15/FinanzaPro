@@ -81,8 +81,8 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         <h2 class="view-title">Presupuestos y Metas</h2>
         <p class="view-description">Administra tus límites de gasto y ahorros.</p>
       </div>
-      <div class="view-buttons" style="display: flex; gap: 12px; align-items: center;">
-        <button class="btn-secondary" style="height: 44px; display: flex; align-items: center; justify-content: center;">
+      <div class="view-buttons">
+        <button class="btn-secondary">
           <span class="material-symbols-outlined">notifications</span>
         </button>
       </div>

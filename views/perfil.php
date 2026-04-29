@@ -70,9 +70,9 @@ $usuario = []; // Placeholder temporal para no romper HTML
                 <h2 class="view-title">Mi Perfil</h2>
                 <p class="view-description">Gestiona tu información personal y preferencias de cuenta.</p>
             </div>
-            <div class="view-buttons" style="display: flex; gap: 12px; align-items: center;">
-                <button class="btn-secondary" style="height: 44px; display: flex; align-items: center; justify-content: center;"><span class="material-symbols-outlined">notifications</span></button>
-                <button class="btn-logout-text" style="display: flex; align-items: center; gap: 6px; color: #ef4444; background: #fee2e2; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; height: 44px;">
+            <div class="view-buttons">
+                <button class="btn-secondary"><span class="material-symbols-outlined">notifications</span></button>
+                <button class="btn-logout-text" id="btn-cerrar-sesion">
                     <span class="material-symbols-outlined">logout</span> Cerrar Sesión
                 </button>
             </div>

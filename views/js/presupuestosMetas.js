@@ -1,12 +1,24 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 let currentUid = null;
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUid = user.uid;
+        // Actualizar sidebar desde Firestore
+        try {
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+            if (userDoc.exists()) {
+                const d = userDoc.data();
+                const nombre = `${d.nombre || ''} ${d.apellido || ''}`.trim();
+                const sideName = document.querySelector(".nav-profile .username");
+                if (sideName) sideName.textContent = nombre;
+                const avatarImg = document.querySelector(".nav-profile img");
+                if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
+            }
+        } catch(e) { console.error(e); }
         cargarDatos();
     } else {
         window.location.href = '../index.php';

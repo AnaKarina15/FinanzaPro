@@ -295,9 +295,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .group-btns { display: flex; gap: 12px; }
 
-.btn-secondary {
-    width: 100%;
-}
+
 
 .btn-primary {
     background: #059669;
