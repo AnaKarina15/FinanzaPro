@@ -39,7 +39,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                 <?php else: ?>
                 <a href="dashboard.php" class="nav-link"><span class="material-symbols-outlined">grid_view</span> Dashboard</a>
                 <a href="ingresosGastos.php" class="nav-link"><span class="material-symbols-outlined">currency_exchange</span> Ingresos y Gastos</a>
-                <a href="#" class="nav-link"><span class="material-symbols-outlined">savings</span> Presupuesto y Metas</a>
+                <a href="presupuestosMetas.php" class="nav-link"><span class="material-symbols-outlined">savings</span> Presupuesto y Metas</a>
                 <a href="#" class="nav-link"><span class="material-symbols-outlined">analytics</span> Reportes y Análisis</a>
                 <?php endif; ?>
                 <a href="perfil.php" class="nav-link nav-profile active">

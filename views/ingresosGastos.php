@@ -47,7 +47,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         <a href="ingresosGastos.php" class="nav-link active" disabled>
           <span class="material-symbols-outlined">currency_exchange</span> Ingresos y Gastos
         </a>
-        <a href="#" class="nav-link">
+        <a href="presupuestosMetas.php" class="nav-link">
           <span class="material-symbols-outlined">savings</span> Presupuesto y Metas
         </a>
         <a href="#" class="nav-link">
