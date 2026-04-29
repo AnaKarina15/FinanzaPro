@@ -53,9 +53,9 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
           <span class="material-symbols-outlined">currency_exchange</span> Ingresos y Gastos
         </a>
         <a href="presupuestosMetas.php" class="nav-link">
-          <span class="material-symbols-outlined">savings</span> Presupuesto y Metas
+          <span class="material-symbols-outlined">savings</span> Presupuestos y Metas
         </a>
-        <a href="#" class="nav-link">
+        <a href="reportes.php" class="nav-link">
           <span class="material-symbols-outlined">analytics</span> Reportes y Análisis
         </a>
         <a href="perfil.php" class="nav-link nav-profile">
