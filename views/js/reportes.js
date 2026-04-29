@@ -232,9 +232,8 @@ function renderMetrics(transacciones, metas) {
 
     const balanceTotal = ingresosTotales - gastosTotales;
     document.getElementById('balance-total').innerText = '$' + new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 }).format(balanceTotal);
-    
-    // Mostrar gastos del mes actual; si es 0, mostrar total acumulado como fallback
-    const gastoAMostrar = gastosMes > 0 ? gastosMes : gastosSem;
+    // Mostrar gastos del semestre actual; si es 0, mostrar total acumulado como fallback
+    const gastoAMostrar = gastosSem > 0 ? gastosSem : gastosTotales;
     document.getElementById('gasto-mensual').innerText = '$' + new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 }).format(gastoAMostrar);
 
     // Calcular tendencias vs semestre anterior
