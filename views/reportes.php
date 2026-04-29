@@ -106,9 +106,6 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
             </div>
           </div>
         </div>
-        <button class="btn-secondary">
-          <span class="material-symbols-outlined">notifications</span>
-        </button>
         <button class="btn-secondary" id="btn-semestre-actual">
           <span class="material-symbols-outlined">calendar_today</span>
           <span id="label-semestre">

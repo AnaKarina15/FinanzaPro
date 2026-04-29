@@ -205,6 +205,10 @@ function renderMetrics(transacciones, metas) {
     let ingresosTotales = 0, gastosTotales = 0;
     let ingresosSem = 0, gastosSem = 0;
     let ingresosSemAnterior = 0, gastosSemAnterior = 0;
+    let gastosMes = 0;
+
+    const now = new Date();
+    const currentMesPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
     transacciones.forEach(t => {
         if (!t || !t.fecha) return;
@@ -212,6 +216,7 @@ function renderMetrics(transacciones, metas) {
         const mesPrefix = String(t.fecha).substring(0, 7);
         const enSemActual = semActual.prefixes.includes(mesPrefix);
         const enSemAnterior = semAnterior.prefixes.includes(mesPrefix);
+        const esMesActual = mesPrefix === currentMesPrefix;
 
         if (t.tipo === 'ingreso') {
             ingresosTotales += monto;
@@ -221,6 +226,7 @@ function renderMetrics(transacciones, metas) {
             gastosTotales += monto;
             if (enSemActual) gastosSem += monto;
             if (enSemAnterior) gastosSemAnterior += monto;
+            if (esMesActual) gastosMes += monto;
         }
     });
 
