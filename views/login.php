@@ -15,10 +15,10 @@ $correo_a_verificar = $_GET['correo'] ?? '';
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="<?= BASE_URL ?>/views/css/global.css" />
-  <link rel="stylesheet" href="<?= BASE_URL ?>/views/css/login.css" />
+  <link rel="stylesheet" href="./css/global.css?v=<?= time() ?>" />
+  <link rel="stylesheet" href="./css/login.css?v=<?= time() ?>" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script type="module" src="<?= BASE_URL ?>/views/js/login.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="./js/login.js?v=<?= time() ?>"></script>
 </head>
 
 <body>
