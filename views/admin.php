@@ -55,7 +55,7 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
             <div class="page-header">
                 <div class="page-header-text">
                     <h1>Gestión de Usuarios</h1>
-                    <p>Manage platform access and user roles.</p>
+                    <p>Gestiona el acceso a la plataforma y los roles de los usuarios.</p>
                 </div>
                 <div class="page-header-actions">
                     <button class="btn-icon-circle" id="btn-notifications">
@@ -74,7 +74,7 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                         <span class="material-symbols-outlined">groups</span>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-label">TOTAL USERS</span>
+                        <span class="stat-label">USUARIOS TOTALES</span>
                         <span class="stat-value" id="stat-total">0</span>
                     </div>
                 </article>
@@ -83,7 +83,7 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                         <span class="material-symbols-outlined">person</span>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-label">ACTIVE NOW</span>
+                        <span class="stat-label">ACTIVOS AHORA</span>
                         <span class="stat-value" id="stat-activos">0</span>
                     </div>
                 </article>
@@ -92,7 +92,7 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                         <span class="material-symbols-outlined">trending_up</span>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-label">NEW THIS WEEK</span>
+                        <span class="stat-label">NUEVOS ESTA SEMANA</span>
                         <div class="stat-value-row">
                             <span class="stat-value" id="stat-nuevos">+0</span>
                         </div>
@@ -103,7 +103,7 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
             <!-- User Directory Table -->
             <section class="card users-card">
                 <div class="users-card-header">
-                    <h2>User Directory</h2>
+                    <h2>Directorio de Usuarios</h2>
                     <div class="users-card-actions">
                         <div class="search-box">
                             <span class="material-symbols-outlined search-icon">search</span>
@@ -115,11 +115,10 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                     <table id="users-table">
                         <thead>
                             <tr>
-                                <th>USER</th>
-                                <th>EMAIL</th>
-                                <th>ROLE</th>
-                                <th>STATUS</th>
-                                <th>ACTIONS</th>
+                                <th>USUARIO</th>
+                                <th>CORREO</th>
+                                <th>ROL</th>
+                                <th>ACCIONES</th>
                             </tr>
                         </thead>
                         <tbody id="users-tbody">
@@ -128,7 +127,7 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                     </table>
                 </div>
                 <div class="table-footer">
-                    <span class="table-info" id="table-info">Showing 0 of 0 users</span>
+                    <span class="table-info" id="table-info">Mostrando 0 de 0 usuarios</span>
                     <div class="pagination">
                         <button class="btn-page" id="btn-prev" disabled>
                             <span class="material-symbols-outlined">chevron_left</span>
