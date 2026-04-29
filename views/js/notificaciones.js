@@ -74,17 +74,21 @@ function _escucharNotificaciones() {
     if (!currentUid) return;
     if (unsubscribeNotif) unsubscribeNotif();
 
-    // Solo filtramos por usuario_id para evitar el requisito de índice compuesto
     const q = query(
         collection(db, "notificaciones"),
         where("usuario_id", "==", currentUid)
     );
 
     unsubscribeNotif = onSnapshot(q, (snapshot) => {
-        // Filtramos leida=false en el cliente
         const noLeidas = snapshot.docs.filter(d => d.data().leida === false);
         _actualizarBadge(noLeidas.length);
-        _renderPanel(noLeidas);
+        // Mostrar TODAS las notificaciones en el panel, ordenadas por fecha desc
+        const todas = [...snapshot.docs].sort((a, b) => {
+            const fa = a.data().fecha_creacion?.toMillis?.() || 0;
+            const fb = b.data().fecha_creacion?.toMillis?.() || 0;
+            return fb - fa;
+        });
+        _renderPanel(todas);
     }, (error) => {
         console.error("Error escuchando notificaciones:", error);
     });
@@ -125,12 +129,14 @@ function _renderPanel(docs) {
 
     docs.forEach(docSnap => {
         const data = docSnap.data();
+        const leida = data.leida === true;
         const fecha = data.fecha_creacion?.toDate
             ? data.fecha_creacion.toDate().toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })
             : 'Ahora';
 
         const item = document.createElement('div');
-        item.className = 'notif-item';
+        // Notificaciones leídas se muestran más tenues
+        item.className = `notif-item${leida ? ' notif-leida' : ''}`;
         item.innerHTML = `
             <div class="notif-icon-wrap" style="background:${colores[data.tipo] || colores.info}22; color:${colores[data.tipo] || colores.info}">
                 <span class="material-symbols-outlined">${iconos[data.tipo] || 'info'}</span>
@@ -140,9 +146,15 @@ function _renderPanel(docs) {
                 <p class="notif-mensaje">${data.mensaje}</p>
                 <span class="notif-fecha">${fecha}</span>
             </div>
-            <button class="notif-mark-read" data-id="${docSnap.id}" title="Marcar como leída">
-                <span class="material-symbols-outlined">check_circle</span>
-            </button>
+            <div class="notif-actions">
+                ${!leida ? `
+                <button class="notif-mark-read" data-id="${docSnap.id}" title="Marcar como leída">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </button>` : '<span class="notif-leida-icon" title="Leída"><span class="material-symbols-outlined">done_all</span></span>'}
+                <button class="notif-delete" data-id="${docSnap.id}" title="Eliminar">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
         `;
         lista.appendChild(item);
     });
@@ -151,8 +163,16 @@ function _renderPanel(docs) {
     lista.querySelectorAll('.notif-mark-read').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            const id = btn.dataset.id;
-            await updateDoc(doc(db, "notificaciones", id), { leida: true });
+            await updateDoc(doc(db, "notificaciones", btn.dataset.id), { leida: true });
+        });
+    });
+
+    // Eliminar notificación
+    lista.querySelectorAll('.notif-delete').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const { deleteDoc: delDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
+            await delDoc(doc(db, "notificaciones", btn.dataset.id));
         });
     });
 }

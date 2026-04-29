@@ -813,4 +813,44 @@ select:focus-visible {
     color: #94a3b8;
     font-size: 13px;
 }
-#notif-empty span { font-size: 36px; color: #cbd5e1; }
+#notif-empty span { font-size: 36px; color: #cbd5e1; }
+
+/* Notificación ya leída — aspecto tenue */
+.notif-item.notif-leida {
+    opacity: 0.55;
+    background: #f8fafc;
+}
+.notif-item.notif-leida .notif-titulo { font-weight: 500; }
+
+/* Contenedor de acciones (check + delete) */
+.notif-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Ícono "leída" (done_all) */
+.notif-leida-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    color: #059669;
+}
+.notif-leida-icon span { font-size: 18px; }
+
+/* Botón eliminar */
+.notif-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #cbd5e1;
+    padding: 4px;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+}
+.notif-delete:hover { color: #ef4444; background: #fef2f2; }
+.notif-delete span { font-size: 16px; }
