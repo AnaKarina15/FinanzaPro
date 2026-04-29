@@ -362,6 +362,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
             <input type="text" name="descripcion_gasto" id="descripcion_gasto" placeholder="Detalle del gasto (opcional)" autocomplete="off">
           </div>
         </div>
+        <p id="info-disponible-presupuesto" style="font-size: 13px; font-weight: 600; margin-bottom: 8px;"></p>
         <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-gasto-presupuesto">Registrar Gasto</button>
       </form>
     </div>

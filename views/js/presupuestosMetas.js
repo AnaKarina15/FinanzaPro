@@ -467,7 +467,7 @@ function renderPresupuestos(presupuestos) {
         
         const card = document.createElement('article');
         card.className = `card budget-card ${estadoClass} cursor-pointer`;
-        card.setAttribute('onclick', `abrirModalGastoPresupuesto('${p.nombre.replace(/'/g, "\\'")}', event)`);
+        card.setAttribute('onclick', `abrirModalGastoPresupuesto('${p.nombre.replace(/'/g, "\\'")}', ${Math.max(0, p.monto_limite - p.monto_consumido)}, event)`);
         card.innerHTML = `
             <div class="budget-header">
               <div class="budget-icon">
@@ -657,11 +657,35 @@ window.abrirModalAbonoMeta = async function(id_meta, nombre_meta, event) {
     document.getElementById('modalAbonoMeta').classList.add('active');
 };
 
-window.abrirModalGastoPresupuesto = function(categoria, event) {
+window.abrirModalGastoPresupuesto = function(categoria, disponible, event) {
     if (event && event.target.closest('.kebab-menu')) return;
     document.getElementById('categoria_gasto').value = categoria;
     document.getElementById('nombre-categoria-presupuesto').innerText = categoria;
     document.getElementById('form-gasto-presupuesto').reset();
+
+    // Guardar disponible en un campo oculto para validar al submit
+    let hiddenDisp = document.getElementById('disponible_presupuesto');
+    if (!hiddenDisp) {
+        hiddenDisp = document.createElement('input');
+        hiddenDisp.type = 'hidden';
+        hiddenDisp.id = 'disponible_presupuesto';
+        document.getElementById('form-gasto-presupuesto').appendChild(hiddenDisp);
+    }
+    hiddenDisp.value = disponible || 0;
+
+    // Mostrar cuánto queda disponible en el modal
+    const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    let infoEl = document.getElementById('info-disponible-presupuesto');
+    if (infoEl) {
+        if (disponible <= 0) {
+            infoEl.innerText = 'Presupuesto agotado — no puedes registrar más gastos en esta categoría.';
+            infoEl.style.color = '#ef4444';
+        } else {
+            infoEl.innerText = `Disponible en este presupuesto: ${formatter.format(disponible)}`;
+            infoEl.style.color = '#059669';
+        }
+    }
+
     document.getElementById('modalGastoPresupuesto').classList.add('active');
 };
 
@@ -839,6 +863,30 @@ document.addEventListener("DOMContentLoaded", () => {
             const inputGasto = document.getElementById('monto_gasto').value;
             const montoGasto = parseFloat(inputGasto.replace(/,/g, ''));
             const descripcion = document.getElementById('descripcion_gasto').value;
+            const disponible = parseFloat(document.getElementById('disponible_presupuesto')?.value || 0);
+
+            // Validar que el monto no exceda el disponible
+            if (!montoGasto || montoGasto <= 0) {
+                Swal.fire('Monto inválido', 'Ingresa un monto mayor a cero.', 'warning');
+                btnSubmit.disabled = false;
+                return;
+            }
+            if (disponible <= 0) {
+                Swal.fire('Presupuesto agotado', 'No tienes saldo disponible en este presupuesto.', 'warning');
+                btnSubmit.disabled = false;
+                return;
+            }
+            if (montoGasto > disponible) {
+                const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Monto excede el disponible',
+                    html: `Solo tienes <strong>${fmt.format(disponible)}</strong> disponible en este presupuesto. No puedes registrar <strong>${fmt.format(montoGasto)}</strong>.`,
+                    confirmButtonColor: '#059669'
+                });
+                btnSubmit.disabled = false;
+                return;
+            }
 
             // Obtener fecha local actual (formato YYYY-MM-DD)
             const hoy = new Date();
