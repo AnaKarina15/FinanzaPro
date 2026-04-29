@@ -26,6 +26,7 @@ class UsuarioController {
             $_SESSION['apellido_usuario'] = $usuario['apellido'];
             $_SESSION['rol'] = $usuario['nombre_rol'] ?? 'Usuario';
             $_SESSION['id_rol'] = $usuario['id_rol'] ?? 2;
+            $_SESSION['foto_perfil'] = $usuario['foto_perfil'] ?? null;
 
             // Si es admin, redirigir al panel de administración
             if ($usuario['id_rol'] == 1) {
@@ -108,6 +109,7 @@ class UsuarioController {
                         $_SESSION['apellido_usuario'] = $usuario['apellido'];
                         $_SESSION['rol'] = $usuario['nombre_rol'];
                         $_SESSION['id_rol'] = $usuario['id_rol'] ?? 2;
+                        $_SESSION['foto_perfil'] = $usuario['foto_perfil'] ?? null;
 
                         echo json_encode(["status" => "success", "mensaje" => "Cuenta activada. Entrando al sistema..."]);
                         exit();
@@ -222,6 +224,77 @@ class UsuarioController {
             header("Location: views/perfil.php?status=success&msg=" . urlencode("Correo actualizado correctamente."));
         } else {
             header("Location: views/perfil.php?status=error&msg=" . urlencode("No se pudo actualizar el correo. Intenta de nuevo."));
+        }
+        exit();
+    }
+
+    public function cambiarFotoPerfil() {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['id_usuario'])) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Sesión no iniciada.']);
+            exit();
+        }
+
+        if (!isset($_FILES['foto_perfil']) || $_FILES['foto_perfil']['error'] !== UPLOAD_ERR_OK) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se recibió ningún archivo o hubo un error en la subida.']);
+            exit();
+        }
+
+        $archivo = $_FILES['foto_perfil'];
+        $tiposPermitidos = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+
+        // Validar tipo MIME real con finfo (más seguro que solo confiar en el cliente)
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $tipoReal = $finfo->file($archivo['tmp_name']);
+
+        if (!in_array($tipoReal, $tiposPermitidos)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Formato de imagen no válido. Solo PNG, JPG y WEBP.']);
+            exit();
+        }
+
+        // Validar tamaño (máximo 2MB)
+        if ($archivo['size'] > 2 * 1024 * 1024) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'La imagen no puede superar los 2MB.']);
+            exit();
+        }
+
+        // Generar nombre único y determinar extensión
+        $extensiones = ['image/png' => 'png', 'image/jpeg' => 'jpg', 'image/jpg' => 'jpg', 'image/webp' => 'webp'];
+        $extension = $extensiones[$tipoReal];
+        $nombreArchivo = 'user_' . $_SESSION['id_usuario'] . '_' . time() . '.' . $extension;
+        $carpetaDestino = __DIR__ . '/../uploads/fotos_perfil/';
+        $rutaCompleta = $carpetaDestino . $nombreArchivo;
+        $rutaRelativa = 'uploads/fotos_perfil/' . $nombreArchivo;
+
+        // Crear carpeta si no existe
+        if (!is_dir($carpetaDestino)) {
+            mkdir($carpetaDestino, 0755, true);
+        }
+
+        // Eliminar foto anterior si existe y no es la de ui-avatars
+        $fotoAnterior = $_SESSION['foto_perfil'] ?? null;
+        if ($fotoAnterior && file_exists(__DIR__ . '/../' . $fotoAnterior)) {
+            @unlink(__DIR__ . '/../' . $fotoAnterior);
+        }
+
+        // Mover el archivo subido
+        if (!move_uploaded_file($archivo['tmp_name'], $rutaCompleta)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se pudo guardar la imagen en el servidor.']);
+            exit();
+        }
+
+        // Guardar la ruta en la base de datos
+        if ($this->modeloUsuario->actualizarFotoPerfil($_SESSION['id_usuario'], $rutaRelativa)) {
+            $_SESSION['foto_perfil'] = $rutaRelativa;
+            echo json_encode([
+                'status' => 'success',
+                'mensaje' => 'Foto de perfil actualizada correctamente.',
+                'ruta_foto' => $rutaRelativa
+            ]);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se pudo actualizar la foto en la base de datos.']);
         }
         exit();
     }
