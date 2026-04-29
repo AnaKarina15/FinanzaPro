@@ -396,6 +396,39 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
     </div>
   </div>
 
+  <!-- MODAL RETIRAR DINERO DE META -->
+  <div class="modal-overlay" id="modalRetirarMeta">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Retirar dinero de meta</h3>
+        <button class="btn-close" id="btn-cerrar-retirar-meta">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">
+        Retiras de: <strong id="nombre-meta-retiro"></strong>
+      </p>
+
+      <form action="#" method="POST" id="form-retirar-meta">
+        <input type="hidden" id="id_meta_retiro" value="">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: #fff7ed; border: 1px solid #fed7aa; margin-bottom: 16px;">
+          <span class="material-symbols-outlined" style="color: #ea580c; font-size: 20px;">savings</span>
+          <span id="info-ahorrado-meta" style="font-size: 14px; font-weight: 600; color: #ea580c;">$0</span>
+        </div>
+        <div class="input-group modal-form-group">
+          <label>Monto a retirar</label>
+          <div class="input-container">
+            <input type="text" name="monto_retiro" id="monto_retiro" placeholder="$ 0" required autocomplete="off">
+          </div>
+        </div>
+        <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-retiro-meta"
+          style="background: linear-gradient(135deg, #ea580c, #f97316);">
+          Retirar dinero
+        </button>
+      </form>
+    </div>
+  </div>
+
   <script type="module" src="./js/presupuestosMetas.js?v=<?php echo time(); ?>"></script>
 </body>
 

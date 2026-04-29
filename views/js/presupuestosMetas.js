@@ -384,6 +384,7 @@ function renderMetas(metas) {
                 <button class="kebab-btn" onclick="toggleKebab(this, event)"><span class="material-symbols-outlined">more_vert</span></button>
                 <div class="kebab-dropdown">
                   <button class="dropdown-item" onclick="editarMeta('${meta.id_meta}')">Editar</button>
+                  <button class="dropdown-item" onclick="abrirModalRetirarMeta('${meta.id_meta}', '${meta.nombre.replace(/'/g, "\\'")}', ${act}, event)">Retirar dinero</button>
                   <button class="dropdown-item dropdown-danger" onclick="eliminarMeta('${meta.id_meta}')">Eliminar</button>
                 </div>
               </div>
@@ -911,6 +912,104 @@ document.addEventListener("DOMContentLoaded", () => {
                 Swal.fire('Error', 'No se pudo registrar el gasto', 'error');
             } finally {
                 btnSubmit.disabled = false;
+            }
+        });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════
+// RETIRAR DINERO DE UNA META
+// ═══════════════════════════════════════════════════════════
+window.abrirModalRetirarMeta = function(idMeta, nombre, montoActual, event) {
+    if (event && event.target.closest('.kebab-menu')) return;
+
+    const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+
+    document.getElementById('id_meta_retiro').value = idMeta;
+    document.getElementById('nombre-meta-retiro').innerText = nombre;
+    document.getElementById('form-retirar-meta').reset();
+
+    const infoEl = document.getElementById('info-ahorrado-meta');
+    if (infoEl) {
+        if (montoActual <= 0) {
+            infoEl.innerText = 'Esta meta no tiene dinero ahorrado.';
+        } else {
+            infoEl.innerText = `Ahorrado: ${formatter.format(montoActual)} — puedes retirar hasta ese monto.`;
+        }
+    }
+
+    document.getElementById('modalRetirarMeta').classList.add('active');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Cerrar modal retiro
+    document.getElementById('btn-cerrar-retirar-meta')?.addEventListener('click', () => {
+        document.getElementById('modalRetirarMeta').classList.remove('active');
+    });
+
+    // Submit retiro
+    const formRetiro = document.getElementById('form-retirar-meta');
+    if (formRetiro) {
+        formRetiro.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUid) return;
+
+            const btnSubmit = document.getElementById('btn-submit-retiro-meta');
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = 'Retirando...';
+
+            const idMeta = document.getElementById('id_meta_retiro').value;
+            const inputRetiro = document.getElementById('monto_retiro').value;
+            const montoRetiro = parseFloat(inputRetiro.replace(/,/g, ''));
+            const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+
+            if (!montoRetiro || montoRetiro <= 0) {
+                Swal.fire('Monto inválido', 'Ingresa un monto mayor a cero.', 'warning');
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = 'Retirar dinero';
+                return;
+            }
+
+            try {
+                const metaRef = doc(db, "metas", idMeta);
+                const metaDoc = await getDoc(metaRef);
+                if (!metaDoc.exists()) throw new Error('Meta no encontrada');
+
+                const metaData = metaDoc.data();
+                const actual = parseFloat(metaData.monto_actual) || 0;
+
+                if (montoRetiro > actual) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Monto excede el ahorro',
+                        html: `Solo tienes <strong>${formatter.format(actual)}</strong> ahorrados en esta meta.`,
+                        confirmButtonColor: '#059669'
+                    });
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = 'Retirar dinero';
+                    return;
+                }
+
+                const nuevoMonto = actual - montoRetiro;
+                const mesActual = new Date().toISOString().substring(0, 7);
+                let historial = metaData.historial || {};
+                historial[mesActual] = nuevoMonto;
+
+                await updateDoc(metaRef, {
+                    monto_actual: nuevoMonto,
+                    historial
+                });
+
+                Swal.fire('¡Listo!', `Retiraste ${formatter.format(montoRetiro)} de tu meta.`, 'success');
+                document.getElementById('modalRetirarMeta').classList.remove('active');
+                cargarDatos();
+
+            } catch (error) {
+                console.error('Error retirando de meta:', error);
+                Swal.fire('Error', 'No se pudo procesar el retiro.', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = 'Retirar dinero';
             }
         });
     }
