@@ -454,17 +454,35 @@ function renderCharts(transacciones, metas) {
         const fills = ['rgba(5, 150, 105, 0.1)', 'transparent'];
         const dash = [[], [5, 5]];
 
-        const growthFactors = [0.1, 0.25, 0.45, 0.65, 0.85, 1.0]; // Simulated past growth
-        
+        const currentMesPrefix = new Date().toISOString().substring(0, 7);
+
         topMetas.forEach((m, i) => {
             const actual = parseFloat(m.monto_actual) || 0;
-            const dataPts = growthFactors.map(factor => parseFloat((actual * factor).toFixed(2)));
+            const historial = m.historial || {};
+            const dataPts = [];
+
+            last6Prefixes.forEach(prefix => {
+                // Si la meta tiene un registro en este mes (se creó o se le abonó)
+                if (historial[prefix] !== undefined) {
+                    dataPts.push(parseFloat(historial[prefix]));
+                } else {
+                    // Soporte de compatibilidad para metas antiguas que no tienen historial
+                    if (Object.keys(historial).length === 0 && prefix === currentMesPrefix) {
+                        dataPts.push(actual);
+                    } else {
+                        // En meses donde no hubo cambio en la meta, no dibujamos punto
+                        dataPts.push(null);
+                    }
+                }
+            });
+
             datasetsAhorro.push({
                 label: m.nombre || `Meta ${i+1}`,
                 data: dataPts,
                 borderColor: colors[i],
                 backgroundColor: fills[i],
-                fill: i === 0,
+                fill: false, // No coloreamos debajo si hay saltos, para mantenerlo limpio
+                spanGaps: true, // Esto conecta la línea a través de meses sin cambios
                 borderDash: dash[i],
                 tension: 0.4
             });

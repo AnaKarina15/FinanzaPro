@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     Swal.fire('¡Éxito!', 'Meta actualizada', 'success');
                 } else {
+                    const mesActual = new Date().toISOString().substring(0, 7);
                     await addDoc(collection(db, "metas"), {
                         id_usuario: currentUid,
                         nombre,
@@ -164,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         fecha_limite,
                         id_icono,
                         codigo_material,
-                        monto_actual: 0
+                        monto_actual: 0,
+                        historial: { [mesActual]: 0 }
                     });
                     Swal.fire('¡Éxito!', 'Meta guardada', 'success');
                 }
@@ -790,8 +792,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     btnSubmit.innerText = 'Transfiriendo...';
                     const nuevoMonto = actual + montoAbono;
-                    await updateDoc(doc(db, "metas", id_meta), {
-                        monto_actual: nuevoMonto
+                    const mesActual = new Date().toISOString().substring(0, 7);
+                    
+                    const metaRef = doc(db, "metas", id_meta);
+                    const metaDoc = await getDoc(metaRef);
+                    let historial = {};
+                    if (metaDoc.exists() && metaDoc.data().historial) {
+                        historial = metaDoc.data().historial;
+                    }
+                    historial[mesActual] = nuevoMonto;
+
+                    await updateDoc(metaRef, {
+                        monto_actual: nuevoMonto,
+                        historial: historial
                     });
                     Swal.fire('¡Éxito!', 'Dinero transferido a la meta', 'success');
                     document.getElementById('modalAbonoMeta').classList.remove('active');
