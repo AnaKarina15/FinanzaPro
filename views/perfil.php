@@ -71,7 +71,23 @@ $usuario = []; // Placeholder temporal para no romper HTML
                 <p class="view-description">Gestiona tu información personal y preferencias de cuenta.</p>
             </div>
             <div class="view-buttons">
-                <button class="btn-secondary"><span class="material-symbols-outlined">notifications</span></button>
+                <div class="notif-wrapper">
+                    <button class="btn-secondary" id="btn-notificaciones">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span id="notif-badge" style="display:none;"></span>
+                    </button>
+                    <div id="notif-panel">
+                        <div class="notif-panel-header">
+                            <h4>Notificaciones</h4>
+                            <button id="btn-marcar-todas">Marcar todas como leídas</button>
+                        </div>
+                        <div id="notif-lista"></div>
+                        <div id="notif-empty">
+                            <span class="material-symbols-outlined">notifications_none</span>
+                            Sin notificaciones nuevas
+                        </div>
+                    </div>
+                </div>
                 <button class="btn-logout-text" id="btn-cerrar-sesion">
                     <span class="material-symbols-outlined">logout</span> Cerrar Sesión
                 </button>

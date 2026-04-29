@@ -1,6 +1,7 @@
 import { db, auth } from './firebase-config.js';
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { initNotificaciones } from "./notificaciones.js";
 
 let currentUid = null;
 
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUid = user.uid;
+            initNotificaciones(user.uid);
             
             // Actualizar perfil en el sidebar
             try {

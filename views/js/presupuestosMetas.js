@@ -1,6 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { initNotificaciones } from "./notificaciones.js";
 
 let currentUid = null;
 
@@ -19,6 +20,7 @@ onAuthStateChanged(auth, async (user) => {
                 if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
             }
         } catch(e) { console.error(e); }
+        initNotificaciones(user.uid);
         cargarDatos();
     } else {
         window.location.href = '../index.php';
