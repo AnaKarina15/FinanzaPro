@@ -1,11 +1,3 @@
-<?php
-session_start();
-// Solo accesible si está logueado Y es admin (id_rol = 1)
-if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
-    header("Location: ../index.php");
-    exit();
-}
-?>
 <!doctype html>
 <html lang="es">
 
@@ -36,15 +28,9 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                 </a>
                 <a href="perfil.php" class="nav-link nav-profile">
                     <div class="avatar">
-                        <?php
-                        $nav_foto = $_SESSION['foto_perfil'] ?? null;
-                        $nav_avatar_src = $nav_foto
-                            ? '../' . htmlspecialchars($nav_foto)
-                            : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff';
-                        ?>
-                        <img src="<?= $nav_avatar_src ?>" alt="Foto de perfil" />
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=059669&color=fff" alt="Foto de perfil" id="admin-nav-avatar" />
                     </div>
-                    <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
+                    <span class="username" id="admin-nav-username">Cargando...</span>
                 </a>
             </nav>
         </aside>
@@ -181,18 +167,16 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                             </div>
                         </div>
                         <div class="modal-form-group">
-                            <label for="input-id-rol">ROL (ID)</label>
+                            <label for="input-rol">ROL</label>
                             <div class="input-container">
-                                <input type="number" id="input-id-rol" min="1" value="2" required />
+                                <select id="input-rol" class="input-soft" required style="width: 100%; border: none; outline: none; background: transparent; padding: 12px; font-family: inherit;">
+                                    <option value="usuario">Usuario</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-form-group" id="grupo-contrasena">
-                        <label for="input-contrasena">CONTRASEÑA</label>
-                        <div class="input-container">
-                            <input type="password" id="input-contrasena" placeholder="Mínimo 8 caracteres" />
-                        </div>
-                    </div>
+
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" id="btn-cancelar-modal">Cancelar</button>

@@ -1,3 +1,7 @@
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { doc, getDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
 document.addEventListener("DOMContentLoaded", () => {
     const formatearMoneda = (valor) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
 
@@ -16,16 +20,146 @@ document.addEventListener("DOMContentLoaded", () => {
         window.history.replaceState(null, null, window.location.pathname);
     }
 
-    // Intentamos traer los datos
-    fetch('../index.php?action=obtenerEstadisticas')
-        .then(response => response.json())
-        .then(data => {
-            console.log("Datos del Dashboard:", data);
+    // --- CONTROL DE SESIÓN CON FIREBASE ---
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            // Si no hay sesión activa en Firebase, lo devolvemos al login
+            window.location.href = "../index.php";
+            return;
+        }
 
-            if (data.error) {
-                console.error("Sesión no encontrada");
-                return;
+        console.log("Usuario autenticado en Firebase:", user.uid);
+
+        // 1. Obtener datos del perfil del usuario
+        try {
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const nombreCompleto = `${userData.nombre} ${userData.apellido}`.trim();
+                
+                // Actualizar nombre en la barra lateral
+                const sideName = document.querySelector(".nav-profile .username");
+                if (sideName) sideName.textContent = nombreCompleto;
+                
+                // Actualizar avatar
+                const avatarImg = document.querySelector(".nav-profile img");
+                if (avatarImg) {
+                    avatarImg.src = userData.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff`;
+                }
+                
+                // Actualizar texto de bienvenida
+                const welcomeText = document.querySelector(".view-description");
+                if (welcomeText) {
+                    welcomeText.textContent = `Bienvenid@ ${nombreCompleto}. Aquí tienes el resumen de hoy.`;
+                }
             }
+        } catch (error) {
+            console.error("Error al obtener perfil:", error);
+        }
+
+        // 2. Obtener estadísticas de Firestore (Próximamente)
+        cargarEstadisticasFirestore(user.uid);
+    });
+
+    const cargarEstadisticasFirestore = async (uid) => {
+        try {
+            const transRef = collection(db, "transacciones");
+            // Obtenemos las transacciones del usuario
+            const q = query(transRef, where("usuario_id", "==", uid));
+            const querySnapshot = await getDocs(q);
+            
+            let ing = 0;
+            let gas = 0;
+            const movimientos = [];
+
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                movimientos.push({ id: docSnap.id, ...data });
+                if (data.tipo === "ingreso") ing += data.monto;
+                if (data.tipo === "gasto") gas += data.monto;
+            });
+
+            // Ordenar por fecha descendente (más reciente primero)
+            movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            // Actualizar tarjetas superiores
+            if(document.getElementById('monto-disponible')) document.getElementById('monto-disponible').innerText = formatearMoneda(ing - gas);
+            if(document.getElementById('monto-ingresos')) document.getElementById('monto-ingresos').innerText = formatearMoneda(ing);
+            if(document.getElementById('monto-gastos')) document.getElementById('monto-gastos').innerText = formatearMoneda(gas);
+
+            // Actualizar tabla de últimos movimientos
+            const tablaCuerpo = document.querySelector('.movimientos-tabla-cuerpo');
+            if (tablaCuerpo) {
+                tablaCuerpo.innerHTML = '';
+                if (movimientos.length === 0) {
+                    tablaCuerpo.innerHTML = `<tr><td colspan="4" class="empty-table-msg">Aún no tienes movimientos en Firebase.</td></tr>`;
+                } else {
+                    const ultimos2 = movimientos.slice(0, 2);
+                    ultimos2.forEach(mov => {
+                        const esGasto = mov.tipo === 'gasto';
+                        const colorMonto = esGasto ? 'text-danger' : 'text-success';
+                        const signo = esGasto ? '-' : '+';
+                        const iconType = esGasto ? 'shopping_bag' : 'business_center';
+                        const iconBg = esGasto ? 'icon-blue' : 'icon-green';
+                        
+                        const dateObj = new Date(mov.fecha + 'T00:00:00');
+                        const fechaFormato = dateObj.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                        tablaCuerpo.innerHTML += `
+                            <tr>
+                                <td class="table-date">${fechaFormato}</td>
+                                <td class="table-desc">
+                                    <div class="table-concept">
+                                        <span class="material-symbols-outlined concept-icon ${iconBg}">${iconType}</span>
+                                        <strong>${mov.descripcion || 'Sin descripción'}</strong>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-neutral">${mov.categoria}</span></td>
+                                <td class="${colorMonto}">${signo}${formatearMoneda(mov.monto)}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+
+            // Actualizar gráfica
+            const canvas = document.querySelector(".incomes-outcomes-chart");
+            if (canvas) {
+                const chartExistente = Chart.getChart(canvas);
+                if (chartExistente) { chartExistente.destroy(); }
+
+                let dIngresos = new Array(12).fill(0);
+                let dGastos = new Array(12).fill(0);
+
+                movimientos.forEach(m => {
+                    const partesFecha = m.fecha.split("-"); // [YYYY, MM, DD]
+                    if (partesFecha.length >= 2) {
+                        const mes = parseInt(partesFecha[1]) - 1; // 0-11
+                        if (m.tipo === "ingreso") dIngresos[mes] += m.monto;
+                        if (m.tipo === "gasto") dGastos[mes] += m.monto;
+                    }
+                });
+
+                new Chart(canvas, {
+                    type: "bar",
+                    data: {
+                        labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                        datasets: [
+                            { label: "Ingresos", data: dIngresos, borderRadius: 32, backgroundColor: "#05966990" },
+                            { label: "Gastos", data: dGastos, borderRadius: 32, backgroundColor: "#2563eb90" }
+                        ]
+                    },
+                    options: { maintainAspectRatio: false }
+                });
+            }
+
+        } catch (error) {
+            console.error("Error al cargar estadísticas:", error);
+        }
+    };
+
+    // (Eliminamos el viejo fetch a PHP)
+    /*
 
             // --- ACTUALIZAR TARJETAS ---
             const ing = parseFloat(data.totales.ingresos) || 0;
@@ -106,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
         })
-        .catch(err => console.error("Error en Fetch:", err));
+    */
 
 
     // --- LÓGICA DEL INPUT DE MONTO (Formateo automático) ---
@@ -119,6 +253,36 @@ document.addEventListener("DOMContentLoaded", () => {
             if (valorPuro === '') { this.value = ''; inputOculto.value = ''; return; }
             this.value = `$ ${new Intl.NumberFormat('es-CO').format(valorPuro)}`;
             inputOculto.value = valorPuro;
+
+            // Quitar error en tiempo real
+            if (parseFloat(valorPuro) > 0) {
+                inputVisual.classList.remove('input-error');
+                const errorEl = document.getElementById('error-monto');
+                if (errorEl) errorEl.style.display = 'none';
+            }
+        });
+    }
+
+    // --- QUITAR ERRORES EN TIEMPO REAL PARA FECHA Y CATEGORÍA ---
+    const inputFecha = document.getElementById('fecha');
+    if (inputFecha) {
+        inputFecha.addEventListener('input', () => {
+            if (inputFecha.value) {
+                inputFecha.classList.remove('input-error');
+                const err = document.getElementById('error-fecha');
+                if (err) err.style.display = 'none';
+            }
+        });
+    }
+
+    const inputCategoria = document.getElementById('categoria');
+    if (inputCategoria) {
+        inputCategoria.addEventListener('input', () => {
+            if (inputCategoria.value.trim()) {
+                inputCategoria.classList.remove('input-error');
+                const err = document.getElementById('error-categoria');
+                if (err) err.style.display = 'none';
+            }
         });
     }
 
@@ -134,10 +298,15 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if(inputVisual) inputVisual.value = '';
             
+            // Limpiar estilos de error residuales
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+            document.querySelectorAll('.error-text').forEach(el => el.style.display = 'none');
+
             document.getElementById('modalNuevoMovimiento').classList.add('active');
         });
     }
 
+    // --- CERRAR MODAL ---
     // --- CERRAR MODAL ---
     const btnCerrarModal = document.getElementById('btn-cerrar-modal');
     if (btnCerrarModal) {
@@ -145,4 +314,101 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('modalNuevoMovimiento').classList.remove('active');
         });
     }
+
+    // --- GUARDAR MOVIMIENTO EN FIREBASE ---
+    const formMovimiento = document.getElementById('form-movimiento');
+    if (formMovimiento) {
+        formMovimiento.addEventListener('submit', async (e) => {
+            e.preventDefault(); // EVITAMOS QUE SE VAYA AL PHP
+            
+            // --- LÓGICA DE VALIDACIÓN ---
+            const setValidacion = (inputId, errorId, esValido) => {
+                const inputEl = document.getElementById(inputId);
+                const errorEl = document.getElementById(errorId);
+                if (esValido) {
+                    inputEl.classList.remove('input-error');
+                    if (errorEl) errorEl.style.display = 'none';
+                } else {
+                    inputEl.classList.add('input-error');
+                    if (errorEl) errorEl.style.display = 'block';
+                }
+            };
+
+            const montoVal = parseFloat(document.getElementById('monto').value);
+            const fechaVal = document.getElementById('fecha').value;
+            const categoriaVal = document.getElementById('categoria').value;
+            
+            let formValido = true;
+            
+            if (!montoVal || isNaN(montoVal) || montoVal <= 0) {
+                setValidacion('monto_visual', 'error-monto', false);
+                formValido = false;
+            } else {
+                setValidacion('monto_visual', 'error-monto', true);
+            }
+            
+            if (!fechaVal) {
+                setValidacion('fecha', 'error-fecha', false);
+                formValido = false;
+            } else {
+                setValidacion('fecha', 'error-fecha', true);
+            }
+            
+            if (!categoriaVal.trim()) {
+                setValidacion('categoria', 'error-categoria', false);
+                formValido = false;
+            } else {
+                setValidacion('categoria', 'error-categoria', true);
+            }
+            
+            if (!formValido) return; // Detenemos el guardado si hay errores
+            // ------------------------------
+
+            const btnSubmit = formMovimiento.querySelector('button[type="submit"]');
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Guardando...";
+
+            try {
+                const tipoInput = document.querySelector('input[name="tipo_movimiento"]:checked');
+                const tipo = tipoInput ? tipoInput.value : 'gasto';
+                const descripcion = document.getElementById('descripcion').value;
+                
+                const user = auth.currentUser;
+                if (!user) throw new Error("No hay usuario autenticado.");
+
+                await addDoc(collection(db, "transacciones"), {
+                    usuario_id: user.uid,
+                    tipo: tipo,
+                    monto: monto,
+                    fecha: fecha,
+                    categoria: categoria,
+                    descripcion: descripcion,
+                    fecha_creacion: new Date()
+                });
+
+                Swal.fire({
+                    title: "Éxito", 
+                    text: "Movimiento guardado", 
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                document.getElementById('modalNuevoMovimiento').classList.remove('active');
+                formMovimiento.reset();
+                if (inputVisual) inputVisual.value = '';
+
+                // Recargar estadísticas automáticamente
+                cargarEstadisticasFirestore(user.uid);
+
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                Swal.fire("Error", "No se pudo guardar el movimiento", "error");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Guardar Transacción";
+            }
+        });
+    }
+
 });

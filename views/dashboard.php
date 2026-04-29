@@ -4,11 +4,16 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-// Si la llave 'usuario' no existe, lo sacamos
-if (!isset($_SESSION['usuario'])) {
-  header("Location: ../index.php");
-  exit();
-}
+// TEMPORAL: Como estamos usando Firebase, PHP ya no controla la sesión.
+// if (!isset($_SESSION['usuario'])) {
+//   header("Location: ../index.php");
+//   exit();
+// }
+
+// Valores por defecto temporales para no romper el HTML
+$_SESSION['nombre_usuario'] = $_SESSION['nombre_usuario'] ?? 'Cargando...';
+$_SESSION['apellido_usuario'] = $_SESSION['apellido_usuario'] ?? '';
+$_SESSION['foto_perfil'] = $_SESSION['foto_perfil'] ?? null;
 
 // Si es admin (id_rol = 1), no debe tener acceso a las vistas de usuario normal
 if (($_SESSION['id_rol'] ?? 0) == 1) {
@@ -91,8 +96,8 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         <button class="btn-secondary">
           <span class="material-symbols-outlined">calendar_today</span>
           <?php
-          $meses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-          echo $meses[date('n')] . ' ' . date('Y');
+          $meses = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+          echo date('j') . ' ' . $meses[date('n')] . ', ' . date('Y');
           ?>
         </button>
         <button class="btn-primary" id="btn-abrir-modal">
@@ -212,22 +217,24 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         <div class="modal-form-group">
           <label for="monto_visual">Monto</label>
           <div class="input-container">
-            <input type="text" id="monto_visual" placeholder="$ 0" required autocomplete="off">
-            <input type="hidden" id="monto" name="monto" required>
+            <input type="text" id="monto_visual" placeholder="$ 0" autocomplete="off">
+            <input type="hidden" id="monto" name="monto">
           </div>
+          <span class="error-text" id="error-monto">Obligatorio</span>
         </div>
 
         <div class="input-row modal-form-group">
           <div class="input-group">
             <label for="fecha">Fecha</label>
             <div class="input-container">
-              <input type="date" id="fecha" name="fecha" required>
+              <input type="date" id="fecha" name="fecha">
             </div>
+            <span class="error-text" id="error-fecha">Obligatorio</span>
           </div>
           <div class="input-group">
             <label for="categoria">Categoría</label>
             <div class="input-container">
-              <input list="lista-categorias" id="categoria" name="categoria" placeholder="Escribe..." autocomplete="off" required>
+              <input list="lista-categorias" id="categoria" name="categoria" placeholder="Escribe..." autocomplete="off">
               <datalist id="lista-categorias">
                 <option value="Alimentación"></option>
                 <option value="Transporte"></option>
@@ -236,6 +243,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
                 <option value="Salario"></option>
               </datalist>
             </div>
+            <span class="error-text" id="error-categoria">Obligatorio</span>
           </div>
         </div>
 

@@ -4,11 +4,16 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-// Si la llave 'usuario' no existe, lo sacamos
-if (!isset($_SESSION['usuario'])) {
-  header("Location: ../index.php");
-  exit();
-}
+// TEMPORAL: Como estamos usando Firebase, PHP ya no controla la sesión.
+// if (!isset($_SESSION['usuario'])) {
+//   header("Location: ../index.php");
+//   exit();
+// }
+
+// Valores por defecto temporales para no romper el HTML
+$_SESSION['nombre_usuario'] = $_SESSION['nombre_usuario'] ?? 'Cargando...';
+$_SESSION['apellido_usuario'] = $_SESSION['apellido_usuario'] ?? '';
+$_SESSION['foto_perfil'] = $_SESSION['foto_perfil'] ?? null;
 
 // Si es admin (id_rol = 1), no debe tener acceso a las vistas de usuario normal
 if (($_SESSION['id_rol'] ?? 0) == 1) {
@@ -71,23 +76,19 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
       </nav>
     </aside>
 
-    <main class="main-content">
-      <header class="app-header app-header-search">
-        <div class="search-bar">
-          <span class="material-symbols-outlined">search</span>
-          <input type="text" placeholder="Buscar presupuesto...">
-        </div>
-        <div class="view-buttons">
-          <button class="btn-secondary">
-            <span class="material-symbols-outlined">notifications</span>
-          </button>
-        </div>
-      </header>
-
-      <div class="view-info" style="margin-top: 16px;">
-        <h2 class="view-title">Presupuesto y Metas</h2>
-        <p class="view-description">Bienvenido de nuevo a FinanzaPro</p>
+    <header class="app-header">
+      <div class="view-info">
+        <h2 class="view-title">Presupuestos y Metas</h2>
+        <p class="view-description">Administra tus límites de gasto y ahorros.</p>
       </div>
+      <div class="view-buttons" style="display: flex; gap: 12px; align-items: center;">
+        <button class="btn-secondary" style="height: 44px; display: flex; align-items: center; justify-content: center;">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+      </div>
+    </header>
+    
+    <main class="main-content">
 
       <section class="presupuestos-section">
         <div class="section-header">
@@ -196,6 +197,10 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
               <input type="radio" name="id_icono" value="13" style="display:none;">
               <span class="material-symbols-outlined">favorite</span>
             </label>
+            <label class="icon-option">
+              <input type="radio" name="id_icono" value="14" style="display:none;">
+              <span class="material-symbols-outlined">directions_bus</span>
+            </label>
           </div>
         </div>
 
@@ -217,23 +222,25 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
 
       <form action="../index.php?action=guardarPresupuesto" method="POST" id="form-presupuesto">
         <input type="hidden" name="id_presupuesto" id="id_presupuesto" value="">
-        <div class="input-group modal-form-group">
-          <label>Nombre de la Categoría</label>
-          <div class="input-container">
-            <input list="lista-categorias-presupuesto" name="nombre" placeholder="Ej. Salud, Educación..." required autocomplete="off">
-            <datalist id="lista-categorias-presupuesto">
-                <option value="Alimentación"></option>
-                <option value="Transporte"></option>
-                <option value="Ocio"></option>
-                <option value="Servicios Públicos"></option>
-            </datalist>
+        <div class="input-row">
+          <div class="input-group modal-form-group">
+            <label>Nombre de la Categoría</label>
+            <div class="input-container">
+              <input list="lista-categorias-presupuesto" name="nombre" placeholder="Ej. Salud, Educación..." required autocomplete="off">
+              <datalist id="lista-categorias-presupuesto">
+                  <option value="Alimentación"></option>
+                  <option value="Transporte"></option>
+                  <option value="Ocio"></option>
+                  <option value="Servicios Públicos"></option>
+              </datalist>
+            </div>
           </div>
-        </div>
 
-        <div class="input-group modal-form-group">
-          <label>Límite Mensual</label>
-          <div class="input-container">
-            <input type="text" name="monto_limite" placeholder="$ 0" required autocomplete="off">
+          <div class="input-group modal-form-group">
+            <label>Límite Mensual</label>
+            <div class="input-container">
+              <input type="text" name="monto_limite" placeholder="$ 0" required autocomplete="off">
+            </div>
           </div>
         </div>
 
@@ -253,16 +260,20 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
               <span class="material-symbols-outlined">local_hospital</span>
             </label>
             <label class="icon-option">
-              <input type="radio" name="id_icono" value="7" style="display:none;">
-              <span class="material-symbols-outlined">bolt</span>
-            </label>
-            <label class="icon-option">
               <input type="radio" name="id_icono" value="8" style="display:none;">
               <span class="material-symbols-outlined">sports_esports</span>
             </label>
             <label class="icon-option">
               <input type="radio" name="id_icono" value="9" style="display:none;">
               <span class="material-symbols-outlined">checkroom</span>
+            </label>
+            <label class="icon-option">
+              <input type="radio" name="id_icono" value="2" style="display:none;">
+              <span class="material-symbols-outlined">directions_car</span>
+            </label>
+            <label class="icon-option">
+              <input type="radio" name="id_icono" value="14" style="display:none;">
+              <span class="material-symbols-outlined">directions_bus</span>
             </label>
           </div>
         </div>
@@ -288,7 +299,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
     </div>
   </div>
 
-  <script src="./js/presupuestosMetas.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="./js/presupuestosMetas.js?v=<?php echo time(); ?>"></script>
 </body>
 
 </html>

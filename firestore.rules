@@ -1,0 +1,80 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────────
+    // FUNCIÓN HELPER: Verifica si el usuario es admin
+    // ─────────────────────────────────────────────
+    function isAdmin() {
+      return request.auth != null &&
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == 'admin';
+    }
+
+    // ─────────────────────────────────────────────
+    // COLECCIÓN: usuarios
+    // ─────────────────────────────────────────────
+    match /usuarios/{uid} {
+      // Leer: solo el propio usuario o un admin
+      allow read: if request.auth != null &&
+                     (request.auth.uid == uid || isAdmin());
+
+      // Crear: solo al registrarse (el UID debe coincidir)
+      allow create: if request.auth != null &&
+                       request.auth.uid == uid;
+
+      // Actualizar: solo el propio usuario o un admin
+      // Un usuario NO puede cambiar su propio rol
+      allow update: if request.auth != null && (
+        (request.auth.uid == uid && !('rol' in request.resource.data.diff(resource.data).affectedKeys())) ||
+        isAdmin()
+      );
+
+      // Eliminar: solo admin
+      allow delete: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────
+    // COLECCIÓN: transacciones
+    // ─────────────────────────────────────────────
+    match /transacciones/{transId} {
+      // Solo el dueño de la transacción puede leer/escribir
+      allow read, update, delete: if request.auth != null &&
+                                     resource.data.usuario_id == request.auth.uid;
+
+      // Crear: el campo usuario_id debe ser del usuario autenticado
+      allow create: if request.auth != null &&
+                       request.resource.data.usuario_id == request.auth.uid;
+
+      // Admin puede leer todas las transacciones
+      allow read: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────
+    // COLECCIÓN: presupuestos
+    // ─────────────────────────────────────────────
+    match /presupuestos/{presId} {
+      allow read, update, delete: if request.auth != null &&
+                                     resource.data.id_usuario == request.auth.uid;
+
+      allow create: if request.auth != null &&
+                       request.resource.data.id_usuario == request.auth.uid;
+
+      allow read: if isAdmin();
+    }
+
+    // ─────────────────────────────────────────────
+    // COLECCIÓN: metas
+    // ─────────────────────────────────────────────
+    match /metas/{metaId} {
+      allow read, update, delete: if request.auth != null &&
+                                     resource.data.id_usuario == request.auth.uid;
+
+      allow create: if request.auth != null &&
+                       request.resource.data.id_usuario == request.auth.uid;
+
+      allow read: if isAdmin();
+    }
+
+  }
+}

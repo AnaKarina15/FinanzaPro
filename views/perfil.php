@@ -1,14 +1,22 @@
 <?php
 session_start();
-if (!isset($_SESSION['usuario'])) {
-    header("Location: ../index.php");
-    exit();
-}
+// TEMPORAL: Como estamos usando Firebase, PHP ya no controla la sesión.
+// if (!isset($_SESSION['usuario'])) {
+//   header("Location: ../index.php");
+//   exit();
+// }
+
+// Valores por defecto temporales para no romper el HTML
+$_SESSION['nombre_usuario'] = $_SESSION['nombre_usuario'] ?? 'Cargando...';
+$_SESSION['apellido_usuario'] = $_SESSION['apellido_usuario'] ?? '';
+$_SESSION['usuario'] = $_SESSION['usuario'] ?? 'cargando@...';
+$_SESSION['foto_perfil'] = $_SESSION['foto_perfil'] ?? null;
 
 // Obtenemos los datos frescos del usuario usando el controlador
-require_once '../controller/UsuarioController.php';
-$controller = new UsuarioController();
-$usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
+// require_once '../controller/UsuarioController.php';
+// $controller = new UsuarioController();
+// $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
+$usuario = []; // Placeholder temporal para no romper HTML
 ?>
 <!doctype html>
 <html lang="es">
@@ -57,13 +65,16 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
             </nav>
         </aside>
 
-        <header class="app-header profile-app-header">
+        <header class="app-header">
             <div class="view-info">
                 <h2 class="view-title">Mi Perfil</h2>
                 <p class="view-description">Gestiona tu información personal y preferencias de cuenta.</p>
             </div>
-            <div class="view-buttons">
-                <button class="btn-secondary"><span class="material-symbols-outlined">notifications</span></button>
+            <div class="view-buttons" style="display: flex; gap: 12px; align-items: center;">
+                <button class="btn-secondary" style="height: 44px; display: flex; align-items: center; justify-content: center;"><span class="material-symbols-outlined">notifications</span></button>
+                <button class="btn-logout-text" style="display: flex; align-items: center; gap: 6px; color: #ef4444; background: #fee2e2; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; height: 44px;">
+                    <span class="material-symbols-outlined">logout</span> Cerrar Sesión
+                </button>
             </div>
         </header>
 
@@ -91,7 +102,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                     </div>
                 </section>
 
-                <form method="POST" action="../index.php?action=actualizarPerfil" id="form-perfil">
+                <div id="form-perfil">
                     <div class="profile-grid">
                         <section class="card">
                             <div class="card-header-icon">
@@ -120,9 +131,9 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                                     <label>NÚMERO DE TELÉFONO</label>
                                     <div class="phone-input-container">
                                         <div class="code-box">+57</div>
-                                        <input type="text" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" class="input-profile readonly" readonly>
+                                        <input type="tel" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" class="input-profile readonly" id="input-telefono" placeholder="3001234567" readonly>
                                     </div>
-                                    <a href="#" class="link-change coming-soon">Cambiar número de teléfono</a>
+                                    <a href="#" class="link-change" id="btn-cambiar-telefono">Cambiar número de teléfono</a>
                                 </div>
 
                                 <button type="button" class="btn-change-pass" id="btn-mostrar-pass">
@@ -130,7 +141,10 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                                 </button>
 
                                 <div class="form-group" id="change-pass-fields" style="display: none;">
-                                    <label>CONTRASEÑA ACTUAL</label>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <label style="margin-bottom: 0;">CONTRASEÑA ACTUAL</label>
+                                        <a href="#" id="btn-olvide-pass" class="link-change" style="font-size: 0.85rem;">¿Olvidaste tu contraseña?</a>
+                                    </div>
                                     <div class="input-container">
                                         <input type="password" name="contrasena_actual" class="input-profile input-pw" value="">
                                         <span class="material-symbols-outlined show-pw">visibility</span>
@@ -146,6 +160,10 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                                     <div class="input-container">
                                         <input type="password" name="confirmar_contrasena" class="input-profile input-pw" value="" autocomplete="new-password">
                                         <span class="material-symbols-outlined show-pw">visibility</span>
+                                    </div>
+                                    <div class="group-btns" style="margin-top: 15px;">
+                                        <button type="button" class="btn-secondary" id="btn-descartar-pass">Cancelar</button>
+                                        <button type="button" class="btn-primary" id="btn-guardar-pass">Guardar Contraseña</button>
                                     </div>
                                 </div>
                             </div>
@@ -191,15 +209,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                             </div>
                         </section>
                     </div>
-
-                    <footer class="profile-actions">
-                        <button type="button" class="btn-logout-text"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</button>
-                        <div class="group-btns">
-                            <button type="button" class="btn-secondary" id="btn-descartar">Descartar</button>
-                            <button type="submit" class="btn-primary">Guardar Cambios</button>
-                        </div>
-                    </footer>
-                </form>
+                </div>
 
                 <div class="modal-overlay" id="modal-cambiar-correo">
                     <div class="modal-content">
@@ -209,18 +219,35 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                                 <span class="material-symbols-outlined">close</span>
                             </button>
                         </div>
-                        <form id="form-cambiar-correo" method="POST" action="../index.php?action=cambiarCorreo">
+                        <form id="form-cambiar-correo">
                             <div class="modal-form-group">
                                 <label>NUEVO CORREO ELECTRÓNICO</label>
                                 <input type="email" name="nuevo_correo" class="input-profile" placeholder="nuevo@correo.com" required>
                             </div>
-                            <div class="modal-form-group">
-                                <label>CONTRASEÑA ACTUAL</label>
-                                <input type="password" name="contrasena_correo" class="input-profile" autocomplete="current-password" required>
-                            </div>
                             <div class="modal-actions">
                                 <button type="button" class="btn-secondary" id="btn-cancelar-cambiar-correo">Cancelar</button>
                                 <button type="submit" class="btn-primary btn-modal-submit">Guardar correo</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="modal-overlay" id="modal-cambiar-telefono">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Cambiar número de teléfono</h3>
+                            <button class="btn-close" type="button" id="btn-cerrar-modal-telefono">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <form id="form-cambiar-telefono">
+                            <div class="modal-form-group">
+                                <label>NUEVO TELÉFONO</label>
+                                <input type="tel" name="nuevo_telefono" class="input-profile" placeholder="3001234567" pattern="^\d{10}$" maxlength="10" title="El número debe tener exactamente 10 dígitos" required>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn-secondary" id="btn-cancelar-cambiar-telefono">Cancelar</button>
+                                <button type="submit" class="btn-primary btn-modal-submit">Guardar teléfono</button>
                             </div>
                         </form>
                     </div>

@@ -1,3 +1,10 @@
+import { auth, db } from "./firebase-config.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+// Forzar el idioma de los correos y las páginas de Firebase a Español
+auth.languageCode = 'es';
+
 /* SHOW/HIDE PASSWORD LOGIC */
 const pwContainers = document.querySelectorAll(".pw-container");
 
@@ -62,6 +69,181 @@ switchForm.forEach((link) => {
     loginForm.classList.toggle("hidden");
     registerForm.classList.toggle("hidden");
   });
+});
+
+/* FIREBASE LOGIN Y REGISTRO */
+document.addEventListener("DOMContentLoaded", () => {
+  const loginForm = document.querySelector(".login-form");
+  const registerForm = document.querySelector(".register-form");
+
+  // INICIO DE SESIÓN
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email_login").value;
+      const password = document.getElementById("login-password").value;
+      const btn = loginForm.querySelector("button[type='submit']");
+      
+      try {
+        btn.disabled = true;
+        btn.textContent = "Iniciando...";
+        
+        const { setPersistence, browserLocalPersistence, browserSessionPersistence } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js");
+        const recordarme = document.getElementById("check-recordarme")?.checked;
+        await setPersistence(auth, recordarme ? browserLocalPersistence : browserSessionPersistence);
+
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        
+        // Verificamos si el correo está confirmado (Excepto si entró con Google, que ya viene verificado)
+        if (!userCredential.user.emailVerified) {
+          const { signOut } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js");
+          await signOut(auth); // Lo sacamos por seguridad
+          
+          Swal.fire({
+            title: "Verifica tu cuenta",
+            text: "Aún no has verificado tu correo. Revisa tu bandeja de entrada (o Spam) y haz clic en el enlace que te enviamos.",
+            icon: "warning",
+            confirmButtonColor: "#059669",
+          });
+          return;
+        }
+
+        // Redirigir al dashboard
+        window.location.href = "/FinanzaPro/views/dashboard.php";
+      } catch (error) {
+        console.error(error);
+        let mensaje = "Correo o contraseña incorrectos.";
+        if (error.code === 'auth/too-many-requests') mensaje = "Demasiados intentos fallidos. Intenta más tarde.";
+        
+        Swal.fire({
+          title: "Credenciales inválidas",
+          text: mensaje,
+          icon: "error",
+          confirmButtonColor: "#059669",
+        });
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Iniciar Sesión";
+      }
+    });
+  }
+
+  // REGISTRO DE USUARIO
+  if (registerForm) {
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const nombre = document.getElementById("name").value;
+      const apellido = document.getElementById("lastname").value;
+      const telefono = document.getElementById("phone").value;
+      const codigoPais = document.querySelector(".select-codigo").value;
+      const email = document.getElementById("email_registro").value;
+      const password = document.getElementById("regster-password").value;
+      const btn = registerForm.querySelector("button[type='submit']");
+
+      try {
+        btn.disabled = true;
+        btn.textContent = "Creando cuenta...";
+
+        // 0. Validar teléfono
+        const telLimpio = telefono.replace(/\D/g, '');
+        if (telLimpio.length !== 10) {
+            Swal.fire('Error', 'El número de teléfono debe tener exactamente 10 dígitos.', 'warning');
+            btn.disabled = false;
+            btn.textContent = "Crear Cuenta";
+            return;
+        }
+
+        // 1. Crear el usuario en Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 2. Guardar datos adicionales en Firestore
+        await setDoc(doc(db, "usuarios", user.uid), {
+          nombre: nombre,
+          apellido: apellido,
+          telefono: `${codigoPais} ${telefono}`,
+          email: email,
+          fecha_creacion: new Date(),
+          rol: "usuario",
+          estado: "activo"
+        });
+
+        // 3. Enviar correo de verificación y cerrar sesión temporalmente
+        const { sendEmailVerification, signOut } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js");
+        await sendEmailVerification(user);
+        await signOut(auth);
+
+        Swal.fire({
+          title: "¡Casi listo!",
+          text: "Hemos enviado un enlace seguro a tu correo electrónico. Por favor, haz clic en él para verificar tu cuenta antes de iniciar sesión.",
+          icon: "info",
+          confirmButtonColor: "#059669",
+          confirmButtonText: "Entendido"
+        }).then(() => {
+          // Cambiamos a la vista de login
+          registerForm.classList.add("hidden");
+          loginForm.classList.remove("hidden");
+        });
+
+      } catch (error) {
+        console.error(error);
+        let mensaje = "Ocurrió un error al registrar.";
+        if (error.code === 'auth/email-already-in-use') mensaje = "El correo ya está en uso.";
+        if (error.code === 'auth/weak-password') mensaje = "La contraseña es muy débil.";
+
+        Swal.fire({
+          title: "Error",
+          text: mensaje,
+          icon: "error",
+          confirmButtonColor: "#059669",
+        });
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Regístrate";
+      }
+    });
+  }
+
+  // --- GOOGLE SIGN IN ---
+  const googleProvider = new GoogleAuthProvider();
+  
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Verificar si el usuario ya existe en Firestore, si no, crearlo
+      const userDocRef = doc(db, "usuarios", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        const nombres = user.displayName ? user.displayName.split(" ") : ["Usuario", ""];
+        await setDoc(userDocRef, {
+          nombre: nombres[0] || "Usuario",
+          apellido: nombres.slice(1).join(" ") || "",
+          telefono: user.phoneNumber || "",
+          email: user.email,
+          fotoPerfil: user.photoURL || "",
+          fecha_creacion: new Date(),
+          rol: "usuario",
+          estado: "activo"
+        });
+      }
+
+      window.location.href = "/FinanzaPro/views/dashboard.php";
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "No se pudo iniciar sesión con Google.", "error");
+    }
+  };
+
+  const btnGoogleLogin = document.getElementById("btn-google-login");
+  if (btnGoogleLogin) btnGoogleLogin.addEventListener("click", handleGoogleSignIn);
+
+  const btnGoogleRegister = document.getElementById("btn-google-register");
+  if (btnGoogleRegister) btnGoogleRegister.addEventListener("click", handleGoogleSignIn);
+
 });
 
 /* LÓGICA PRINCIPAL AL CARGAR LA PÁGINA (Alertas y Verificación) */
@@ -154,166 +336,50 @@ document.addEventListener("DOMContentLoaded", () => {
       if (pinRec) pinRec.value = "";
       const nuevaContrasena = document.getElementById("contrasena_nueva");
       if (nuevaContrasena) nuevaContrasena.value = "";
-      const confirmarContrasena = document.getElementById(
-        "confirmar_contrasena",
-      );
-      if (confirmarContrasena) confirmarContrasena.value = "";
-      if (resetFooterText) {
-        resetFooterText.innerHTML = `Si el PIN es correcto, te devolveremos al login.<br />¿Revisaste tu base de datos para ver el PIN?`;
-      }
     });
   }
 
   if (formReset) {
-    formReset.addEventListener("submit", function (e) {
+    formReset.addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const correo = emailRecuperacion.value.trim();
-      const pin = document.getElementById("pin_recuperacion").value.trim();
-      const nuevaContrasena = document.getElementById("contrasena_nueva").value;
-      const confirmarContrasena = document.getElementById(
-        "confirmar_contrasena",
-      ).value;
-      const inputPinRec = document.getElementById("pin_recuperacion");
 
       if (!correo || !correo.includes("@")) {
         Swal.fire("Atención", "Ingresa un correo válido.", "warning");
         return;
       }
 
-      if (resetStep2 && resetStep2.classList.contains("hidden")) {
-        // Primer paso: solicitar el PIN de recuperación
-        fetch("index.php?action=solicitarRecuperacion", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ correo: correo }),
-        })
-          .then((response) => response.text())
-          .then((text) => {
-            try {
-              return JSON.parse(text);
-            } catch (err) {
-              throw new Error("Respuesta JSON inválida: " + text);
-            }
-          })
-          .then((data) => {
-            if (data.status === "success") {
-              if (resetStep1) resetStep1.classList.add("hidden");
-              resetStep2.classList.remove("hidden");
-              resetSendPinBtn.classList.add("hidden");
-              resetSubmitBtn.classList.remove("hidden");
-              emailRecuperacion.disabled = true;
-              const sanitizedCorreo = correo
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#39;");
-              resetFooterText.innerHTML = `Se envió un PIN al correo <strong>${sanitizedCorreo}</strong>.<br />¿Revisaste tu base de datos para ver el PIN?`;
-              if (data.pin_desarrollo) {
-                resetFooterText.innerHTML += `<br /><strong>PIN de prueba: ${data.pin_desarrollo}</strong>`;
-              }
-            } else {
-              Swal.fire(
-                "Atención",
-                data.mensaje || "No se pudo enviar el PIN.",
-                "warning",
-              );
-            }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            Swal.fire(
-              "Error crítico",
-              "No se pudo contactar con el servidor.",
-              "error",
-            );
-          });
+      resetSendPinBtn.disabled = true;
+      resetSendPinBtn.textContent = "Enviando...";
 
-        return;
-      }
-
-      // Segundo paso: cambiar la contraseña
-      if (pin.length < 6 || /[^0-9]/.test(pin)) {
-        if (inputPinRec) inputPinRec.classList.add("input-error");
-        Swal.fire(
-          "Atención",
-          "El código PIN debe tener 6 dígitos numéricos.",
-          "warning",
-        );
-        return;
-      }
-
-      if (nuevaContrasena.length < 8) {
-        Swal.fire(
-          "Atención",
-          "La nueva contraseña debe tener al menos 8 caracteres.",
-          "warning",
-        );
-        return;
-      }
-
-      if (nuevaContrasena !== confirmarContrasena) {
-        Swal.fire("Atención", "Las contraseñas no coinciden.", "warning");
-        return;
-      }
-
-      fetch("index.php?action=restablecerContrasena", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          correo: correo,
-          pin: pin,
-          nueva_contrasena: nuevaContrasena,
-        }),
-      })
-        .then((response) => {
-          return response.text().then((text) => {
-            if (!response.ok) {
-              throw new Error(text || "Error en la respuesta del servidor.");
-            }
-            try {
-              return JSON.parse(text);
-            } catch (err) {
-              throw new Error("Respuesta JSON inválida: " + text);
-            }
-          });
-        })
-        .then((data) => {
-          if (data.status === "success") {
-            Swal.fire({
-              title: "Contraseña actualizada",
-              text: data.mensaje,
-              icon: "success",
-              timer: 2000,
-              showConfirmButton: false,
-            }).then(() => {
-              window.location.href = "index.php";
-            });
-          } else {
-            Swal.fire({
-              title: "No se pudo cambiar la contraseña",
-              text: data.mensaje,
-              icon: "error",
-              confirmButtonColor: "#059669",
-              confirmButtonText: "Volver al login",
-            }).then(() => {
-              window.location.href = "index.php";
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          Swal.fire({
-            title: "Error crítico",
-            text: "No se pudo contactar con el servidor.",
-            icon: "error",
-            confirmButtonColor: "#059669",
-            confirmButtonText: "Volver al login",
-          }).then(() => {
-            window.location.href = "index.php";
-          });
+      try {
+        await sendPasswordResetEmail(auth, correo);
+        
+        Swal.fire({
+          title: "¡Correo enviado!",
+          text: "Firebase te ha enviado un enlace seguro a tu correo para restablecer tu contraseña. (Revisa tu carpeta de Spam si no lo ves).",
+          icon: "success",
+          confirmButtonColor: "#059669",
+          confirmButtonText: "Entendido",
+        }).then(() => {
+          // Volvemos al login principal
+          formReset.classList.add("hidden");
+          loginForm.classList.remove("hidden");
+          emailRecuperacion.value = "";
         });
+
+      } catch (error) {
+        console.error("Error enviando reset:", error);
+        let mensaje = "No se pudo enviar el correo de recuperación.";
+        if (error.code === 'auth/user-not-found') {
+          mensaje = "No hay ninguna cuenta registrada con este correo.";
+        }
+        Swal.fire("Error", mensaje, "error");
+      } finally {
+        resetSendPinBtn.disabled = false;
+        resetSendPinBtn.textContent = "Enviar enlace de recuperación";
+      }
     });
   }
 

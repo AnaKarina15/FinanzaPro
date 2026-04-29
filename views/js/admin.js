@@ -1,190 +1,156 @@
-/**
- * Admin Panel - Gestión de Usuarios
- * FinanzaPro
- */
+import { auth, db } from './firebase-config.js';
+import { onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
-const BASE_URL = "/FinanzaPro/index.php";
+// Necesitamos la configuración de Firebase de nuevo para inicializar la segunda app
+// Vamos a extraerla de la app principal
+const firebaseConfig = auth.app.options;
 
-// Estado global
+// Inicializamos una app secundaria solo para crear cuentas de usuario
+const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+const secondaryAuth = getAuth(secondaryApp);
+
+let currentUid = null;
+let todosLosUsuarios = [];
 let paginaActual = 1;
-let totalPaginas = 1;
-let busquedaActual = "";
-let debounceTimer = null;
+const porPagina = 10;
 
-// ========== INICIALIZACIÓN ==========
-document.addEventListener("DOMContentLoaded", () => {
-  cargarEstadisticas();
-  cargarUsuarios();
-  inicializarEventos();
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUid = user.uid;
+        
+        // Verificar si es admin
+        const docSnap = await getDoc(doc(db, "usuarios", currentUid));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.rol !== 'admin') {
+                Swal.fire('Acceso denegado', 'No tienes permisos de administrador', 'error').then(() => {
+                    window.location.href = 'dashboard.php';
+                });
+                return;
+            }
+            
+            // Actualizar info del admin en UI
+            const nombreCompleto = `${data.nombre} ${data.apellido}`;
+            document.getElementById('admin-nav-username').textContent = nombreCompleto;
+            if (data.foto_perfil) {
+                document.getElementById('admin-nav-avatar').src = data.foto_perfil;
+            } else {
+                document.getElementById('admin-nav-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff`;
+            }
+
+            // Iniciar carga de datos
+            await cargarUsuariosFirestore();
+            inicializarEventos();
+        } else {
+            window.location.href = '../index.php';
+        }
+    } else {
+        window.location.href = '../index.php';
+    }
 });
 
 // ========== EVENTOS ==========
 function inicializarEventos() {
-  // Botones de agregar usuario
-  document
-    .getElementById("btn-agregar-usuario")
-    .addEventListener("click", abrirModalCrear);
+    document.getElementById("btn-agregar-usuario").addEventListener("click", abrirModalCrear);
+    document.getElementById("btn-cerrar-modal").addEventListener("click", cerrarModal);
+    document.getElementById("btn-cancelar-modal").addEventListener("click", cerrarModal);
+    document.getElementById("form-usuario").addEventListener("submit", guardarUsuario);
 
-  // Modal
-  document
-    .getElementById("btn-cerrar-modal")
-    .addEventListener("click", cerrarModal);
-  document
-    .getElementById("btn-cancelar-modal")
-    .addEventListener("click", cerrarModal);
-  document
-    .getElementById("form-usuario")
-    .addEventListener("submit", guardarUsuario);
-
-  // Cerrar modal al hacer clic fuera
-  document.getElementById("modal-usuario").addEventListener("click", (e) => {
-    if (e.target === e.currentTarget) cerrarModal();
-  });
-
-  // Búsqueda con debounce
-  document.getElementById("search-input").addEventListener("input", (e) => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      busquedaActual = e.target.value.trim();
-      paginaActual = 1;
-      cargarUsuarios();
-    }, 400);
-  });
-
-  // Paginación
-  document.getElementById("btn-prev").addEventListener("click", () => {
-    if (paginaActual > 1) {
-      paginaActual--;
-      cargarUsuarios();
-    }
-  });
-
-  document.getElementById("btn-next").addEventListener("click", () => {
-    if (paginaActual < totalPaginas) {
-      paginaActual++;
-      cargarUsuarios();
-    }
-  });
-
-  // ESC cierra modal
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") cerrarModal();
-  });
-}
-
-// ========== CARGAR ESTADÍSTICAS ==========
-async function cargarEstadisticas() {
-  try {
-    const resp = await fetch(`${BASE_URL}?action=adminEstadisticas`);
-    const data = await resp.json();
-
-    if (data.status === "success") {
-      animarNumero("stat-total", data.totalUsuarios);
-      animarNumero("stat-activos", data.activos);
-      document.getElementById("stat-nuevos").textContent =
-        `+${data.nuevosSemana}`;
-    }
-  } catch (error) {
-    console.error("Error cargando estadísticas:", error);
-  }
-}
-
-/**
- * Anima un número de 0 al valor final
- */
-function animarNumero(elementId, valorFinal) {
-  const el = document.getElementById(elementId);
-  const duracion = 800;
-  const inicio = performance.now();
-
-  function step(timestamp) {
-    const progreso = Math.min((timestamp - inicio) / duracion, 1);
-    const eased = 1 - Math.pow(1 - progreso, 3); // easeOutCubic
-    el.textContent = Math.floor(eased * valorFinal).toLocaleString("es-CO");
-
-    if (progreso < 1) {
-      requestAnimationFrame(step);
-    }
-  }
-
-  requestAnimationFrame(step);
-}
-
-// ========== CARGAR USUARIOS ==========
-async function cargarUsuarios() {
-  const tbody = document.getElementById("users-tbody");
-  tbody.innerHTML = `
-        <tr class="loading-row">
-            <td colspan="4">
-                <div class="loading-spinner"></div>
-                <p>Cargando usuarios...</p>
-            </td>
-        </tr>
-    `;
-
-  try {
-    const params = new URLSearchParams({
-      action: "adminListarUsuarios",
-      pagina: paginaActual,
-      porPagina: 10,
-      busqueda: busquedaActual,
+    document.getElementById("modal-usuario").addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) cerrarModal();
     });
 
-    const resp = await fetch(`${BASE_URL}?${params.toString()}`);
-    const data = await resp.json();
+    document.getElementById("search-input").addEventListener("input", (e) => {
+        const querySearch = e.target.value.toLowerCase();
+        const filtrados = todosLosUsuarios.filter(u => 
+            u.nombre.toLowerCase().includes(querySearch) || 
+            u.apellido.toLowerCase().includes(querySearch) || 
+            u.email.toLowerCase().includes(querySearch)
+        );
+        paginaActual = 1;
+        renderizarTabla(filtrados);
+    });
 
-    if (data.status === "success") {
-      renderizarTabla(data.usuarios);
-      actualizarPaginacion(data);
-    } else {
-      tbody.innerHTML = `
-                <tr><td colspan="4" class="empty-state">
-                    <span class="material-symbols-outlined">error</span>
-                    <p>${data.mensaje || "Error al cargar usuarios"}</p>
-                </td></tr>
-            `;
+    document.getElementById("btn-prev").addEventListener("click", () => {
+        if (paginaActual > 1) {
+            paginaActual--;
+            renderizarTabla(todosLosUsuarios);
+        }
+    });
+
+    document.getElementById("btn-next").addEventListener("click", () => {
+        const totalPaginas = Math.ceil(todosLosUsuarios.length / porPagina);
+        if (paginaActual < totalPaginas) {
+            paginaActual++;
+            renderizarTabla(todosLosUsuarios);
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") cerrarModal();
+    });
+}
+
+// ========== CARGAR USUARIOS FIRESTORE ==========
+async function cargarUsuariosFirestore() {
+    const tbody = document.getElementById("users-tbody");
+    tbody.innerHTML = `<tr><td colspan="4"><div class="loading-spinner"></div><p>Cargando usuarios...</p></td></tr>`;
+
+    try {
+        const querySnapshot = await getDocs(collection(db, "usuarios"));
+        todosLosUsuarios = [];
+        querySnapshot.forEach((doc) => {
+            todosLosUsuarios.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Calcular estadísticas
+        const total = todosLosUsuarios.length;
+        const activos = todosLosUsuarios.filter(u => u.estado !== 'inactivo').length;
+        // Asumiendo nuevos esta semana
+        const nuevos = 0; 
+        
+        animarNumero("stat-total", total);
+        animarNumero("stat-activos", activos);
+        document.getElementById("stat-nuevos").textContent = `+${nuevos}`;
+
+        renderizarTabla(todosLosUsuarios);
+    } catch (error) {
+        console.error("Error cargando usuarios:", error);
+        tbody.innerHTML = `<tr><td colspan="4"><p>Error de conexión</p></td></tr>`;
     }
-  } catch (error) {
-    console.error("Error cargando usuarios:", error);
-    tbody.innerHTML = `
-            <tr><td colspan="4" class="empty-state">
-                <span class="material-symbols-outlined">cloud_off</span>
-                <p>Error de conexión</p>
-            </td></tr>
-        `;
-  }
+}
+
+function animarNumero(elementId, valorFinal) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.textContent = valorFinal; // Simplificado para que no falle
 }
 
 // ========== RENDERIZAR TABLA ==========
-function renderizarTabla(usuarios) {
-  const tbody = document.getElementById("users-tbody");
+function renderizarTabla(listaFiltrada) {
+    const tbody = document.getElementById("users-tbody");
 
-  if (!usuarios || usuarios.length === 0) {
-    tbody.innerHTML = `
-            <tr><td colspan="4">
-                <div class="empty-state">
-                    <span class="material-symbols-outlined">person_off</span>
-                    <p>No se encontraron usuarios</p>
-                </div>
-            </td></tr>
-        `;
-    return;
-  }
+    if (!listaFiltrada || listaFiltrada.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><p>No se encontraron usuarios</p></div></td></tr>`;
+        return;
+    }
 
-  tbody.innerHTML = usuarios
-    .map((u, i) => {
-      const nombreCompleto = `${u.nombre} ${u.apellido}`;
-      const iniciales =
-        `${u.nombre.charAt(0)}${u.apellido.charAt(0)}`.toUpperCase();
-      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff&size=80`;
+    const inicio = (paginaActual - 1) * porPagina;
+    const fin = inicio + porPagina;
+    const paginados = listaFiltrada.slice(inicio, fin);
 
-      // Role badge class
-      let roleClass = "role-other";
-      if (u.id_rol == 1) roleClass = "role-admin";
-      else if (u.id_rol == 2) roleClass = "role-usuario";
+    tbody.innerHTML = paginados.map((u, i) => {
+        const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Sin Nombre';
+        const avatarUrl = u.foto_perfil ? u.foto_perfil : `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff&size=80`;
 
-      return `
-            <tr style="animation: fadeInUp 0.3s ease forwards; animation-delay: ${i * 0.04}s; opacity: 0;">
+        let roleClass = u.rol === 'admin' ? "role-admin" : "role-usuario";
+        let rolNombre = u.rol === 'admin' ? "Administrador" : "Usuario";
+
+        return `
+            <tr>
                 <td>
                     <div class="user-cell">
                         <div class="user-avatar">
@@ -193,198 +159,153 @@ function renderizarTabla(usuarios) {
                         <span class="user-name">${escapeHtml(nombreCompleto)}</span>
                     </div>
                 </td>
-                <td>${escapeHtml(u.correo)}</td>
-                <td><span class="role-badge ${roleClass}">${escapeHtml(u.nombre_rol)}</span></td>
+                <td>${escapeHtml(u.email || u.correo || 'Sin correo')}</td>
+                <td><span class="role-badge ${roleClass}">${rolNombre}</span></td>
                 <td>
                     <div class="actions-cell">
-                        <button class="btn-action btn-edit" onclick="editarUsuario(${u.id_usuario})" title="Editar">
+                        <button class="btn-action btn-edit" onclick="editarUsuario('${u.id}')" title="Editar">
                             <span class="material-symbols-outlined">edit</span>
                         </button>
-                        <button class="btn-action btn-delete" onclick="eliminarUsuario(${u.id_usuario}, '${escapeHtml(nombreCompleto)}')" title="Eliminar">
+                        <button class="btn-action btn-delete" onclick="eliminarUsuario('${u.id}', '${escapeHtml(nombreCompleto)}')" title="Eliminar (Desactivar)">
                             <span class="material-symbols-outlined">delete</span>
                         </button>
                     </div>
                 </td>
             </tr>
         `;
-    })
-    .join("");
-}
+    }).join("");
 
-// ========== PAGINACIÓN ==========
-function actualizarPaginacion(data) {
-  totalPaginas = data.totalPaginas || 1;
-
-  const inicio = (data.pagina - 1) * data.porPagina + 1;
-  const fin = Math.min(data.pagina * data.porPagina, data.total);
-
-  document.getElementById("table-info").textContent =
-    data.total > 0
-      ? `Mostrando ${inicio}-${fin} de ${data.total.toLocaleString("es-CO")} usuarios`
-      : "No se encontraron usuarios";
-
-  document.getElementById("btn-prev").disabled = paginaActual <= 1;
-  document.getElementById("btn-next").disabled = paginaActual >= totalPaginas;
+    const totalPaginas = Math.ceil(listaFiltrada.length / porPagina);
+    document.getElementById("btn-prev").disabled = paginaActual <= 1;
+    document.getElementById("btn-next").disabled = paginaActual >= totalPaginas;
+    document.getElementById("table-info").textContent = `Mostrando ${inicio + 1}-${Math.min(fin, listaFiltrada.length)} de ${listaFiltrada.length} usuarios`;
 }
 
 // ========== MODAL: CREAR ==========
 function abrirModalCrear() {
-  document.getElementById("modal-titulo").textContent = "Agregar Usuario";
-  document.getElementById("btn-guardar").textContent = "Guardar Usuario";
-  document.getElementById("form-usuario").reset();
-  document.getElementById("input-id-usuario").value = "";
-  document.getElementById("input-id-rol").value = "2";
+    document.getElementById("modal-titulo").textContent = "Agregar Usuario";
+    document.getElementById("btn-guardar").textContent = "Crear Usuario y Enviar Clave";
+    document.getElementById("form-usuario").reset();
+    document.getElementById("input-id-usuario").value = "";
+    document.getElementById("input-rol").value = "usuario";
+    
+    // El input de correo debe ser editable
+    document.getElementById("input-correo").readOnly = false;
 
-  // Mostrar campo contraseña
-  document.getElementById("grupo-contrasena").style.display = "block";
-  document.getElementById("input-contrasena").required = true;
-
-  document.getElementById("modal-usuario").classList.add("active");
-  document.getElementById("input-nombre").focus();
+    document.getElementById("modal-usuario").classList.add("active");
+    document.getElementById("input-nombre").focus();
 }
 
 // ========== MODAL: EDITAR ==========
 window.editarUsuario = async function (id) {
-  try {
-    const resp = await fetch(`${BASE_URL}?action=adminObtenerUsuario&id=${id}`);
-    const data = await resp.json();
+    const user = todosLosUsuarios.find(u => u.id === id);
+    if (user) {
+        document.getElementById("modal-titulo").textContent = "Editar Usuario";
+        document.getElementById("btn-guardar").textContent = "Actualizar Usuario";
+        document.getElementById("input-id-usuario").value = user.id;
+        document.getElementById("input-nombre").value = user.nombre || '';
+        document.getElementById("input-apellido").value = user.apellido || '';
+        document.getElementById("input-correo").value = user.email || user.correo || '';
+        document.getElementById("input-telefono").value = user.telefono || "";
+        document.getElementById("input-rol").value = user.rol === 'admin' ? 'admin' : 'usuario';
 
-    if (data.status === "success") {
-      const u = data.usuario;
-      document.getElementById("modal-titulo").textContent = "Editar Usuario";
-      document.getElementById("btn-guardar").textContent = "Actualizar Usuario";
-      document.getElementById("input-id-usuario").value = u.id_usuario;
-      document.getElementById("input-nombre").value = u.nombre;
-      document.getElementById("input-apellido").value = u.apellido;
-      document.getElementById("input-correo").value = u.correo;
-      document.getElementById("input-telefono").value = u.telefono || "";
-      document.getElementById("input-id-rol").value = u.id_rol;
+        // Por seguridad, no permitimos cambiar el correo directamente en edición sin verificación
+        document.getElementById("input-correo").readOnly = true;
 
-      // Ocultar campo contraseña en edición
-      document.getElementById("grupo-contrasena").style.display = "none";
-      document.getElementById("input-contrasena").required = false;
-
-      document.getElementById("modal-usuario").classList.add("active");
-      document.getElementById("input-nombre").focus();
-    } else {
-      Swal.fire("Error", data.mensaje, "error");
+        document.getElementById("modal-usuario").classList.add("active");
+        document.getElementById("input-nombre").focus();
     }
-  } catch (error) {
-    Swal.fire("Error", "No se pudo cargar el usuario.", "error");
-  }
 };
 
 // ========== GUARDAR (Crear o Actualizar) ==========
 async function guardarUsuario(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const idUsuario = document.getElementById("input-id-usuario").value;
-  const esEdicion = idUsuario !== "";
+    const idUsuario = document.getElementById("input-id-usuario").value;
+    const esEdicion = idUsuario !== "";
+    const btn = document.getElementById("btn-guardar");
+    btn.disabled = true;
+    btn.textContent = "Guardando...";
 
-  const payload = {
-    nombre: document.getElementById("input-nombre").value.trim(),
-    apellido: document.getElementById("input-apellido").value.trim(),
-    correo: document.getElementById("input-correo").value.trim(),
-    telefono: document.getElementById("input-telefono").value.trim(),
-    id_rol: parseInt(document.getElementById("input-id-rol").value),
-  };
+    const payload = {
+        nombre: document.getElementById("input-nombre").value.trim(),
+        apellido: document.getElementById("input-apellido").value.trim(),
+        telefono: document.getElementById("input-telefono").value.trim(),
+        rol: document.getElementById("input-rol").value,
+        estado: 'activo'
+    };
 
-  if (esEdicion) {
-    payload.id_usuario = parseInt(idUsuario);
-  } else {
-    payload.contrasena = document.getElementById("input-contrasena").value;
-  }
+    try {
+        if (esEdicion) {
+            await updateDoc(doc(db, "usuarios", idUsuario), payload);
+            Swal.fire({ icon: "success", title: "Actualizado", text: "Usuario actualizado", timer: 2000, showConfirmButton: false });
+        } else {
+            const email = document.getElementById("input-correo").value.trim();
+            payload.email = email;
+            payload.fecha_creacion = new Date();
 
-  const action = esEdicion ? "adminActualizarUsuario" : "adminCrearUsuario";
+            // Usamos la app secundaria para crear la cuenta de Auth sin cerrar sesión al admin
+            const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, "TemporalFinanzaPro2026!");
+            const newUid = userCred.user.uid;
+            
+            // Cerramos sesión en la app secundaria
+            await signOut(secondaryAuth);
+            
+            // Guardamos en firestore
+            await setDoc(doc(db, "usuarios", newUid), payload);
 
-  try {
-    const resp = await fetch(`${BASE_URL}?action=${action}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+            // Enviamos el correo para que restablezca su contraseña al ingresar
+            await sendPasswordResetEmail(auth, email);
 
-    const data = await resp.json();
-
-    if (data.status === "success") {
-      cerrarModal();
-      Swal.fire({
-        icon: "success",
-        title: esEdicion ? "Actualizado" : "Creado",
-        text: data.mensaje,
-        timer: 2000,
-        showConfirmButton: false,
-        toast: true,
-        position: "top-end",
-      });
-      cargarUsuarios();
-      cargarEstadisticas();
-    } else {
-      Swal.fire("Error", data.mensaje, "error");
+            Swal.fire({ icon: "success", title: "Creado", text: "Usuario creado exitosamente. Se envió un correo para que asigne su contraseña.", timer: 3000 });
+        }
+        
+        cerrarModal();
+        cargarUsuariosFirestore();
+    } catch (error) {
+        console.error("Error guardando:", error);
+        Swal.fire("Error", "Ocurrió un error: " + error.message, "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Guardar Usuario";
     }
-  } catch (error) {
-    Swal.fire("Error", "Error de conexión al servidor.", "error");
-  }
 }
 
 // ========== ELIMINAR ==========
 window.eliminarUsuario = async function (id, nombre) {
-  const result = await Swal.fire({
-    title: "¿Eliminar usuario?",
-    html: `Estás a punto de eliminar a <strong>${nombre}</strong>.<br>Esta acción no se puede deshacer.`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#ef4444",
-    cancelButtonColor: "#64748b",
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-  });
-
-  if (result.isConfirmed) {
-    try {
-      const resp = await fetch(`${BASE_URL}?action=adminEliminarUsuario`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: id }),
-      });
-
-      const data = await resp.json();
-
-      if (data.status === "success") {
-        Swal.fire({
-          icon: "success",
-          title: "Eliminado",
-          text: data.mensaje,
-          timer: 2000,
-          showConfirmButton: false,
-          toast: true,
-          position: "top-end",
-        });
-        cargarUsuarios();
-        cargarEstadisticas();
-      } else {
-        Swal.fire("Error", data.mensaje, "error");
-      }
-    } catch (error) {
-      Swal.fire("Error", "Error de conexión al servidor.", "error");
+    if(id === currentUid) {
+        Swal.fire("Acción no permitida", "No puedes eliminar tu propia cuenta desde aquí.", "error");
+        return;
     }
-  }
+
+    const result = await Swal.fire({
+        title: "¿Desactivar usuario?",
+        html: `Al estar en modo cliente, Firebase no permite borrar el login de <strong>${nombre}</strong>.<br>Pero desactivaremos su perfil en la app.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444",
+        confirmButtonText: "Sí, desactivar",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (result.isConfirmed) {
+        try {
+            await updateDoc(doc(db, "usuarios", id), { estado: 'inactivo' });
+            Swal.fire({ icon: "success", title: "Desactivado", timer: 2000, showConfirmButton: false });
+            cargarUsuariosFirestore();
+        } catch (error) {
+            Swal.fire("Error", "No se pudo desactivar", "error");
+        }
+    }
 };
 
-// ========== CERRAR MODAL ==========
 function cerrarModal() {
-  document.getElementById("modal-usuario").classList.remove("active");
+    document.getElementById("modal-usuario").classList.remove("active");
 }
 
-// ========== UTILIDADES ==========
 function escapeHtml(text) {
-  if (!text) return "";
-  const map = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
-  };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
+    if (!text) return "";
+    return String(text).replace(/[&<>"']/g, function (m) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m];
+    });
 }

@@ -565,10 +565,21 @@ select:focus-visible {
 .btn-modal-submit {
     width: 100%;
     margin-top: 10px;
+    background-color: var(--primary);
+    color: white;
+    padding: 14px;
+    font-size: 16px;
+    transition: background-color 0.2s;
 }
 
 .btn-modal-submit:hover {
     background: #047857;
+}
+
+.btn-modal-submit:disabled {
+    background-color: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
 }
 
 #monto_visual {
@@ -602,14 +613,25 @@ select:focus-visible {
     box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
 }
 
-/* Clase que le pondremos con JS si el PIN es incorrecto */
-.pin-input.input-error {
-    border-color: #ef4444; /* Rojo error */
-    background-color: #fef2f2;
+/* --- ESTILOS PARA ERRORES DE FORMULARIO --- */
+.error-text {
+    display: none; /* Oculto por defecto */
+    color: #ef4444;
+    font-size: 13px;
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+.input-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
     animation: shake 0.4s ease-in-out;
 }
 
-/* Animación para que la caja tiemble */
+.input-error:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-8px); }

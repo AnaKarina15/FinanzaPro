@@ -65,7 +65,7 @@ $correo_a_verificar = $_GET['correo'] ?? '';
       </div>
       <div class="right">
 
-        <form class="card login-form <?= $modo_verificacion ? 'hidden' : '' ?>" action="index.php?action=iniciarSesion" method="POST">
+        <form class="card login-form <?= $modo_verificacion ? 'hidden' : '' ?>" id="form-login-auth">
           <div class="form-info">
             <h2 class="form-title">Bienvenido de nuevo</h2>
             <p class="form-subtitle">Ingresa tus datos para continuar</p>
@@ -100,11 +100,23 @@ $correo_a_verificar = $_GET['correo'] ?? '';
           </div>
           <div class="login-actions">
             <label class="checkbox-container">
-              <input type="checkbox" /> Recordarme
+              <input type="checkbox" id="check-recordarme" checked /> Recordarme
             </label>
             <a href="#" id="forgot-password-link" class="link-primario">¿Olvidaste tu contraseña?</a>
           </div>
           <button type="submit" class="btn-primary">Iniciar Sesión</button>
+          
+          <div style="display: flex; align-items: center; text-align: center; margin: 15px 0;">
+            <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+            <span style="padding: 0 10px; color: #64748b; font-size: 0.9rem;">O</span>
+            <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+          </div>
+          
+          <button type="button" class="btn-secondary" id="btn-google-login" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: white; color: #333; border: 1px solid #e2e8f0; width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 500; font-family: inherit; transition: background 0.3s;">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20">
+            Continuar con Google
+          </button>
+
           <span class="login-footer">
             <p>
               ¿No tienes cuenta?
@@ -113,7 +125,7 @@ $correo_a_verificar = $_GET['correo'] ?? '';
           </span>
         </form>
 
-        <form class="card register-form hidden" action="index.php?action=registrar" method="post">
+        <form class="card register-form hidden" id="form-register-auth">
           <div class="form-info">
             <h2 class="form-title">Crea tu cuenta</h2>
             <p class="form-subtitle">
@@ -160,8 +172,9 @@ $correo_a_verificar = $_GET['correo'] ?? '';
                   name="telefono"
                   class="input-soft input-tel"
                   placeholder="Ej. 300 456 7890"
-                  pattern="^\d{10,}$"
-                  title="El número debe tener 10 dígitos al menos"
+                  pattern="^\d{10}$"
+                  maxlength="10"
+                  title="El número debe tener exactamente 10 dígitos"
                   required />
               </div>
             </div>
@@ -204,6 +217,18 @@ $correo_a_verificar = $_GET['correo'] ?? '';
             </label>
           </div>
           <button type="submit" class="btn-primary">Regístrate</button>
+          
+          <div style="display: flex; align-items: center; text-align: center; margin: 15px 0;">
+            <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+            <span style="padding: 0 10px; color: #64748b; font-size: 0.9rem;">O</span>
+            <hr style="flex: 1; border: none; border-top: 1px solid #e2e8f0;">
+          </div>
+          
+          <button type="button" class="btn-secondary" id="btn-google-register" style="display: flex; align-items: center; justify-content: center; gap: 10px; background: white; color: #333; border: 1px solid #e2e8f0; width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 500; font-family: inherit; transition: background 0.3s;">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20">
+            Registrarse con Google
+          </button>
+
           <span class="login-footer">
             <p>
               ¿Ya tienes cuenta?
@@ -265,65 +290,12 @@ $correo_a_verificar = $_GET['correo'] ?? '';
                   required />
               </div>
             </div>
-            <button type="submit" class="btn-primary" id="reset-send-pin">Enviar PIN</button>
-          </div>
-
-          <div class="reset-step-2 hidden" id="reset-step-2">
-            <div class="input-group">
-              <label for="pin_recuperacion">Código PIN</label>
-              <div class="input-container">
-                <input
-                  type="text"
-                  id="pin_recuperacion"
-                  class="pin-input"
-                  maxlength="6"
-                  placeholder="123456"
-                  required
-                  autocomplete="off" />
-              </div>
-            </div>
-            <div class="input-group pw-container">
-              <label for="contrasena_nueva">Nueva Contraseña</label>
-              <div class="input-container">
-                <input
-                  type="password"
-                  id="contrasena_nueva"
-                  name="contrasena_nueva"
-                  class="input-pw"
-                  autocomplete="new-password"
-                  placeholder="••••••••"
-                  required />
-                <button type="button" class="show-pw material-symbols-outlined">
-                  visibility
-                </button>
-              </div>
-            </div>
-            <div class="input-group pw-container">
-              <label for="confirmar_contrasena">Confirmar Contraseña</label>
-              <div class="input-container">
-                <input
-                  type="password"
-                  id="confirmar_contrasena"
-                  name="confirmar_contrasena"
-                  class="input-pw"
-                  autocomplete="new-password"
-                  placeholder="••••••••"
-                  required />
-                <button type="button" class="show-pw material-symbols-outlined">
-                  visibility
-                </button>
-              </div>
-            </div>
-            <button type="submit" class="btn-primary hidden" id="reset-submit">Cambiar contraseña</button>
+            <button type="submit" class="btn-primary" id="reset-send-pin" style="margin-top: 16px; width: 100%;">Enviar enlace de recuperación</button>
           </div>
 
           <span class="login-footer">
             <p style="color: #64748b; text-align: center;" id="reset-footer-text">
-              Si el PIN es correcto, te devolveremos al login.
-              <br />¿Revisaste tu base de datos para ver el PIN?
-              <?php if (!empty($_SESSION['pin_desarrollo'])): ?>
-                <br /><strong>PIN de prueba: <?= htmlspecialchars($_SESSION['pin_desarrollo']) ?></strong>
-              <?php endif; ?>
+              Te enviaremos un enlace seguro a tu correo para que puedas elegir una nueva contraseña.
             </p>
           </span>
         </form>

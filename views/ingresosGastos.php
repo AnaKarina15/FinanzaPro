@@ -1,10 +1,15 @@
 <?php
 date_default_timezone_set('America/Bogota');
-session_start();
-if (!isset($_SESSION['usuario'])) {
-  header("Location: ../index.php");
-  exit();
-}
+// TEMPORAL: Como estamos usando Firebase, PHP ya no controla la sesión.
+// if (!isset($_SESSION['usuario'])) {
+//   header("Location: ../index.php");
+//   exit();
+// }
+
+// Valores por defecto temporales para no romper el HTML
+$_SESSION['nombre_usuario'] = $_SESSION['nombre_usuario'] ?? 'Cargando...';
+$_SESSION['apellido_usuario'] = $_SESSION['apellido_usuario'] ?? '';
+$_SESSION['foto_perfil'] = $_SESSION['foto_perfil'] ?? null;
 
 // Si es admin (id_rol = 1), no debe tener acceso a las vistas de usuario normal
 if (($_SESSION['id_rol'] ?? 0) == 1) {
@@ -27,7 +32,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script type="module" src="./js/ingresosGastos.js"></script>
+  <script type="module" src="./js/ingresosGastos.js?v=<?php echo time(); ?>"></script>
 </head>
 
 <body>

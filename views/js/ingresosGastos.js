@@ -1,4 +1,20 @@
+import { auth, db } from './firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+let currentUid = null;
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUid = user.uid;
+        cargarDatosFirestore();
+    } else {
+        window.location.href = '../index.php';
+    }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
+    // --- FORMATTING LOGIC ---
     const inputVisual = document.getElementById('monto_visual');
     const inputOculto = document.getElementById('monto');
     
@@ -31,9 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {
         contador.innerText = `${longitud}/${maximo}`;
     };
 
-    let movimientosGlobales = [];
-    let filtroTipoSeleccionado = 'todos';
-    let filtroTiempoSeleccionado = 'esteMes';
+    const descripcionTextarea = document.getElementById('descripcion');
+    if (descripcionTextarea) {
+        descripcionTextarea.addEventListener('input', actualizarContadorDescripcion);
+        actualizarContadorDescripcion();
+    }
+
+    // --- FILTROS LOGIC ---
+    window.movimientosGlobales = [];
+    window.filtroTipoSeleccionado = 'todos';
+    window.filtroTiempoSeleccionado = 'esteMes';
 
     const obtenerRangoTiempo = (tipo) => {
         const hoy = new Date();
@@ -42,12 +65,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         switch (tipo) {
             case 'hoy':
+                inicio.setHours(0, 0, 0, 0);
+                fin.setHours(23, 59, 59, 999);
                 return { desde: inicio, hasta: fin };
             case 'estaSemana':
                 const diaSemana = hoy.getDay();
                 const desde = new Date(hoy);
                 const hasta = new Date(hoy);
-                // Tomamos lunes como inicio de semana
                 desde.setDate(hoy.getDate() - ((diaSemana + 6) % 7));
                 hasta.setDate(desde.getDate() + 6);
                 desde.setHours(0, 0, 0, 0);
@@ -74,11 +98,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return fechaObj >= rango.desde && fechaObj <= rango.hasta;
     };
 
-    const aplicarFiltros = () => {
-        const rango = obtenerRangoTiempo(filtroTiempoSeleccionado);
+    window.aplicarFiltros = () => {
+        const rango = obtenerRangoTiempo(window.filtroTiempoSeleccionado);
         const tabla = document.getElementById('tabla-movimientos-body');
-        const movsFiltrados = movimientosGlobales.filter(mov => {
-            const coincideTipo = filtroTipoSeleccionado === 'todos' || mov.tipo === filtroTipoSeleccionado;
+        const movsFiltrados = window.movimientosGlobales.filter(mov => {
+            const coincideTipo = window.filtroTipoSeleccionado === 'todos' || mov.tipo === window.filtroTipoSeleccionado;
             const coincideTiempo = estaDentroDelRango(mov.fecha, rango);
             return coincideTipo && coincideTiempo;
         });
@@ -92,8 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     const esG = mov.tipo === 'gasto';
                     const fecha = new Date(mov.fecha + 'T00:00:00').toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
                     const descripcionCompleta = String(mov.descripcion || '');
-                const descripcionCortada = formatearDescripcion(descripcionCompleta, 70);
-                tabla.innerHTML += `
+                    const descripcionCortada = formatearDescripcion(descripcionCompleta, 70);
+                    tabla.innerHTML += `
                         <tr>
                             <td class="table-date">${fecha}</td>
                             <td class="table-desc">
@@ -108,10 +132,10 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <div class="dropdown-menu">
                                     <button class="btn-icon-only"><span class="material-symbols-outlined">more_vert</span></button>
                                     <div class="dropdown-content">
-                                        <a href="#" class="action-edit" data-id="${mov.id_transaccion}" data-tipo="${mov.tipo}" data-monto="${mov.monto}" data-fecha="${mov.fecha}" data-cat="${escapeHtml(mov.categoria)}" data-desc="${escapeHtml(descripcionCompleta)}">
+                                        <a href="#" class="action-edit" data-id="${mov.id}" data-tipo="${mov.tipo}" data-monto="${mov.monto}" data-fecha="${mov.fecha}" data-cat="${escapeHtml(mov.categoria)}" data-desc="${escapeHtml(descripcionCompleta)}">
                                             <span class="material-symbols-outlined dropdown-icon">edit</span> Modificar
                                         </a>
-                                        <a href="#" class="action-delete" data-id="${mov.id_transaccion}">
+                                        <a href="#" class="action-delete" data-id="${mov.id}">
                                             <span class="material-symbols-outlined dropdown-icon">delete</span> Eliminar
                                         </a>
                                     </div>
@@ -121,32 +145,63 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
         }
-
         actualizarFiltrosVisuales();
     };
 
     const actualizarFiltrosVisuales = () => {
         document.querySelectorAll('.filter-option').forEach(el => {
-            el.classList.toggle('filter-active', el.dataset.filter === filtroTipoSeleccionado);
+            el.classList.toggle('filter-active', el.dataset.filter === window.filtroTipoSeleccionado);
         });
         document.querySelectorAll('.filter-time-option').forEach(el => {
-            el.classList.toggle('filter-time-active', el.dataset.time === filtroTiempoSeleccionado);
+            el.classList.toggle('filter-time-active', el.dataset.time === window.filtroTiempoSeleccionado);
         });
         const label = document.getElementById('filter-time-label');
         if (label) {
-            label.innerText = document.querySelector(`.filter-time-option[data-time="${filtroTiempoSeleccionado}"]`)?.innerText || 'Este Mes';
+            label.innerText = document.querySelector(`.filter-time-option[data-time="${window.filtroTiempoSeleccionado}"]`)?.innerText || 'Este Mes';
         }
     };
 
+    const dropdownTime = document.getElementById('filter-time-dropdown');
+    if (dropdownTime) {
+        dropdownTime.addEventListener('click', (e) => {
+            if (e.target.closest('.filter-time-option')) return;
+            e.stopPropagation();
+            dropdownTime.classList.toggle('open');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (dropdownTime && !dropdownTime.contains(e.target)) {
+            dropdownTime.classList.remove('open');
+        }
+
+        const opcionTipo = e.target.closest('.filter-option');
+        if (opcionTipo) {
+            e.preventDefault();
+            window.filtroTipoSeleccionado = opcionTipo.dataset.filter;
+            window.aplicarFiltros();
+            return;
+        }
+
+        const opcionTiempo = e.target.closest('.filter-time-option');
+        if (opcionTiempo) {
+            e.preventDefault();
+            window.filtroTiempoSeleccionado = opcionTiempo.dataset.time;
+            if (dropdownTime) dropdownTime.classList.remove('open');
+            window.aplicarFiltros();
+            return;
+        }
+    });
+
     // --- RENDERIZADO DE GRÁFICAS Y LEYENDAS ---
-    function renderizarDonaYleyenda(canvasId, centerId, legendId, dataset, totalGlobal, colores, tipo) {
+    window.renderizarDonaYleyenda = function(canvasId, centerId, legendId, dataset, totalGlobal, colores, tipo) {
         const canvas = document.getElementById(canvasId);
         const centerLabel = document.getElementById(centerId);
         const legendContainer = document.getElementById(legendId);
 
         if (!canvas) return;
 
-        const chartExistente = Chart.getChart(canvas);
+        let chartExistente = Chart.getChart(canvas);
         if (chartExistente) {
             chartExistente.destroy();
         }
@@ -187,72 +242,33 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
         });
-    }
+    };
 
-    // --- FETCH DE DATOS ---
-    console.log("Iniciando petición al servidor...");
-
-    fetch('../index.php?action=obtenerEstadisticas') 
-        .then(res => {
-            if (!res.ok) throw new Error("Error de red o HTTP: " + res.status);
-            return res.text();
-        })
-        .then(texto => {
-            console.log("Respuesta cruda de PHP:", texto); 
-            const data = JSON.parse(texto);
+    // --- ABRIR MODAL (NUEVO MOVIMIENTO) ---
+    const btnAbrirModal = document.getElementById('btn-abrir-modal');
+    if (btnAbrirModal) {
+        btnAbrirModal.addEventListener('click', () => {
+            const form = document.getElementById('form-movimiento');
+            if(form) form.reset();
             
-            if (data.error) {
-                console.error("PHP detuvo el proceso por este error:", data.error);
-                return;
-            }
-
-            console.log("Datos procesados correctamente:", data);
-
-            const totalI = parseFloat(data.totales?.ingresos) || 0;
-            const totalG = parseFloat(data.totales?.gastos) || 0;
+            document.getElementById('modal-titulo').innerText = "Registro de Movimientos";
+            document.getElementById('id_transaccion').value = ""; 
             
-            document.getElementById('total-ingresos-view').innerText = formatearMoneda(totalI);
-            document.getElementById('total-gastos-view').innerText = formatearMoneda(totalG);
-
-            renderizarDonaYleyenda('graficaIngresos', 'center-ingresos', 'legend-ingresos-list', data.categoriasIngresos, totalI, ['#059669', '#34d399', '#6ee7b7', '#a7f3d0'], 'ingreso');
-            renderizarDonaYleyenda('graficaGastos', 'center-gastos', 'legend-gastos-list', data.categoriasGastos, totalG, ['#ef4444', '#f97316', '#eab308', '#cbd5e1'], 'gasto');
-
-            movimientosGlobales = Array.isArray(data.movimientos) ? data.movimientos : [];
-            aplicarFiltros();
-        })
-        .catch(err => console.error("Error catastrófico en Fetch:", err));
-        
-    const dropdownTime = document.getElementById('filter-time-dropdown');
-    if (dropdownTime) {
-        dropdownTime.addEventListener('click', (e) => {
-            if (e.target.closest('.filter-time-option')) return;
-            e.stopPropagation();
-            dropdownTime.classList.toggle('open');
+            const inputVisual = document.getElementById('monto_visual');
+            if(inputVisual) inputVisual.value = '';
+            
+            actualizarContadorDescripcion();
+            document.getElementById('modalNuevoMovimiento').classList.add('active');
         });
     }
 
-    document.addEventListener('click', (e) => {
-        if (dropdownTime && !dropdownTime.contains(e.target)) {
-            dropdownTime.classList.remove('open');
-        }
-
-        const opcionTipo = e.target.closest('.filter-option');
-        if (opcionTipo) {
-            e.preventDefault();
-            filtroTipoSeleccionado = opcionTipo.dataset.filter;
-            aplicarFiltros();
-            return;
-        }
-
-        const opcionTiempo = e.target.closest('.filter-time-option');
-        if (opcionTiempo) {
-            e.preventDefault();
-            filtroTiempoSeleccionado = opcionTiempo.dataset.time;
-            if (dropdownTime) dropdownTime.classList.remove('open');
-            aplicarFiltros();
-            return;
-        }
-    });
+    // --- CERRAR MODAL ---
+    const btnCerrarModal = document.getElementById('btn-cerrar-modal');
+    if (btnCerrarModal) {
+        btnCerrarModal.addEventListener('click', () => {
+            document.getElementById('modalNuevoMovimiento').classList.remove('active');
+        });
+    }
     
     // --- DELEGACIÓN DE EVENTOS (EDITAR / ELIMINAR) ---
     document.addEventListener('click', (e) => {
@@ -270,17 +286,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 cancelButtonColor: '#64748b',
                 confirmButtonText: 'Sí, eliminar',
                 cancelButtonText: 'Cancelar'
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
-                    fetch('../index.php?action=eliminarMovimiento', {
-                        method: 'POST',
-                        body: JSON.stringify({ id_transaccion: id })
-                    }).then(res => res.json()).then(resData => {
-                        if(resData.exito) {
-                            Swal.fire({ title: '¡Eliminado!', icon: 'success', confirmButtonColor: '#059669' })
-                            .then(() => window.location.reload());
-                        }
-                    });
+                    try {
+                        await deleteDoc(doc(db, "transacciones", id));
+                        Swal.fire('¡Eliminado!', 'Movimiento eliminado', 'success');
+                        window.cargarDatosFirestore();
+                    } catch (error) {
+                        Swal.fire('Error', 'No se pudo eliminar', 'error');
+                    }
                 }
             });
         }
@@ -303,35 +317,94 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- ABRIR MODAL (NUEVO MOVIMIENTO) ---
-    const btnAbrirModal = document.getElementById('btn-abrir-modal');
-    if (btnAbrirModal) {
-        btnAbrirModal.addEventListener('click', () => {
-            const form = document.getElementById('form-movimiento');
-            if(form) form.reset();
-            
-            document.getElementById('modal-titulo').innerText = "Registro de Movimientos";
-            document.getElementById('id_transaccion').value = ""; 
-            
-            const inputVisual = document.getElementById('monto_visual');
-            if(inputVisual) inputVisual.value = '';
-            
-            actualizarContadorDescripcion();
-            document.getElementById('modalNuevoMovimiento').classList.add('active');
-        });
-    }
+    // --- ENVIAR FORMULARIO (NUEVO/EDITAR) A FIRESTORE ---
+    const formMovimiento = document.getElementById("form-movimiento");
+    if (formMovimiento) {
+        formMovimiento.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if(!currentUid) return;
 
-    const descripcionTextarea = document.getElementById('descripcion');
-    if (descripcionTextarea) {
-        descripcionTextarea.addEventListener('input', actualizarContadorDescripcion);
-        actualizarContadorDescripcion();
-    }
+            const btn = formMovimiento.querySelector(".btn-modal-submit");
+            btn.disabled = true;
+            btn.textContent = "Guardando...";
 
-    // --- CERRAR MODAL ---
-    const btnCerrarModal = document.getElementById('btn-cerrar-modal');
-    if (btnCerrarModal) {
-        btnCerrarModal.addEventListener('click', () => {
-            document.getElementById('modalNuevoMovimiento').classList.remove('active');
+            const idTransaccion = document.getElementById("id_transaccion").value;
+            const tipo = formMovimiento.querySelector("input[name='tipo_movimiento']:checked").value;
+            const monto = parseFloat(document.getElementById("monto").value);
+            const fecha = document.getElementById("fecha").value;
+            const categoria = document.getElementById("categoria").value;
+            const descripcion = document.getElementById("descripcion").value;
+
+            try {
+                if (idTransaccion) {
+                    await updateDoc(doc(db, "transacciones", idTransaccion), {
+                        tipo, monto, fecha, categoria, descripcion
+                    });
+                    Swal.fire("Éxito", "Movimiento actualizado", "success");
+                } else {
+                    await addDoc(collection(db, "transacciones"), {
+                        usuario_id: currentUid,
+                        tipo, monto, fecha, categoria, descripcion
+                    });
+                    Swal.fire("Éxito", "Movimiento guardado", "success");
+                }
+                document.getElementById('modalNuevoMovimiento').classList.remove('active');
+                formMovimiento.reset();
+                window.cargarDatosFirestore();
+            } catch (error) {
+                console.error("Error guardando:", error);
+                Swal.fire("Error", "Ocurrió un problema", "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = idTransaccion ? "Guardar Cambios" : "Guardar Transacción";
+            }
         });
     }
 });
+
+// --- CARGAR DATOS DESDE FIRESTORE ---
+window.cargarDatosFirestore = async () => {
+    if(!currentUid) return;
+    try {
+        const q = query(collection(db, "transacciones"), where("usuario_id", "==", currentUid));
+        const querySnapshot = await getDocs(q);
+        
+        let ing = 0;
+        let gas = 0;
+        const movimientos = [];
+        const catIngresos = {};
+        const catGastos = {};
+
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            movimientos.push({ id: docSnap.id, ...data });
+            
+            if (data.tipo === "ingreso") {
+                ing += data.monto;
+                if (!catIngresos[data.categoria]) catIngresos[data.categoria] = 0;
+                catIngresos[data.categoria] += data.monto;
+            }
+            if (data.tipo === "gasto") {
+                gas += data.monto;
+                if (!catGastos[data.categoria]) catGastos[data.categoria] = 0;
+                catGastos[data.categoria] += data.monto;
+            }
+        });
+
+        movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        document.getElementById('total-ingresos-view').innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(ing);
+        document.getElementById('total-gastos-view').innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(gas);
+
+        const mapCategorias = (obj) => Object.keys(obj).map(k => ({ nombre: k, total: obj[k] })).sort((a,b) => b.total - a.total);
+
+        window.renderizarDonaYleyenda('graficaIngresos', 'center-ingresos', 'legend-ingresos-list', mapCategorias(catIngresos), ing, ['#059669', '#34d399', '#6ee7b7', '#a7f3d0'], 'ingreso');
+        window.renderizarDonaYleyenda('graficaGastos', 'center-gastos', 'legend-gastos-list', mapCategorias(catGastos), gas, ['#ef4444', '#f97316', '#eab308', '#cbd5e1'], 'gasto');
+
+        window.movimientosGlobales = movimientos;
+        window.aplicarFiltros();
+
+    } catch (error) {
+        console.error("Error al cargar estadísticas:", error);
+    }
+};
