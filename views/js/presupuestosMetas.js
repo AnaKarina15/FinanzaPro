@@ -277,7 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const porcentaje = limite > 0 ? (consumido / limite) * 100 : 0;
             
             let estadoClass = 'stable';
-            let badgeClass = 'ESTABLE';
             let badgeText = 'ESTABLE';
             let statusText = 'BAJO CONTROL';
             
@@ -285,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 estadoClass = 'critical';
                 badgeText = 'CRÍTICO';
                 statusText = 'LÍMITE EXCEDIDO';
-            } else if (porcentaje >= 80) {
+            } else if (porcentaje >= 80 && p.alerta_80_porciento == 1) {
                 estadoClass = 'alert';
                 badgeText = 'ALERTA';
                 statusText = Math.round(porcentaje) + '% UTILIZADO';
