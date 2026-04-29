@@ -19,11 +19,38 @@ onAuthStateChanged(auth, async (user) => {
                 if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
             }
         } catch(e) { console.error(e); }
+        
+        cargarCategoriasDePresupuestos();
         cargarDatosFirestore();
     } else {
         window.location.href = '../index.php';
     }
 });
+
+const cargarCategoriasDePresupuestos = async () => {
+    if (!currentUid) return;
+    try {
+        const presupuestosRef = collection(db, "presupuestos");
+        const q = query(presupuestosRef, where("id_usuario", "==", currentUid));
+        const querySnapshot = await getDocs(q);
+        
+        const datalist = document.getElementById('lista-categorias');
+        if (datalist) {
+            let categories = new Set(['Alimentación', 'Transporte', 'Ocio', 'Servicios Públicos', 'Salario']);
+            querySnapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.categoria) categories.add(data.categoria);
+            });
+            
+            datalist.innerHTML = '';
+            categories.forEach(cat => {
+                datalist.innerHTML += `<option value="${cat}"></option>`;
+            });
+        }
+    } catch (error) {
+        console.error("Error al cargar categorías:", error);
+    }
+};
 
 document.addEventListener("DOMContentLoaded", () => {
     // --- FORMATTING LOGIC ---
@@ -127,7 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 movsFiltrados.forEach(mov => {
                     const esG = mov.tipo === 'gasto';
                     const fecha = new Date(mov.fecha + 'T00:00:00').toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
-                    const descripcionCompleta = String(mov.descripcion || '');
+                    const descripcionString = (mov.descripcion || '').trim();
+                    const descripcionCompleta = descripcionString !== '' ? descripcionString : 'Sin descripción';
                     const descripcionCortada = formatearDescripcion(descripcionCompleta, 70);
                     tabla.innerHTML += `
                         <tr>

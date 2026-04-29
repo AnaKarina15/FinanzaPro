@@ -21,45 +21,68 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- CONTROL DE SESIÓN CON FIREBASE ---
+    let currentUid = null;
     onAuthStateChanged(auth, async (user) => {
-        if (!user) {
+        if (user) {
+            currentUid = user.uid;
+            try {
+                const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const nombreCompleto = `${userData.nombre} ${userData.apellido}`.trim();
+                    
+                    // Actualizar nombre en la barra lateral
+                    const sideName = document.querySelector(".nav-profile .username");
+                    if (sideName) sideName.textContent = nombreCompleto;
+                    
+                    // Actualizar avatar
+                    const avatarImg = document.querySelector(".nav-profile img");
+                    if (avatarImg) {
+                        avatarImg.src = userData.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff`;
+                    }
+                    
+                    // Actualizar texto de bienvenida
+                    const welcomeText = document.querySelector(".view-description");
+                    if (welcomeText) {
+                        welcomeText.textContent = `Bienvenid@ ${nombreCompleto}. Aquí tienes el resumen de hoy.`;
+                    }
+                }
+            } catch (error) {
+                console.error("Error al obtener perfil:", error);
+            }
+            
+            cargarCategoriasDePresupuestos();
+            cargarEstadisticasFirestore(user.uid);
+        } else {
             // Si no hay sesión activa en Firebase, lo devolvemos al login
             window.location.href = "../index.php";
-            return;
         }
+    });
 
-        console.log("Usuario autenticado en Firebase:", user.uid);
-
-        // 1. Obtener datos del perfil del usuario
+    const cargarCategoriasDePresupuestos = async () => {
+        if (!currentUid) return;
         try {
-            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                const nombreCompleto = `${userData.nombre} ${userData.apellido}`.trim();
+            const presupuestosRef = collection(db, "presupuestos");
+            const q = query(presupuestosRef, where("id_usuario", "==", currentUid));
+            const querySnapshot = await getDocs(q);
+            
+            const datalist = document.getElementById('lista-categorias');
+            if (datalist) {
+                let categories = new Set(['Alimentación', 'Transporte', 'Ocio', 'Servicios Públicos', 'Salario']);
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.categoria) categories.add(data.categoria);
+                });
                 
-                // Actualizar nombre en la barra lateral
-                const sideName = document.querySelector(".nav-profile .username");
-                if (sideName) sideName.textContent = nombreCompleto;
-                
-                // Actualizar avatar
-                const avatarImg = document.querySelector(".nav-profile img");
-                if (avatarImg) {
-                    avatarImg.src = userData.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff`;
-                }
-                
-                // Actualizar texto de bienvenida
-                const welcomeText = document.querySelector(".view-description");
-                if (welcomeText) {
-                    welcomeText.textContent = `Bienvenid@ ${nombreCompleto}. Aquí tienes el resumen de hoy.`;
-                }
+                datalist.innerHTML = '';
+                categories.forEach(cat => {
+                    datalist.innerHTML += `<option value="${cat}"></option>`;
+                });
             }
         } catch (error) {
-            console.error("Error al obtener perfil:", error);
+            console.error("Error al cargar categorías:", error);
         }
-
-        // 2. Obtener estadísticas de Firestore (Próximamente)
-        cargarEstadisticasFirestore(user.uid);
-    });
+    };
 
     const cargarEstadisticasFirestore = async (uid) => {
         try {
@@ -82,8 +105,23 @@ document.addEventListener("DOMContentLoaded", () => {
             // Ordenar por fecha descendente (más reciente primero)
             movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
+            // Obtenemos el dinero guardado en las metas (ahorros)
+            const metasRef = collection(db, "metas");
+            const qMetas = query(metasRef, where("id_usuario", "==", uid));
+            const metasSnapshot = await getDocs(qMetas);
+            
+            let ahorroEnMetas = 0;
+            metasSnapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                ahorroEnMetas += parseFloat(data.monto_actual) || 0;
+            });
+
             // Actualizar tarjetas superiores
-            if(document.getElementById('monto-disponible')) document.getElementById('monto-disponible').innerText = formatearMoneda(ing - gas);
+            const balanceTotal = ing - gas;
+            const disponible = balanceTotal - ahorroEnMetas;
+
+            if(document.getElementById('monto-disponible')) document.getElementById('monto-disponible').innerText = formatearMoneda(disponible);
+            if(document.getElementById('monto-total-real')) document.getElementById('monto-total-real').innerText = formatearMoneda(balanceTotal);
             if(document.getElementById('monto-ingresos')) document.getElementById('monto-ingresos').innerText = formatearMoneda(ing);
             if(document.getElementById('monto-gastos')) document.getElementById('monto-gastos').innerText = formatearMoneda(gas);
 

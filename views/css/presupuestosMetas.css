@@ -275,7 +275,7 @@
 
 .kebab-dropdown {
     position: absolute;
-    top: 100%;
+    bottom: 100%;
     right: 0;
     background-color: white;
     border: 1px solid var(--border-color);
@@ -286,7 +286,7 @@
     min-width: 140px;
     z-index: 50;
     overflow: hidden;
-    margin-top: 4px;
+    margin-bottom: 8px;
 }
 
 .kebab-dropdown.show {

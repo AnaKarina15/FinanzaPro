@@ -96,9 +96,13 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
             <span class="material-symbols-outlined icon-blue" style="background-color: transparent; padding:0; color: #2563eb;">pie_chart</span> 
             Presupuestos
           </h3>
-          <div class="toggle-switch">
-            <button class="toggle-btn active">Mensual</button>
-            <button class="toggle-btn">Anual</button>
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <a href="#" class="link-ver-todas" id="btn-ver-todos-presupuestos">Ver todos</a>
+            <div class="toggle-switch" id="toggle-presupuesto-filtro">
+              <button class="toggle-btn active" data-filtro="mensual">Mensual</button>
+              <button class="toggle-btn" data-filtro="anual">Anual</button>
+              <button class="toggle-btn" data-filtro="todos">Todos</button>
+            </div>
           </div>
         </div>
 
@@ -118,7 +122,14 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
           <h3>
             <span class="material-symbols-outlined icon-green">stars</span> Metas de Ahorro
           </h3>
-          <a href="#" class="link-ver-todas">Ver todas</a>
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <a href="#" class="link-ver-todas" id="btn-ver-todas-metas">Ver todas</a>
+            <div class="toggle-switch" id="toggle-meta-filtro">
+              <button class="toggle-btn" data-filtro="mensual">Mensual</button>
+              <button class="toggle-btn" data-filtro="anual">Anual</button>
+              <button class="toggle-btn active" data-filtro="todas">Todas</button>
+            </div>
+          </div>
         </div>
         
         <div class="cards-grid" id="grid-metas">
@@ -218,7 +229,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
-      <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">Establece límites inteligentes para tus gastos mensuales.</p>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">Establece límites inteligentes para tus gastos.</p>
 
       <form action="../index.php?action=guardarPresupuesto" method="POST" id="form-presupuesto">
         <input type="hidden" name="id_presupuesto" id="id_presupuesto" value="">
@@ -237,9 +248,25 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
           </div>
 
           <div class="input-group modal-form-group">
-            <label>Límite Mensual</label>
+            <label>Límite</label>
             <div class="input-container">
               <input type="text" name="monto_limite" placeholder="$ 0" required autocomplete="off">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group modal-form-group">
+            <label>Tipo de Presupuesto</label>
+            <div class="input-container" style="display:flex; align-items:center; gap:16px; padding: 12px 16px;">
+              <label style="display:flex; align-items:center; gap:4px; margin:0; cursor:pointer;"><input type="radio" name="tipo_periodo" value="mensual" checked> Mensual</label>
+              <label style="display:flex; align-items:center; gap:4px; margin:0; cursor:pointer;"><input type="radio" name="tipo_periodo" value="anual"> Anual</label>
+            </div>
+          </div>
+          <div class="input-group modal-form-group" id="grupo_periodo_presupuesto">
+            <label id="label_periodo_presupuesto">Mes</label>
+            <div class="input-container">
+              <input type="month" name="periodo" id="periodo_presupuesto" required>
             </div>
           </div>
         </div>
@@ -295,6 +322,59 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-presupuesto">
           <span class="material-symbols-outlined" style="margin-right: 8px;">check_circle</span> <span id="text-submit-presupuesto">Asignar Presupuesto</span>
         </button>
+      </form>
+    </div>
+  </div>
+  <!-- MODAL AGREGAR GASTO A PRESUPUESTO -->
+  <div class="modal-overlay" id="modalGastoPresupuesto">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-titulo-gasto-presupuesto">Registrar Gasto</h3>
+        <button class="btn-close" id="btn-cerrar-gasto-presupuesto">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">El gasto se asociará a la categoría: <strong id="nombre-categoria-presupuesto"></strong></p>
+
+      <form action="#" method="POST" id="form-gasto-presupuesto">
+        <input type="hidden" name="categoria_gasto" id="categoria_gasto" value="">
+        <div class="input-group modal-form-group">
+          <label>Monto</label>
+          <div class="input-container">
+            <input type="text" name="monto_gasto" id="monto_gasto" placeholder="$ 0" required autocomplete="off">
+          </div>
+        </div>
+        <div class="input-group modal-form-group">
+          <label>Descripción</label>
+          <div class="input-container">
+            <input type="text" name="descripcion_gasto" id="descripcion_gasto" placeholder="Detalle del gasto (opcional)" autocomplete="off">
+          </div>
+        </div>
+        <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-gasto-presupuesto">Registrar Gasto</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL AGREGAR ABONO A META -->
+  <div class="modal-overlay" id="modalAbonoMeta">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-titulo-abono-meta">Abonar a Meta</h3>
+        <button class="btn-close" id="btn-cerrar-abono-meta">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">Transfiere saldo disponible a: <strong id="nombre-meta-abono"></strong></p>
+
+      <form action="#" method="POST" id="form-abono-meta">
+        <input type="hidden" name="id_meta_abono" id="id_meta_abono" value="">
+        <div class="input-group modal-form-group">
+          <label>Monto a transferir</label>
+          <div class="input-container">
+            <input type="text" name="monto_abono" id="monto_abono" placeholder="$ 0" required autocomplete="off">
+          </div>
+        </div>
+        <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-abono-meta">Transferir</button>
       </form>
     </div>
   </div>

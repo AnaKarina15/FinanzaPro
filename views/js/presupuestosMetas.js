@@ -179,6 +179,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const radiosPeriodo = document.querySelectorAll('input[name="tipo_periodo"]');
+    const inputPeriodo = document.getElementById('periodo_presupuesto');
+    const labelPeriodo = document.getElementById('label_periodo_presupuesto');
+    if (radiosPeriodo.length && inputPeriodo) {
+        radiosPeriodo.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'mensual') {
+                    labelPeriodo.innerText = 'Mes';
+                    inputPeriodo.type = 'month';
+                } else {
+                    labelPeriodo.innerText = 'Año';
+                    inputPeriodo.type = 'number';
+                    inputPeriodo.min = "2020";
+                    inputPeriodo.max = "2100";
+                    inputPeriodo.value = new Date().getFullYear();
+                }
+            });
+        });
+    }
+
     const formPresupuesto = document.getElementById('form-presupuesto');
     if(formPresupuesto) {
         formPresupuesto.addEventListener('submit', async (e) => {
@@ -195,12 +215,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const id_icono = formPresupuesto.querySelector('input[name="id_icono"]:checked')?.value || '1';
             const codigo_material = iconMap[id_icono] || 'category';
             const alerta_80_porciento = formPresupuesto.querySelector('input[name="alerta_80_porciento"]').checked ? 1 : 0;
+            const tipo_periodo = formPresupuesto.querySelector('input[name="tipo_periodo"]:checked').value;
+            const periodo = formPresupuesto.querySelector('input[name="periodo"]').value;
 
             try {
                 if (id_presupuesto) {
                     const presRef = doc(db, "presupuestos", id_presupuesto);
                     await updateDoc(presRef, {
-                        nombre, monto_limite, id_icono, codigo_material, alerta_80_porciento
+                        nombre, monto_limite, id_icono, codigo_material, alerta_80_porciento, tipo_periodo, periodo
                     });
                     Swal.fire('¡Éxito!', 'Presupuesto actualizado', 'success');
                 } else {
@@ -210,7 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         monto_limite,
                         id_icono,
                         codigo_material,
-                        alerta_80_porciento
+                        alerta_80_porciento,
+                        tipo_periodo,
+                        periodo
                     });
                     Swal.fire('¡Éxito!', 'Presupuesto asignado', 'success');
                 }
@@ -246,6 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- CARGA DE DATOS ---
 window.metasGlobales = [];
 window.presupuestosGlobales = [];
+window.verTodasMetas = false;
+window.verTodosPresupuestos = false;
+window.filtroPresupuesto = 'mensual';
+window.filtroMeta = 'todas';
 
 async function cargarDatos() {
     if (!currentUid) return;
@@ -258,6 +286,9 @@ async function cargarDatos() {
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
 
+        const currentMonthFormatted = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const currentYearString = String(now.getFullYear());
+
         const qMetas = query(collection(db, "metas"), where("id_usuario", "==", currentUid));
         const snapshotMetas = await getDocs(qMetas);
         window.metasGlobales = snapshotMetas.docs.map(doc => ({ id_meta: doc.id, ...doc.data() }));
@@ -268,11 +299,21 @@ async function cargarDatos() {
             const p = doc.data();
             p.id_presupuesto = doc.id;
             
+            // Retrocompatibilidad
+            if (!p.tipo_periodo) {
+                p.tipo_periodo = 'mensual';
+                p.periodo = currentMonthFormatted;
+            }
+            
             let consumido = 0;
             transacciones.forEach(t => {
                 if (t.tipo === 'gasto' && t.categoria === p.nombre) {
-                    const tDate = new Date(t.fecha + "T00:00:00");
-                    if (tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear) {
+                    const tMonth = t.fecha.substring(0, 7); // YYYY-MM
+                    const tYear = t.fecha.substring(0, 4);  // YYYY
+                    
+                    if (p.tipo_periodo === 'mensual' && tMonth === p.periodo) {
+                        consumido += parseFloat(t.monto);
+                    } else if (p.tipo_periodo === 'anual' && tYear === p.periodo) {
                         consumido += parseFloat(t.monto);
                     }
                 }
@@ -293,21 +334,48 @@ function renderMetas(metas) {
     const btnNuevo = document.getElementById('btn-nueva-meta');
     grid.innerHTML = '';
     
-    metas.forEach(meta => {
+    const now = new Date();
+    const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+    const currentYear = String(now.getFullYear());
+
+    let metasFiltradas = metas.filter(m => {
+        if (window.filtroMeta === 'todas') return true;
+        if (!m.fecha_limite) return true; // Retrocompatibilidad
+        const mYear = m.fecha_limite.substring(0, 4);
+        const mMonth = m.fecha_limite.substring(5, 7);
+        
+        if (window.filtroMeta === 'mensual') {
+            return mYear === currentYear && mMonth === currentMonth;
+        } else if (window.filtroMeta === 'anual') {
+            return mYear === currentYear;
+        }
+        return true;
+    });
+
+    let metasAMostrar = metasFiltradas;
+    if (!window.verTodasMetas && metasFiltradas.length > 3) {
+        metasAMostrar = metasFiltradas.slice(0, 3);
+    }
+    
+    metasAMostrar.forEach(meta => {
         const obj = parseFloat(meta.monto_objetivo) || 0;
         const act = parseFloat(meta.monto_actual) || 0;
-        const porcentaje = obj > 0 ? Math.min(100, Math.round((act / obj) * 100)) : 0;
+        let porcentajeNumerico = obj > 0 ? (act / obj) * 100 : 0;
+        let porcentajeMostrar = porcentajeNumerico > 0 && porcentajeNumerico < 1 ? porcentajeNumerico.toFixed(1) : Math.round(porcentajeNumerico);
+        if (porcentajeNumerico >= 100) porcentajeMostrar = 100;
+        let widthBarra = porcentajeNumerico > 0 && porcentajeNumerico < 2 ? 2 : Math.min(100, porcentajeNumerico);
         
         const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
         
         const card = document.createElement('article');
-        card.className = 'card goal-card';
+        card.className = 'card goal-card cursor-pointer';
+        card.setAttribute('onclick', `abrirModalAbonoMeta('${meta.id_meta}', '${meta.nombre.replace(/'/g, "\\'")}', event)`);
         card.innerHTML = `
             <div class="goal-header">
               <div class="icon-box icon-blue" style="background-color: #e0f2fe; color: #0284c7;">
                 <span class="material-symbols-outlined">${meta.codigo_material || 'stars'}</span>
               </div>
-              <div class="goal-percentage text-success">${porcentaje}%</div>
+              <div class="goal-percentage text-success">${porcentajeMostrar}%</div>
               <div class="kebab-menu">
                 <button class="kebab-btn" onclick="toggleKebab(this, event)"><span class="material-symbols-outlined">more_vert</span></button>
                 <div class="kebab-dropdown">
@@ -322,7 +390,7 @@ function renderMetas(metas) {
             </div>
             <div class="goal-footer">
               <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width: ${porcentaje}%;"></div>
+                <div class="progress-bar-fill" style="width: ${widthBarra}%;"></div>
               </div>
               <div class="goal-amounts">
                 <span>${formatter.format(act)}</span>
@@ -333,6 +401,16 @@ function renderMetas(metas) {
         grid.appendChild(card);
     });
     grid.appendChild(btnNuevo);
+    
+    const btnVerTodas = document.getElementById('btn-ver-todas-metas');
+    if (btnVerTodas) {
+        if (metasFiltradas.length <= 3) {
+            btnVerTodas.style.display = 'none';
+        } else {
+            btnVerTodas.style.display = 'inline-block';
+            btnVerTodas.innerText = window.verTodasMetas ? 'Ver menos' : 'Ver todas';
+        }
+    }
 }
 
 function renderPresupuestos(presupuestos) {
@@ -340,10 +418,30 @@ function renderPresupuestos(presupuestos) {
     const btnNuevo = document.getElementById('btn-nuevo-presupuesto');
     grid.innerHTML = '';
     
-    presupuestos.forEach(p => {
+    const now = new Date();
+    const currentMonthFormatted = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const currentYearString = String(now.getFullYear());
+    
+    let presupuestosFiltrados = presupuestos.filter(p => {
+        if (window.filtroPresupuesto === 'todos') return true;
+        if (window.filtroPresupuesto === 'mensual') {
+            return p.tipo_periodo === 'mensual' && p.periodo === currentMonthFormatted;
+        } else {
+            return p.tipo_periodo === 'anual' && p.periodo === currentYearString;
+        }
+    });
+    
+    let presupuestosAMostrar = presupuestosFiltrados;
+    if (!window.verTodosPresupuestos && presupuestosFiltrados.length > 3) {
+        presupuestosAMostrar = presupuestosFiltrados.slice(0, 3);
+    }
+    
+    presupuestosAMostrar.forEach(p => {
         const limite = parseFloat(p.monto_limite) || 0;
         const consumido = parseFloat(p.monto_consumido) || 0;
         const porcentaje = limite > 0 ? (consumido / limite) * 100 : 0;
+        
+        let porcentajeMostrar = porcentaje > 0 && porcentaje < 1 ? porcentaje.toFixed(1) : Math.round(porcentaje);
         
         let estadoClass = 'stable';
         let badgeText = 'ESTABLE';
@@ -356,15 +454,16 @@ function renderPresupuestos(presupuestos) {
         } else if (porcentaje >= 80 && p.alerta_80_porciento == 1) {
             estadoClass = 'alert';
             badgeText = 'ALERTA';
-            statusText = Math.round(porcentaje) + '% UTILIZADO';
+            statusText = porcentajeMostrar + '% UTILIZADO';
         } else if (porcentaje > 0) {
-            statusText = Math.round(porcentaje) + '% UTILIZADO';
+            statusText = porcentajeMostrar + '% UTILIZADO';
         }
         
         const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
         
         const card = document.createElement('article');
-        card.className = `card budget-card ${estadoClass}`;
+        card.className = `card budget-card ${estadoClass} cursor-pointer`;
+        card.setAttribute('onclick', `abrirModalGastoPresupuesto('${p.nombre.replace(/'/g, "\\'")}', event)`);
         card.innerHTML = `
             <div class="budget-header">
               <div class="budget-icon">
@@ -399,6 +498,16 @@ function renderPresupuestos(presupuestos) {
         grid.appendChild(card);
     });
     grid.appendChild(btnNuevo);
+    
+    const btnVerTodos = document.getElementById('btn-ver-todos-presupuestos');
+    if (btnVerTodos) {
+        if (presupuestosFiltrados.length <= 3) {
+            btnVerTodos.style.display = 'none';
+        } else {
+            btnVerTodos.style.display = 'inline-block';
+            btnVerTodos.innerText = window.verTodosPresupuestos ? 'Ver menos' : 'Ver todos';
+        }
+    }
 }
 
 // Funciones globales
@@ -472,25 +581,179 @@ window.editarMeta = function(id) {
 };
 
 window.editarPresupuesto = function(id) {
-    const p = window.presupuestosGlobales.find(p => p.id_presupuesto === id);
-    if(!p) return;
-
+    const p = window.presupuestosGlobales.find(x => x.id_presupuesto === id);
+    if (!p) return;
     document.getElementById('modal-titulo-presupuesto').innerText = "Editar Presupuesto";
-    document.getElementById('text-submit-presupuesto').innerText = "Guardar Presupuesto";
+    document.getElementById('id_presupuesto').value = p.id_presupuesto;
+    document.querySelector('#form-presupuesto input[name="nombre"]').value = p.nombre;
+    document.querySelector('#form-presupuesto input[name="monto_limite"]').value = new Intl.NumberFormat('en-US').format(p.monto_limite);
     
-    const form = document.getElementById('form-presupuesto');
-    form.querySelector('input[name="id_presupuesto"]').value = p.id_presupuesto;
-    form.querySelector('input[name="nombre"]').value = p.nombre;
-    form.querySelector('input[name="monto_limite"]').value = new Intl.NumberFormat('en-US').format(p.monto_limite);
-    
-    const checkbox = form.querySelector('input[name="alerta_80_porciento"]');
-    if(checkbox) checkbox.checked = p.alerta_80_porciento == 1;
+    const radioPeriodo = document.querySelector(`#form-presupuesto input[name="tipo_periodo"][value="${p.tipo_periodo || 'mensual'}"]`);
+    if (radioPeriodo) {
+        radioPeriodo.checked = true;
+        radioPeriodo.dispatchEvent(new Event('change'));
+    }
+    document.querySelector('#form-presupuesto input[name="periodo"]').value = p.periodo || '';
 
-    const radio = form.querySelector(`input[name="id_icono"][value="${p.id_icono}"]`);
+    const radio = document.querySelector(`#form-presupuesto input[name="id_icono"][value="${p.id_icono}"]`);
     if(radio) {
+        document.querySelectorAll('#form-presupuesto .icon-option').forEach(el => el.classList.remove('active'));
         radio.checked = true;
-        form.querySelectorAll('.icon-option').forEach(l => l.classList.remove('active'));
         radio.closest('.icon-option').classList.add('active');
     }
+    document.querySelector('#form-presupuesto input[name="alerta_80_porciento"]').checked = p.alerta_80_porciento == 1;
     document.getElementById('modalNuevoPresupuesto').classList.add('active');
 };
+
+// --- LOGICA DE NUEVOS MODALES ---
+window.abrirModalAbonoMeta = function(id_meta, nombre_meta, event) {
+    if (event && event.target.closest('.kebab-menu')) return;
+    document.getElementById('id_meta_abono').value = id_meta;
+    document.getElementById('nombre-meta-abono').innerText = nombre_meta;
+    document.getElementById('form-abono-meta').reset();
+    document.getElementById('modalAbonoMeta').classList.add('active');
+};
+
+window.abrirModalGastoPresupuesto = function(categoria, event) {
+    if (event && event.target.closest('.kebab-menu')) return;
+    document.getElementById('categoria_gasto').value = categoria;
+    document.getElementById('nombre-categoria-presupuesto').innerText = categoria;
+    document.getElementById('form-gasto-presupuesto').reset();
+    document.getElementById('modalGastoPresupuesto').classList.add('active');
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Botones de "Ver todos"
+    document.getElementById('btn-ver-todas-metas')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.verTodasMetas = !window.verTodasMetas;
+        renderMetas(window.metasGlobales);
+    });
+
+    document.getElementById('btn-ver-todos-presupuestos')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.verTodosPresupuestos = !window.verTodosPresupuestos;
+        renderPresupuestos(window.presupuestosGlobales);
+    });
+
+    const toggleMetaContainer = document.getElementById('toggle-meta-filtro');
+    if (toggleMetaContainer) {
+        toggleMetaContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toggle-btn')) {
+                toggleMetaContainer.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                window.filtroMeta = e.target.dataset.filtro;
+                renderMetas(window.metasGlobales);
+            }
+        });
+    }
+
+    const toggleContainer = document.getElementById('toggle-presupuesto-filtro');
+    if (toggleContainer) {
+        toggleContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toggle-btn')) {
+                toggleContainer.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                window.filtroPresupuesto = e.target.dataset.filtro;
+                cargarDatos();
+            }
+        });
+    }
+
+    // Cerrar modales nuevos
+    document.getElementById('btn-cerrar-abono-meta')?.addEventListener('click', () => {
+        document.getElementById('modalAbonoMeta').classList.remove('active');
+    });
+    document.getElementById('btn-cerrar-gasto-presupuesto')?.addEventListener('click', () => {
+        document.getElementById('modalGastoPresupuesto').classList.remove('active');
+    });
+
+    // Formatear montos nuevos
+    const inputsNuevos = document.querySelectorAll('#monto_gasto, #monto_abono');
+    inputsNuevos.forEach(input => {
+        input.type = 'text';
+        input.inputMode = 'numeric';
+        input.addEventListener('input', function(e) {
+            let value = this.value.replace(/[^0-9]/g, '');
+            if(value) {
+                value = parseInt(value, 10);
+                this.value = new Intl.NumberFormat('en-US').format(value);
+            } else {
+                this.value = '';
+            }
+        });
+    });
+
+    // Submit Abono a Meta
+    const formAbono = document.getElementById('form-abono-meta');
+    if (formAbono) {
+        formAbono.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.getElementById('btn-submit-abono-meta');
+            btnSubmit.disabled = true;
+
+            const id_meta = document.getElementById('id_meta_abono').value;
+            const inputAbono = document.getElementById('monto_abono').value;
+            const montoAbono = parseFloat(inputAbono.replace(/,/g, ''));
+
+            try {
+                // Actualizar monto actual de la meta
+                const metaData = window.metasGlobales.find(m => m.id_meta === id_meta);
+                if (metaData) {
+                    const nuevoMonto = (parseFloat(metaData.monto_actual) || 0) + montoAbono;
+                    await updateDoc(doc(db, "metas", id_meta), {
+                        monto_actual: nuevoMonto
+                    });
+                    Swal.fire('¡Éxito!', 'Dinero transferido a la meta', 'success');
+                    document.getElementById('modalAbonoMeta').classList.remove('active');
+                    cargarDatos();
+                }
+            } catch (error) {
+                console.error("Error al abonar meta:", error);
+                Swal.fire('Error', 'No se pudo abonar a la meta', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+            }
+        });
+    }
+
+    // Submit Gasto a Presupuesto
+    const formGasto = document.getElementById('form-gasto-presupuesto');
+    if (formGasto) {
+        formGasto.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUid) return;
+            const btnSubmit = document.getElementById('btn-submit-gasto-presupuesto');
+            btnSubmit.disabled = true;
+
+            const categoria = document.getElementById('categoria_gasto').value;
+            const inputGasto = document.getElementById('monto_gasto').value;
+            const montoGasto = parseFloat(inputGasto.replace(/,/g, ''));
+            const descripcion = document.getElementById('descripcion_gasto').value;
+
+            // Obtener fecha local actual (formato YYYY-MM-DD)
+            const hoy = new Date();
+            const fechaHoy = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+
+            try {
+                // Registrar nueva transaccion (gasto) en esa categoria
+                await addDoc(collection(db, "transacciones"), {
+                    usuario_id: currentUid,
+                    tipo: "gasto",
+                    monto: montoGasto,
+                    categoria: categoria,
+                    descripcion: descripcion,
+                    fecha: fechaHoy
+                });
+                Swal.fire('¡Éxito!', 'Gasto registrado correctamente', 'success');
+                document.getElementById('modalGastoPresupuesto').classList.remove('active');
+                cargarDatos();
+            } catch (error) {
+                console.error("Error al registrar gasto:", error);
+                Swal.fire('Error', 'No se pudo registrar el gasto', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+            }
+        });
+    }
+});

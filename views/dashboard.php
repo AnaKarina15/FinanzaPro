@@ -114,7 +114,10 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
             </div>
             <p class="card-titulo">Disponible</p>
           </div>
-          <p class="card-value texto-primario" id="monto-disponible">$0</p>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 8px;">
+            <p class="card-value texto-primario" id="monto-disponible" style="margin: 0;">$0</p>
+            <p style="font-size: 14px; color: var(--text-secondary); font-weight: 500; margin: 0;">Total <span id="monto-total-real">$0</span></p>
+          </div>
         </article>
 
         <article class="card incomes-card">
