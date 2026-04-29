@@ -14,12 +14,13 @@ let unsubscribeNotif = null;
 export function initNotificaciones(uid) {
     currentUid = uid;
     _escucharNotificaciones();
+    // Verificar presupuestos excedidos en cada carga de vista
+    verificarPresupuestosAlCargar(uid);
 
     // Garantizar que el DOM esté listo antes de bindear botones
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', _bindBellButton);
     } else {
-        // DOM ya está listo (caso normal cuando onAuthStateChanged dispara tarde)
         _bindBellButton();
     }
 }
