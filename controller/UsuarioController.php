@@ -390,4 +390,140 @@ class UsuarioController {
         echo json_encode(["status" => "error", "mensaje" => "El PIN es incorrecto o ha expirado."]);
         exit();
     }
+
+    // ===== MÉTODOS DE ADMINISTRACIÓN =====
+
+    private function verificarAdmin() {
+        if (session_status() == PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['id_usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['status' => 'error', 'mensaje' => 'Acceso denegado.']);
+            exit();
+        }
+    }
+
+    public function listarUsuariosAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
+        $porPagina = isset($_GET['porPagina']) ? (int) $_GET['porPagina'] : 10;
+        $busqueda = $_GET['busqueda'] ?? '';
+
+        $resultado = $this->modeloUsuario->listarUsuarios($pagina, $porPagina, $busqueda);
+        $resultado['status'] = 'success';
+        echo json_encode($resultado);
+        exit();
+    }
+
+    public function obtenerUsuarioAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        $usuario = $this->modeloUsuario->obtenerPorId($id);
+
+        if ($usuario) {
+            echo json_encode(['status' => 'success', 'usuario' => $usuario]);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Usuario no encontrado.']);
+        }
+        exit();
+    }
+
+    public function crearUsuarioAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $datos = json_decode(file_get_contents('php://input'), true);
+        $nombre = trim($datos['nombre'] ?? '');
+        $apellido = trim($datos['apellido'] ?? '');
+        $correo = trim($datos['correo'] ?? '');
+        $telefono = trim($datos['telefono'] ?? '');
+        $contrasena = $datos['contrasena'] ?? '';
+        $id_rol = (int) ($datos['id_rol'] ?? 2);
+
+        if (empty($nombre) || empty($apellido) || empty($correo) || empty($contrasena)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Nombre, apellido, correo y contraseña son obligatorios.']);
+            exit();
+        }
+
+        if (strlen($contrasena) < 8) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'La contraseña debe tener al menos 8 caracteres.']);
+            exit();
+        }
+
+        if ($this->modeloUsuario->existeCorreo($correo)) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'El correo ya está registrado.']);
+            exit();
+        }
+
+        if ($this->modeloUsuario->crearUsuarioAdmin($nombre, $apellido, $correo, $telefono, $contrasena, $id_rol)) {
+            echo json_encode(['status' => 'success', 'mensaje' => 'Usuario creado correctamente.']);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se pudo crear el usuario.']);
+        }
+        exit();
+    }
+
+    public function actualizarUsuarioAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $datos = json_decode(file_get_contents('php://input'), true);
+        $id_usuario = (int) ($datos['id_usuario'] ?? 0);
+        $nombre = trim($datos['nombre'] ?? '');
+        $apellido = trim($datos['apellido'] ?? '');
+        $correo = trim($datos['correo'] ?? '');
+        $telefono = trim($datos['telefono'] ?? '');
+        $id_rol = (int) ($datos['id_rol'] ?? 2);
+
+        if (empty($nombre) || empty($apellido) || empty($correo) || $id_usuario === 0) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Datos incompletos.']);
+            exit();
+        }
+
+        if ($this->modeloUsuario->actualizarUsuarioAdmin($id_usuario, $nombre, $apellido, $correo, $telefono, $id_rol)) {
+            echo json_encode(['status' => 'success', 'mensaje' => 'Usuario actualizado correctamente.']);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se pudo actualizar el usuario.']);
+        }
+        exit();
+    }
+
+    public function eliminarUsuarioAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $datos = json_decode(file_get_contents('php://input'), true);
+        $id_usuario = (int) ($datos['id_usuario'] ?? 0);
+
+        if ($id_usuario === 0) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'ID de usuario inválido.']);
+            exit();
+        }
+
+        // No permitir auto-eliminación
+        if ($id_usuario === (int) $_SESSION['id_usuario']) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No puedes eliminarte a ti mismo.']);
+            exit();
+        }
+
+        if ($this->modeloUsuario->eliminarUsuario($id_usuario)) {
+            echo json_encode(['status' => 'success', 'mensaje' => 'Usuario eliminado correctamente.']);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'No se pudo eliminar el usuario.']);
+        }
+        exit();
+    }
+
+    public function estadisticasAdmin() {
+        $this->verificarAdmin();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $stats = $this->modeloUsuario->estadisticasAdmin();
+        $stats['status'] = 'success';
+        echo json_encode($stats);
+        exit();
+    }
 }

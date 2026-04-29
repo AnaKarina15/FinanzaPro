@@ -28,45 +28,26 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
         <aside class="navigation-sidebar">
             <div class="logo-container">
                 <div class="logo-icon"><span class="material-symbols-outlined">payments</span></div>
-                <div class="logo-brand">
-                    <h1 class="logo-text">FinanzaPro</h1>
-                    <span class="logo-subtitle">Admin Console</span>
-                </div>
+                <h1 class="logo-text">FinanzaPro</h1>
             </div>
             <nav class="sidebar-nav">
                 <a href="admin.php" class="nav-link active">
                     <span class="material-symbols-outlined">people</span> Usuarios
                 </a>
+                <a href="perfil.php" class="nav-link nav-profile">
+                    <div class="avatar">
+                        <?php
+                        $nav_foto = $_SESSION['foto_perfil'] ?? null;
+                        $nav_avatar_src = $nav_foto
+                            ? '../' . htmlspecialchars($nav_foto)
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff';
+                        ?>
+                        <img src="<?= $nav_avatar_src ?>" alt="Foto de perfil" />
+                    </div>
+                    <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
+                </a>
             </nav>
-            <div class="sidebar-bottom">
-                <button class="btn-add-user" id="btn-sidebar-agregar">
-                    <span class="material-symbols-outlined">person_add</span> Agregar Usuario
-                </button>
-            </div>
         </aside>
-
-        <!-- HEADER TOP BAR -->
-        <header class="admin-topbar">
-            <div class="topbar-brand">FinanzaPro</div>
-            <div class="topbar-actions">
-                <div class="search-box">
-                    <span class="material-symbols-outlined search-icon">search</span>
-                    <input type="text" id="search-input" placeholder="Search..." />
-                </div>
-                <button class="btn-icon" id="btn-notifications">
-                    <span class="material-symbols-outlined">notifications</span>
-                </button>
-                <div class="admin-avatar">
-                    <?php
-                    $nav_foto = $_SESSION['foto_perfil'] ?? null;
-                    $nav_avatar_src = $nav_foto
-                        ? '../' . htmlspecialchars($nav_foto)
-                        : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff';
-                    ?>
-                    <img src="<?= $nav_avatar_src ?>" alt="Admin" />
-                </div>
-            </div>
-        </header>
 
         <!-- MAIN CONTENT -->
         <main class="admin-main">
@@ -76,9 +57,14 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                     <h1>Gestión de Usuarios</h1>
                     <p>Manage platform access and user roles.</p>
                 </div>
-                <button class="btn-primary btn-agregar-usuario" id="btn-agregar-usuario">
-                    <span class="material-symbols-outlined">person_add</span> Agregar Usuario
-                </button>
+                <div class="page-header-actions">
+                    <button class="btn-icon-circle" id="btn-notifications">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button class="btn-primary btn-agregar-usuario" id="btn-agregar-usuario">
+                        <span class="material-symbols-outlined">person_add</span> Agregar Usuario
+                    </button>
+                </div>
             </div>
 
             <!-- Stats Cards -->
@@ -119,12 +105,10 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                 <div class="users-card-header">
                     <h2>User Directory</h2>
                     <div class="users-card-actions">
-                        <button class="btn-icon-sm" title="Filtrar">
-                            <span class="material-symbols-outlined">tune</span>
-                        </button>
-                        <button class="btn-icon-sm" title="Exportar">
-                            <span class="material-symbols-outlined">download</span>
-                        </button>
+                        <div class="search-box">
+                            <span class="material-symbols-outlined search-icon">search</span>
+                            <input type="text" id="search-input" placeholder="Buscar usuario..." />
+                        </div>
                     </div>
                 </div>
                 <div class="table-container">

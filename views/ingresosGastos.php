@@ -5,6 +5,12 @@ if (!isset($_SESSION['usuario'])) {
   header("Location: ../index.php");
   exit();
 }
+
+// Si es admin (id_rol = 1), no debe tener acceso a las vistas de usuario normal
+if (($_SESSION['id_rol'] ?? 0) == 1) {
+  header("Location: admin.php");
+  exit();
+}
 ?>
 <!doctype html>
 <html lang="es">
