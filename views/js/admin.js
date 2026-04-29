@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function inicializarEventos() {
     // Botones de agregar usuario
     document.getElementById('btn-agregar-usuario').addEventListener('click', abrirModalCrear);
-    document.getElementById('btn-sidebar-agregar').addEventListener('click', abrirModalCrear);
 
     // Modal
     document.getElementById('btn-cerrar-modal').addEventListener('click', cerrarModal);

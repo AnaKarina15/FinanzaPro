@@ -155,4 +155,121 @@ class Usuario {
             return false;
         }
     }
+
+    // ===== MÉTODOS DE ADMINISTRACIÓN =====
+
+    public function listarUsuarios($pagina = 1, $porPagina = 10, $busqueda = '') {
+        $offset = ($pagina - 1) * $porPagina;
+
+        // Contar total
+        if (!empty($busqueda)) {
+            $queryCount = "SELECT COUNT(*) as total FROM usuarios u 
+                           INNER JOIN roles r ON u.id_rol = r.id_rol
+                           WHERE u.nombre LIKE :busqueda OR u.apellido LIKE :busqueda2 OR u.correo LIKE :busqueda3";
+            $stmtCount = $this->conexion->prepare($queryCount);
+            $like = "%$busqueda%";
+            $stmtCount->bindParam(':busqueda', $like, PDO::PARAM_STR);
+            $stmtCount->bindParam(':busqueda2', $like, PDO::PARAM_STR);
+            $stmtCount->bindParam(':busqueda3', $like, PDO::PARAM_STR);
+        } else {
+            $queryCount = "SELECT COUNT(*) as total FROM usuarios";
+            $stmtCount = $this->conexion->prepare($queryCount);
+        }
+        $stmtCount->execute();
+        $total = (int) $stmtCount->fetch()['total'];
+
+        // Obtener registros paginados
+        if (!empty($busqueda)) {
+            $query = "SELECT u.*, r.nombre_rol FROM usuarios u
+                      INNER JOIN roles r ON u.id_rol = r.id_rol
+                      WHERE u.nombre LIKE :busqueda OR u.apellido LIKE :busqueda2 OR u.correo LIKE :busqueda3
+                      ORDER BY u.id_usuario DESC LIMIT :limite OFFSET :offset";
+            $stmt = $this->conexion->prepare($query);
+            $stmt->bindParam(':busqueda', $like, PDO::PARAM_STR);
+            $stmt->bindParam(':busqueda2', $like, PDO::PARAM_STR);
+            $stmt->bindParam(':busqueda3', $like, PDO::PARAM_STR);
+        } else {
+            $query = "SELECT u.*, r.nombre_rol FROM usuarios u
+                      INNER JOIN roles r ON u.id_rol = r.id_rol
+                      ORDER BY u.id_usuario DESC LIMIT :limite OFFSET :offset";
+            $stmt = $this->conexion->prepare($query);
+        }
+        $stmt->bindParam(':limite', $porPagina, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'usuarios' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            'total' => $total,
+            'pagina' => $pagina,
+            'porPagina' => $porPagina,
+            'totalPaginas' => ceil($total / $porPagina)
+        ];
+    }
+
+    public function estadisticasAdmin() {
+        $total = $this->conexion->query("SELECT COUNT(*) as c FROM usuarios")->fetch()['c'];
+        $activos = $this->conexion->query("SELECT COUNT(*) as c FROM usuarios WHERE cuenta_verificada = 1")->fetch()['c'];
+        $nuevos = $this->conexion->query("SELECT COUNT(*) as c FROM usuarios WHERE fecha_registro >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetch()['c'];
+
+        return [
+            'totalUsuarios' => (int) $total,
+            'activos' => (int) $activos,
+            'nuevosSemana' => (int) $nuevos
+        ];
+    }
+
+    public function crearUsuarioAdmin($nombre, $apellido, $correo, $telefono, $contrasena, $id_rol) {
+        $contrasena_hashed = password_hash($contrasena, PASSWORD_DEFAULT);
+        $query = "INSERT INTO usuarios (nombre, apellido, correo, telefono, contrasena, id_rol, cuenta_verificada)
+                  VALUES (:nombre, :apellido, :correo, :telefono, :contrasena, :id_rol, 1)";
+
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+        $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
+        $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+        $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+        $stmt->bindParam(':contrasena', $contrasena_hashed, PDO::PARAM_STR);
+        $stmt->bindParam(':id_rol', $id_rol, PDO::PARAM_INT);
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error creando usuario admin: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function actualizarUsuarioAdmin($id_usuario, $nombre, $apellido, $correo, $telefono, $id_rol) {
+        $query = "UPDATE usuarios SET nombre = :nombre, apellido = :apellido, correo = :correo,
+                  telefono = :telefono, id_rol = :id_rol WHERE id_usuario = :id_usuario";
+
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+        $stmt->bindParam(':apellido', $apellido, PDO::PARAM_STR);
+        $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
+        $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+        $stmt->bindParam(':id_rol', $id_rol, PDO::PARAM_INT);
+        $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error actualizando usuario admin: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function eliminarUsuario($id_usuario) {
+        $query = "DELETE FROM usuarios WHERE id_usuario = :id_usuario";
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+
+        try {
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error eliminando usuario: " . $e->getMessage());
+            return false;
+        }
+    }
 }

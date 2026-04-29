@@ -12,6 +12,12 @@
     padding-bottom: 50px;
 }
 
+.profile-app-header {
+    max-width: 1132px; /* 1100px content + 32px padding from .app-header */
+    margin: 0 auto;
+    width: 100%;
+}
+
 .profile-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

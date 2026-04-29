@@ -34,11 +34,15 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
                 <h1 class="logo-text">FinanzaPro</h1>
             </div>
             <nav class="sidebar-nav">
+                <?php if (($_SESSION['id_rol'] ?? 0) == 1): ?>
+                <a href="admin.php" class="nav-link"><span class="material-symbols-outlined">people</span> Usuarios</a>
+                <?php else: ?>
                 <a href="dashboard.php" class="nav-link"><span class="material-symbols-outlined">grid_view</span> Dashboard</a>
-                <a href="ingresosGastos.php" class="nav-link active" disabled><span class="material-symbols-outlined">currency_exchange</span> Ingresos y Gastos</a>
+                <a href="ingresosGastos.php" class="nav-link"><span class="material-symbols-outlined">currency_exchange</span> Ingresos y Gastos</a>
                 <a href="#" class="nav-link"><span class="material-symbols-outlined">savings</span> Presupuesto y Metas</a>
                 <a href="#" class="nav-link"><span class="material-symbols-outlined">analytics</span> Reportes y Análisis</a>
-                <a href="perfil.php" class="nav-link nav-profile">
+                <?php endif; ?>
+                <a href="perfil.php" class="nav-link nav-profile active">
                     <div class="avatar">
                         <?php
                         $nav_foto = $_SESSION['foto_perfil'] ?? null;
@@ -53,7 +57,7 @@ $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
             </nav>
         </aside>
 
-        <header class="app-header">
+        <header class="app-header profile-app-header">
             <div class="view-info">
                 <h2 class="view-title">Mi Perfil</h2>
                 <p class="view-description">Gestiona tu información personal y preferencias de cuenta.</p>
