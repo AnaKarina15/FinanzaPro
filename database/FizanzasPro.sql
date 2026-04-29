@@ -23,6 +23,7 @@ CREATE TABLE usuarios (
     cuenta_verificada BOOLEAN DEFAULT FALSE,
     moneda_principal VARCHAR(3) DEFAULT 'COP',
     tema_interfaz VARCHAR(10) DEFAULT 'claro',
+    foto_perfil VARCHAR(255) DEFAULT NULL,
     notificaciones_push BOOLEAN DEFAULT TRUE,
     reportes_semanales BOOLEAN DEFAULT FALSE,
     CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol) REFERENCES roles(id_rol)

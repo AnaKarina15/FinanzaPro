@@ -57,7 +57,13 @@ if (!isset($_SESSION['usuario']) || ($_SESSION['id_rol'] ?? 0) != 1) {
                     <span class="material-symbols-outlined">notifications</span>
                 </button>
                 <div class="admin-avatar">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?>&background=059669&color=fff" alt="Admin" />
+                    <?php
+                    $nav_foto = $_SESSION['foto_perfil'] ?? null;
+                    $nav_avatar_src = $nav_foto
+                        ? '../' . htmlspecialchars($nav_foto)
+                        : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff';
+                    ?>
+                    <img src="<?= $nav_avatar_src ?>" alt="Admin" />
                 </div>
             </div>
         </header>

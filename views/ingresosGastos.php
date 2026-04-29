@@ -49,7 +49,13 @@ if (!isset($_SESSION['usuario'])) {
         </a>
         <a href="perfil.php" class="nav-link nav-profile">
           <div class="avatar">
-            <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?>&background=059669&color=fff" alt="Foto de perfil" />
+            <?php
+            $nav_foto = $_SESSION['foto_perfil'] ?? null;
+            $nav_avatar_src = $nav_foto
+                ? '../' . htmlspecialchars($nav_foto)
+                : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff';
+            ?>
+            <img src="<?= $nav_avatar_src ?>" alt="Foto de perfil" />
           </div>
           <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
         </a>
