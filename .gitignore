@@ -1,6 +1,5 @@
-# Configuración de base de datos (Contiene credenciales)
-config/database.php
-config/ca.pem
+# Configuración de Firebase (Contiene credenciales)
+views/js/firebase-config.js
 
 # Subidas de usuarios
 uploads/

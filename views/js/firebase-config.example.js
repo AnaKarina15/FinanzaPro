@@ -3,14 +3,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/fireba
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
-// Tu configuración de Firebase
+// ⚠️ Copia este archivo como firebase-config.js y reemplaza los valores
+// con los de tu proyecto en https://console.firebase.google.com
 const firebaseConfig = {
-  apiKey: "AIzaSyBecDHELrQQf5ApUJn-xhZmxtIi-MCG0bk",
-  authDomain: "finanzapro-89c93.firebaseapp.com",
-  projectId: "finanzapro-89c93",
-  storageBucket: "finanzapro-89c93.firebasestorage.app",
-  messagingSenderId: "798668585737",
-  appId: "1:798668585737:web:25ad03ba16ae7e12c831d8"
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_PROYECTO.firebaseapp.com",
+  projectId: "TU_PROYECTO",
+  storageBucket: "TU_PROYECTO.firebasestorage.app",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
 };
 
 // Inicializar Firebase
