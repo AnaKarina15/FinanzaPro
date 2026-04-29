@@ -8,6 +8,7 @@ define('BASE_URL', 'http://localhost/FinanzaPro');
 
 require_once 'controller/UsuarioController.php';
 require_once 'controller/TransaccionController.php';
+require_once 'controller/PresupuestoMetaController.php';
 
 // Determinamos la acción, por defecto enviamos al login
 $action = isset($_GET['action']) ? $_GET['action'] : 'default';
@@ -82,6 +83,37 @@ switch ($action) {
         // RUTA PARA ELIMINACIÓN DESDE JS
         $controller = new TransaccionController();
         $controller->eliminarMovimiento();
+        break;
+
+    // --- RUTAS DE PRESUPUESTOS Y METAS ---
+    case 'obtenerMetas':
+        $controller = new PresupuestoMetaController();
+        $controller->obtenerMetasJson();
+        break;
+
+    case 'guardarMeta':
+        $controller = new PresupuestoMetaController();
+        $controller->guardarMeta();
+        break;
+
+    case 'eliminarMeta':
+        $controller = new PresupuestoMetaController();
+        $controller->eliminarMeta();
+        break;
+
+    case 'obtenerPresupuestos':
+        $controller = new PresupuestoMetaController();
+        $controller->obtenerPresupuestosJson();
+        break;
+
+    case 'guardarPresupuesto':
+        $controller = new PresupuestoMetaController();
+        $controller->guardarPresupuesto();
+        break;
+
+    case 'eliminarPresupuesto':
+        $controller = new PresupuestoMetaController();
+        $controller->eliminarPresupuesto();
         break;
 
     // --- RUTAS DE ADMINISTRACIÓN ---
