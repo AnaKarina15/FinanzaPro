@@ -96,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.movimientosGlobales = [];
     window.filtroTipoSeleccionado = 'todos';
     window.filtroTiempoSeleccionado = 'esteMes';
+    window.terminoBusqueda = '';
 
     const obtenerRangoTiempo = (tipo) => {
         const hoy = new Date();
@@ -140,15 +141,31 @@ document.addEventListener("DOMContentLoaded", () => {
     window.aplicarFiltros = () => {
         const rango = obtenerRangoTiempo(window.filtroTiempoSeleccionado);
         const tabla = document.getElementById('tabla-movimientos-body');
+        const termino = window.terminoBusqueda.toLowerCase().trim();
+
         const movsFiltrados = window.movimientosGlobales.filter(mov => {
             const coincideTipo = window.filtroTipoSeleccionado === 'todos' || mov.tipo === window.filtroTipoSeleccionado;
             const coincideTiempo = estaDentroDelRango(mov.fecha, rango);
-            return coincideTipo && coincideTiempo;
+
+            // Filtro de búsqueda
+            let coincideBusqueda = true;
+            if (termino) {
+                const desc = (mov.descripcion || '').toLowerCase();
+                const cat = (mov.categoria || '').toLowerCase();
+                const montoStr = String(mov.monto || '');
+                const montoFormateado = formatearMoneda(mov.monto).toLowerCase();
+                coincideBusqueda = desc.includes(termino) || cat.includes(termino) || montoStr.includes(termino) || montoFormateado.includes(termino);
+            }
+
+            return coincideTipo && coincideTiempo && coincideBusqueda;
         });
 
         if (tabla) {
             if (movsFiltrados.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="5" class="empty-table-msg">No hay transacciones para este filtro.</td></tr>';
+                const mensajeVacio = termino
+                    ? `No se encontraron transacciones para "<strong>${termino}</strong>".`
+                    : 'No hay transacciones para este filtro.';
+                tabla.innerHTML = `<tr><td colspan="5" class="empty-table-msg">${mensajeVacio}</td></tr>`;
             } else {
                 tabla.innerHTML = '';
                 movsFiltrados.forEach(mov => {
@@ -233,6 +250,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // --- BARRA DE BÚSQUEDA ---
+    const inputBuscar = document.getElementById('buscar-transaccion');
+    const btnLimpiarBusqueda = document.getElementById('search-clear-btn');
+
+    if (inputBuscar) {
+        inputBuscar.addEventListener('input', () => {
+            window.terminoBusqueda = inputBuscar.value;
+            if (btnLimpiarBusqueda) {
+                btnLimpiarBusqueda.style.display = inputBuscar.value.length > 0 ? 'flex' : 'none';
+            }
+            window.aplicarFiltros();
+        });
+    }
+
+    if (btnLimpiarBusqueda) {
+        btnLimpiarBusqueda.addEventListener('click', () => {
+            if (inputBuscar) inputBuscar.value = '';
+            window.terminoBusqueda = '';
+            btnLimpiarBusqueda.style.display = 'none';
+            window.aplicarFiltros();
+            if (inputBuscar) inputBuscar.focus();
+        });
+    }
+
     // --- RENDERIZADO DE GRÁFICAS Y LEYENDAS ---
     window.renderizarDonaYleyenda = function(canvasId, centerId, legendId, dataset, totalGlobal, colores, tipo) {
         const canvas = document.getElementById(canvasId);
@@ -262,12 +303,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         dataset.forEach((cat, index) => {
             let porcentaje = ((parseFloat(cat.total) / totalGlobal) * 100).toFixed(0);
-            const claseColor = `dot-${tipo}-${index % 4}`;
+            const colorDot = colores[index % colores.length];
             
             legendContainer.innerHTML += `
                 <div class="legend-item">
                     <div class="legend-item-left">
-                        <div class="legend-dot ${claseColor}"></div>
+                        <div class="legend-dot" style="background-color: ${colorDot};"></div>
                         <span>${cat.nombre}</span>
                     </div>
                     <span class="legend-percent">${porcentaje}%</span>

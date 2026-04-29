@@ -233,6 +233,7 @@ button {
         justify-content: space-between;
         align-items: center;
         text-align: center;
+        gap: 10px;
     }
 
     .card-value {

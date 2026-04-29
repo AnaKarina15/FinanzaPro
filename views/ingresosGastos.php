@@ -142,6 +142,13 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
       <article class="card movimientos-card">
         <div class="card-top movimientos-header">
           <h3 class="movimientos-title">Historial de Transacciones</h3>
+          <div class="search-bar-container" id="search-bar-container">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input type="text" id="buscar-transaccion" placeholder="Buscar por descripción, categoría o monto..." autocomplete="off">
+            <button class="search-clear-btn" id="search-clear-btn" style="display: none;">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
           <div class="table-filters">
             <span class="filter-option filter-active" data-filter="todos">Todos</span>
             <span class="filter-option" data-filter="ingreso">Ingresos</span>
