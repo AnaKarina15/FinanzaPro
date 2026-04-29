@@ -1,5 +1,3 @@
-/* ARCHIVO: vistas/js/presupuestosMetas.js */
-
 document.addEventListener('DOMContentLoaded', () => {
     const kebabBtns = document.querySelectorAll('.kebab-btn');
     
