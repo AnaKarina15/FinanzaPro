@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { doc, getDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { initNotificaciones, enviarBienvenidaSiNecesario } from "./notificaciones.js";
+import { initNotificaciones, enviarBienvenidaSiNecesario, verificarPresupuestosAlCargar } from "./notificaciones.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const formatearMoneda = (valor) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
@@ -53,9 +53,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             
             initNotificaciones(user.uid);
-            // Enviar bienvenida si es la primera vez que entra (usuarios nuevos Y existentes)
-            const _nombre = document.querySelector(".nav-profile .username")?.textContent || 'Usuario';
+            // Usar el nombre directamente de Firestore (no del DOM que puede decir 'Cargando...')
+            const _nombre = userDoc?.data()?.nombre
+                ? `${userDoc.data().nombre} ${userDoc.data().apellido || ''}`.trim()
+                : (user.displayName || 'Usuario');
             enviarBienvenidaSiNecesario(user.uid, _nombre);
+            // Verificar presupuestos excedidos existentes al cargar
+            verificarPresupuestosAlCargar(user.uid);
             cargarCategoriasDePresupuestos();
             cargarEstadisticasFirestore(user.uid);
         } else {
