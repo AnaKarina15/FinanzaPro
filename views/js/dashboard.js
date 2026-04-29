@@ -417,9 +417,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 await addDoc(collection(db, "transacciones"), {
                     usuario_id: user.uid,
                     tipo: tipo,
-                    monto: monto,
-                    fecha: fecha,
-                    categoria: categoria,
+                    monto: montoVal,
+                    fecha: fechaVal,
+                    categoria: categoriaVal,
                     descripcion: descripcion,
                     fecha_creacion: new Date()
                 });
