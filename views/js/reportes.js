@@ -107,8 +107,10 @@ function renderMetrics(transacciones, metas) {
     });
 
     const balanceTotal = ingresosTotales - gastosTotales;
-    document.getElementById('balance-total').innerText = '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(balanceTotal);
-    document.getElementById('gasto-mensual').innerText = '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(gastosMes);
+    document.getElementById('balance-total').innerText = '$' + new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 }).format(balanceTotal);
+    // Mostrar gastos del mes actual; si es 0, mostrar total acumulado como fallback
+    const gastoAMostrar = gastosMes > 0 ? gastosMes : gastosTotales;
+    document.getElementById('gasto-mensual').innerText = '$' + new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 }).format(gastoAMostrar);
 
     // Calcular tendencias vs mes anterior
     const balanceMesAnterior = ingresosTotales - gastosTotales - (ingresosMes - gastosMes); // Rough estimation if we only look at global vs monthly. Better: compare current month balance vs previous month balance.
