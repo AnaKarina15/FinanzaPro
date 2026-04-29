@@ -154,8 +154,8 @@ if (registerForm) {
 
       // 4. Crear notificación de bienvenida en Firestore (antes de cerrar sesión)
       await crearNotificacion(user.uid, {
-        titulo: `¡Bienvenid@ ${nombre} a FinanzaPro! 🎉`,
-        mensaje: `Es bacano tenerte aquí. Empieza registrando tus ingresos y gastos para tomar control de tus finanzas.`,
+        titulo: `¡Bienvenid@ a FinanzaPro, ${nombre}! 🎉`,
+        mensaje: `Nos alegra que estés aquí. Ya tienes todo listo para llevar el control de tus finanzas personales. ¡Empieza registrando tus primeros ingresos y gastos!`,
         tipo: 'meta'
       });
 
