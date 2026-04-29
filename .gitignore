@@ -1,0 +1,11 @@
+# Configuración de base de datos (Contiene credenciales)
+config/database.php
+config/ca.pem
+
+# Subidas de usuarios
+uploads/
+views/pictures/
+
+# Otros
+.DS_Store
+Thumbs.db
