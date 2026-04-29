@@ -72,7 +72,6 @@ switchForm.forEach((link) => {
 });
 
 /* FIREBASE LOGIN Y REGISTRO */
-document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.querySelector(".login-form");
   const registerForm = document.querySelector(".register-form");
 
@@ -244,10 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnGoogleRegister = document.getElementById("btn-google-register");
   if (btnGoogleRegister) btnGoogleRegister.addEventListener("click", handleGoogleSignIn);
 
-});
-
 /* LÓGICA PRINCIPAL AL CARGAR LA PÁGINA (Alertas y Verificación) */
-document.addEventListener("DOMContentLoaded", () => {
   // --- 1. MANEJO DE ALERTAS POR URL ---
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -440,6 +436,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "error",
           );
         });
+        });
     });
   }
-});
