@@ -11,7 +11,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc, deleteField, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { crearNotificacion } from "./notificaciones.js";
 
 // Idioma de Firebase en Español
@@ -89,6 +89,29 @@ if (loginForm) {
           confirmButtonColor: "#059669",
         });
         return;
+      }
+
+      // Comprobar si la cuenta está programada para eliminarse
+      const userDocRef = doc(db, "usuarios", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists() && userDocSnap.data().fecha_eliminacion) {
+        const fechaEliminacion = new Date(userDocSnap.data().fecha_eliminacion);
+        const ahora = new Date();
+        
+        if (ahora > fechaEliminacion) {
+          // Ya pasaron los 10 días, borrar cuenta definitivamente
+          await deleteDoc(userDocRef);
+          import("https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js").then(async ({ deleteUser }) => {
+             try { await deleteUser(user); } catch(e) { console.error(e); }
+          });
+          await signOut(auth);
+          Swal.fire("Cuenta eliminada", "Tu cuenta ha sido eliminada permanentemente porque pasaron los 10 días.", "error");
+          return;
+        } else {
+          // Aún no pasan los 10 días, cancelar eliminación
+          await updateDoc(userDocRef, { fecha_eliminacion: deleteField() });
+          Swal.fire("Eliminación cancelada", "Al iniciar sesión, hemos cancelado la eliminación de tu cuenta.", "success");
+        }
       }
 
       window.location.href = "/FinanzaPro/views/dashboard.php";
@@ -213,6 +236,22 @@ const handleGoogleSignIn = async () => {
         rol: "usuario",
         estado: "activo"
       });
+    } else if (userDoc.data().fecha_eliminacion) {
+        const fechaEliminacion = new Date(userDoc.data().fecha_eliminacion);
+        const ahora = new Date();
+        
+        if (ahora > fechaEliminacion) {
+          await deleteDoc(userDocRef);
+          import("https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js").then(async ({ deleteUser }) => {
+             try { await deleteUser(user); } catch(e) { console.error(e); }
+          });
+          await signOut(auth);
+          Swal.fire("Cuenta eliminada", "Tu cuenta ha sido eliminada permanentemente.", "error");
+          return;
+        } else {
+          await updateDoc(userDocRef, { fecha_eliminacion: deleteField() });
+          Swal.fire("Eliminación cancelada", "Al iniciar sesión, hemos cancelado la eliminación de tu cuenta.", "success");
+        }
     }
 
     window.location.href = "/FinanzaPro/views/dashboard.php";
