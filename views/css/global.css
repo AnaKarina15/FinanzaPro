@@ -817,7 +817,7 @@ select:focus-visible {
 
 /* Notificación ya leída — aspecto tenue */
 .notif-item.notif-leida {
-    opacity: 0.55;
+    opacity: 0.78;
     background: #f8fafc;
 }
 .notif-item.notif-leida .notif-titulo { font-weight: 500; }
