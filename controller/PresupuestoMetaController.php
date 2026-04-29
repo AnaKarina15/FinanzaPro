@@ -108,16 +108,7 @@ class PresupuestoMetaController {
         $anio_actual = date('Y');
 
         $presupuestoModel = new Presupuesto();
-        $presupuestos = $presupuestoModel->obtenerPresupuestosPorUsuario($id_usuario);
-
-        // Añadimos el monto consumido a cada presupuesto
-        foreach ($presupuestos as &$p) {
-            $consumido = 0;
-            if ($p['id_categoria']) {
-                $consumido = $presupuestoModel->obtenerConsumido($id_usuario, $p['id_categoria'], $mes_actual, $anio_actual);
-            }
-            $p['monto_consumido'] = $consumido;
-        }
+        $presupuestos = $presupuestoModel->obtenerPresupuestosPorUsuario($id_usuario, $mes_actual, $anio_actual);
 
         echo json_encode(['exito' => true, 'datos' => $presupuestos]);
     }

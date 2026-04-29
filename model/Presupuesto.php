@@ -9,14 +9,20 @@ class Presupuesto {
         $this->conn = $conexion->getConexion();
     }
 
-    public function obtenerPresupuestosPorUsuario($id_usuario) {
-        $sql = "SELECT p.*, i.codigo_material, c.nombre as nombre_categoria 
+    public function obtenerPresupuestosPorUsuario($id_usuario, $mes, $anio) {
+        $sql = "SELECT p.*, i.codigo_material, c.nombre as nombre_categoria, 
+                       COALESCE(SUM(t.monto), 0) as monto_consumido
                 FROM presupuestos p 
                 LEFT JOIN iconos i ON p.id_icono = i.id_icono 
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
-                WHERE p.id_usuario = ?";
+                LEFT JOIN transacciones t ON p.id_categoria = t.id_categoria 
+                      AND t.id_usuario = p.id_usuario 
+                      AND MONTH(t.fecha) = ? 
+                      AND YEAR(t.fecha) = ?
+                WHERE p.id_usuario = ?
+                GROUP BY p.id_presupuesto";
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$id_usuario]);
+        $stmt->execute([$mes, $anio, $id_usuario]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
