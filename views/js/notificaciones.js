@@ -40,18 +40,21 @@ export async function crearNotificacion(uid, { titulo, mensaje, tipo = 'info' })
 // ═══════════════════════════════════════════════════════════
 function _escucharNotificaciones() {
     if (!currentUid) return;
-    if (unsubscribeNotif) unsubscribeNotif(); // limpiar listener anterior
+    if (unsubscribeNotif) unsubscribeNotif();
 
+    // Solo filtramos por usuario_id para evitar el requisito de índice compuesto
     const q = query(
         collection(db, "notificaciones"),
-        where("usuario_id", "==", currentUid),
-        where("leida", "==", false)
+        where("usuario_id", "==", currentUid)
     );
 
     unsubscribeNotif = onSnapshot(q, (snapshot) => {
-        const count = snapshot.size;
-        _actualizarBadge(count);
-        _renderPanel(snapshot.docs);
+        // Filtramos leida=false en el cliente
+        const noLeidas = snapshot.docs.filter(d => d.data().leida === false);
+        _actualizarBadge(noLeidas.length);
+        _renderPanel(noLeidas);
+    }, (error) => {
+        console.error("Error escuchando notificaciones:", error);
     });
 }
 
@@ -145,13 +148,15 @@ function _bindBellButton() {
     // Marcar todas como leídas
     document.getElementById('btn-marcar-todas')?.addEventListener('click', async () => {
         if (!currentUid) return;
+        // Traer todas las notificaciones del usuario y filtrar en cliente
         const q = query(
             collection(db, "notificaciones"),
-            where("usuario_id", "==", currentUid),
-            where("leida", "==", false)
+            where("usuario_id", "==", currentUid)
         );
         const snap = await getDocs(q);
-        const promises = snap.docs.map(d => updateDoc(doc(db, "notificaciones", d.id), { leida: true }));
+        const promises = snap.docs
+            .filter(d => d.data().leida === false)
+            .map(d => updateDoc(doc(db, "notificaciones", d.id), { leida: true }));
         await Promise.all(promises);
     });
 }
