@@ -1,12 +1,14 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut, updatePassword, verifyBeforeUpdateEmail, sendPasswordResetEmail, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { getDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { initNotificaciones } from "./notificaciones.js";
 
 let currentUid = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUid = user.uid;
+        initNotificaciones(user.uid);
         cargarPerfil(user);
     } else {
         window.location.href = '../index.php';

@@ -1,6 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { doc, getDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { initNotificaciones } from "./notificaciones.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const formatearMoneda = (valor) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
@@ -51,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Error al obtener perfil:", error);
             }
             
+            initNotificaciones(user.uid);
             cargarCategoriasDePresupuestos();
             cargarEstadisticasFirestore(user.uid);
         } else {

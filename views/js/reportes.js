@@ -1,6 +1,7 @@
 import { db, auth } from './firebase-config.js';
 import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { initNotificaciones } from "./notificaciones.js";
 
 let currentUid = null;
 
@@ -65,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUid = user.uid;
+            initNotificaciones(user.uid);
             
             // Actualizar perfil en el sidebar
             try {
@@ -223,8 +225,10 @@ function renderMetrics(transacciones, metas) {
     });
 
     const balanceTotal = ingresosTotales - gastosTotales;
-    document.getElementById('balance-total').innerText = '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(balanceTotal);
-    document.getElementById('gasto-mensual').innerText = '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(gastosSem);
+    document.getElementById('balance-total').innerText = '$' + new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 }).format(balanceTotal);
+    // Mostrar gastos del mes actual; si es 0, mostrar total acumulado como fallback
+    const gastoAMostrar = gastosMes > 0 ? gastosMes : gastosTotales;
+    document.getElementById('gasto-mensual').innerText = '$' + new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 }).format(gastoAMostrar);
 
     // Calcular tendencias vs semestre anterior
     const balanceSemActual = ingresosSem - gastosSem;

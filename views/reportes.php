@@ -89,6 +89,23 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         </p>
       </div>
       <div class="view-buttons">
+        <div class="notif-wrapper">
+          <button class="btn-secondary" id="btn-notificaciones">
+            <span class="material-symbols-outlined">notifications</span>
+            <span id="notif-badge" style="display:none;"></span>
+          </button>
+          <div id="notif-panel">
+            <div class="notif-panel-header">
+              <h4>Notificaciones</h4>
+              <button id="btn-marcar-todas">Marcar todas como leídas</button>
+            </div>
+            <div id="notif-lista"></div>
+            <div id="notif-empty">
+              <span class="material-symbols-outlined">notifications_none</span>
+              Sin notificaciones nuevas
+            </div>
+          </div>
+        </div>
         <button class="btn-secondary">
           <span class="material-symbols-outlined">notifications</span>
         </button>

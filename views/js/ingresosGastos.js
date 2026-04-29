@@ -1,8 +1,18 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { initNotificaciones, crearNotificacion } from "./notificaciones.js";
 
 let currentUid = null;
+let domListo = false;
+
+// Llamar carga cuando tanto Auth como DOM estén listos
+function intentarCargar() {
+    if (currentUid && domListo) {
+        cargarCategoriasDePresupuestos();
+        window.cargarDatosFirestore();
+    }
+}
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -19,9 +29,9 @@ onAuthStateChanged(auth, async (user) => {
                 if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
             }
         } catch(e) { console.error(e); }
-        
-        cargarCategoriasDePresupuestos();
-        cargarDatosFirestore();
+
+        intentarCargar();
+        initNotificaciones(user.uid);
     } else {
         window.location.href = '../index.php';
     }
@@ -53,6 +63,8 @@ const cargarCategoriasDePresupuestos = async () => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    domListo = true;
+    intentarCargar();
     // --- FORMATTING LOGIC ---
     const inputVisual = document.getElementById('monto_visual');
     const inputOculto = document.getElementById('monto');
@@ -95,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- FILTROS LOGIC ---
     window.movimientosGlobales = [];
     window.filtroTipoSeleccionado = 'todos';
-    window.filtroTiempoSeleccionado = 'esteMes';
+    window.filtroTiempoSeleccionado = 'todos';
     window.terminoBusqueda = '';
 
     const obtenerRangoTiempo = (tipo) => {
@@ -104,6 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const fin = new Date(hoy);
 
         switch (tipo) {
+            case 'todos':
+                return { desde: new Date('2000-01-01'), hasta: new Date('2100-12-31') };
             case 'hoy':
                 inicio.setHours(0, 0, 0, 0);
                 fin.setHours(23, 59, 59, 999);
@@ -438,6 +452,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById('modalNuevoMovimiento').classList.remove('active');
                 formMovimiento.reset();
                 window.cargarDatosFirestore();
+                // Verificar alertas de presupuesto tras guardar
+                if (tipo === 'gasto') _verificarAlertasPresupuesto(currentUid, categoria);
             } catch (error) {
                 console.error("Error guardando:", error);
                 Swal.fire("Error", "Ocurrió un problema", "error");
@@ -495,3 +511,62 @@ window.cargarDatosFirestore = async () => {
         console.error("Error al cargar estadísticas:", error);
     }
 };
+
+// ═══════════════════════════════════════════════════════════
+// VERIFICAR ALERTA DE PRESUPUESTO (>= 80%)
+// ═══════════════════════════════════════════════════════════
+async function _verificarAlertasPresupuesto(uid, categoriaGasto) {
+    if (!uid) return;
+    try {
+        // Buscar el presupuesto de la misma categoría del gasto
+        const qPres = query(
+            collection(db, "presupuestos"),
+            where("id_usuario", "==", uid),
+            where("categoria", "==", categoriaGasto)
+        );
+        const snapPres = await getDocs(qPres);
+        if (snapPres.empty) return;
+
+        // Sumar todos los gastos de esa categoría este mes
+        const now = new Date();
+        const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        const qTrans = query(
+            collection(db, "transacciones"),
+            where("usuario_id", "==", uid),
+            where("tipo", "==", "gasto"),
+            where("categoria", "==", categoriaGasto)
+        );
+        const snapTrans = await getDocs(qTrans);
+        let totalGastado = 0;
+        snapTrans.forEach(d => {
+            if (String(d.data().fecha || '').startsWith(mesActual)) {
+                totalGastado += parseFloat(d.data().monto) || 0;
+            }
+        });
+
+        // Comparar con el límite del presupuesto
+        snapPres.forEach(async (pDoc) => {
+            const pData = pDoc.data();
+            const limite = parseFloat(pData.valor_limite || pData.limite || 0);
+            if (limite <= 0) return;
+            const porcentaje = (totalGastado / limite) * 100;
+
+            if (porcentaje >= 100) {
+                await crearNotificacion(uid, {
+                    titulo: `¡Límite superado! — ${categoriaGasto}`,
+                    mensaje: `Has superado el 100% de tu presupuesto de ${categoriaGasto} (${totalGastado.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
+                    tipo: 'alerta'
+                });
+            } else if (porcentaje >= 80) {
+                await crearNotificacion(uid, {
+                    titulo: `Alerta 80% — ${categoriaGasto}`,
+                    mensaje: `Llevas el ${Math.round(porcentaje)}% de tu presupuesto de ${categoriaGasto} (${totalGastado.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
+                    tipo: 'alerta'
+                });
+            }
+        });
+    } catch (e) {
+        console.error("Error verificando presupuesto:", e);
+    }
+}
