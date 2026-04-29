@@ -3,6 +3,15 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/f
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 let currentUid = null;
+let domListo = false;
+
+// Llamar carga cuando tanto Auth como DOM estén listos
+function intentarCargar() {
+    if (currentUid && domListo) {
+        cargarCategoriasDePresupuestos();
+        window.cargarDatosFirestore();
+    }
+}
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -19,9 +28,8 @@ onAuthStateChanged(auth, async (user) => {
                 if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
             }
         } catch(e) { console.error(e); }
-        
-        cargarCategoriasDePresupuestos();
-        cargarDatosFirestore();
+
+        intentarCargar();
     } else {
         window.location.href = '../index.php';
     }
@@ -53,6 +61,8 @@ const cargarCategoriasDePresupuestos = async () => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    domListo = true;
+    intentarCargar();
     // --- FORMATTING LOGIC ---
     const inputVisual = document.getElementById('monto_visual');
     const inputOculto = document.getElementById('monto');
