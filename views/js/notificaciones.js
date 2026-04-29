@@ -14,7 +14,14 @@ let unsubscribeNotif = null;
 export function initNotificaciones(uid) {
     currentUid = uid;
     _escucharNotificaciones();
-    _bindBellButton();
+
+    // Garantizar que el DOM esté listo antes de bindear botones
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', _bindBellButton);
+    } else {
+        // DOM ya está listo (caso normal cuando onAuthStateChanged dispara tarde)
+        _bindBellButton();
+    }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -22,16 +29,41 @@ export function initNotificaciones(uid) {
 // ═══════════════════════════════════════════════════════════
 export async function crearNotificacion(uid, { titulo, mensaje, tipo = 'info' }) {
     try {
-        await addDoc(collection(db, "notificaciones"), {
+        const ref = await addDoc(collection(db, "notificaciones"), {
             usuario_id: uid,
             titulo,
             mensaje,
-            tipo,          // 'alerta', 'meta', 'info'
+            tipo,
             leida: false,
             fecha_creacion: serverTimestamp()
         });
+        console.log("Notificación creada:", ref.id);
     } catch (e) {
         console.error("Error creando notificación:", e);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// BIENVENIDA — enviar solo si el usuario no tiene ninguna aún
+// Funciona para usuarios nuevos Y usuarios ya registrados
+// ═══════════════════════════════════════════════════════════
+export async function enviarBienvenidaSiNecesario(uid, nombre) {
+    try {
+        const q = query(
+            collection(db, "notificaciones"),
+            where("usuario_id", "==", uid)
+        );
+        const snap = await getDocs(q);
+        // Si ya tiene notificaciones, no enviamos de nuevo
+        if (!snap.empty) return;
+
+        await crearNotificacion(uid, {
+            titulo: `¡Bienvenid@ a FinanzaPro, ${nombre}! 🎉`,
+            mensaje: `Nos alegra que estés aquí. Ya tienes todo listo para llevar el control de tus finanzas personales. ¡Empieza registrando tus primeros ingresos y gastos!`,
+            tipo: 'meta'
+        });
+    } catch (e) {
+        console.error("Error enviando bienvenida:", e);
     }
 }
 
