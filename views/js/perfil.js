@@ -117,6 +117,53 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // --- BORRAR CUENTA ---
+    const btnBorrarCuenta = document.getElementById("btn-borrar-cuenta");
+    if (btnBorrarCuenta) {
+        btnBorrarCuenta.addEventListener("click", (e) => {
+            e.preventDefault();
+            Swal.fire({
+                title: "¿Eliminar cuenta?",
+                text: "Tu cuenta se programará para eliminación. Si no inicias sesión en 10 días, se borrará permanentemente.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ef4444",
+                cancelButtonColor: "#64748b",
+                confirmButtonText: "Sí, borrar cuenta",
+                cancelButtonText: "Cancelar",
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    if(!currentUid) return;
+                    
+                    try {
+                        const fechaEliminacion = new Date();
+                        fechaEliminacion.setDate(fechaEliminacion.getDate() + 10);
+                        
+                        // Importamos updateDoc
+                        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
+                        
+                        await updateDoc(doc(db, "usuarios", currentUid), { 
+                            fecha_eliminacion: fechaEliminacion.toISOString() 
+                        });
+                        
+                        Swal.fire({
+                            title: "Cuenta programada",
+                            text: `Tu cuenta se eliminará el ${fechaEliminacion.toLocaleDateString()} si no inicias sesión antes.`,
+                            icon: "info",
+                            confirmButtonColor: "#059669"
+                        }).then(async () => {
+                            await signOut(auth);
+                            window.location.href = '../index.php';
+                        });
+
+                    } catch(err) {
+                        Swal.fire('Error', 'No se pudo programar la eliminación: ' + err.message, 'error');
+                    }
+                }
+            });
+        });
+    }
+
     // --- TEMA DE INTERFAZ ---
     const toggleBtns = document.querySelectorAll(".theme-toggle .toggle-btn");
     if (toggleBtns.length > 0) {

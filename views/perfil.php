@@ -88,9 +88,6 @@ $usuario = []; // Placeholder temporal para no romper HTML
                         </div>
                     </div>
                 </div>
-                <button class="btn-logout-text" id="btn-cerrar-sesion">
-                    <span class="material-symbols-outlined">logout</span> Cerrar Sesión
-                </button>
             </div>
         </header>
 
@@ -225,6 +222,15 @@ $usuario = []; // Placeholder temporal para no romper HTML
                             </div>
                         </section>
                     </div>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="btn-logout-text" id="btn-cerrar-sesion">
+                        <span class="material-symbols-outlined">logout</span> Cerrar Sesión
+                    </button>
+                    <button class="btn-danger" id="btn-borrar-cuenta">
+                        <span class="material-symbols-outlined">delete_forever</span> Borrar cuenta
+                    </button>
                 </div>
 
                 <div class="modal-overlay" id="modal-cambiar-correo">
