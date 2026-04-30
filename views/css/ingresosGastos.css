@@ -8,7 +8,6 @@
 /* TARJETAS DE RESUMEN (INGRESOS/GASTOS)*/
 .combined-chart-card {
     padding: 32px;
-    border: 1px solid #e2e8f0;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
@@ -121,7 +120,7 @@
     padding: 8px 16px;
     border-radius: 999px;
     background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--border-color);
     transition: all 0.25s ease;
     min-width: 180px;
     max-width: 480px;
@@ -214,7 +213,7 @@
     padding: 10px 12px;
     border-radius: 999px;
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
