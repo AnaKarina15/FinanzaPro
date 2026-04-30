@@ -523,7 +523,8 @@
     text-transform: uppercase;
 }
 
-.modal-body .input-container input {
+.modal-body .input-container input,
+.modal-body .input-container select {
     text-align: left;
     border-radius: 12px;
     padding: 12px 16px;

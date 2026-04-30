@@ -11,7 +11,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { doc, setDoc, getDoc, updateDoc, deleteField, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { doc, setDoc, getDoc, updateDoc, deleteField, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { crearNotificacion } from "./notificaciones.js";
 
 // Idioma de Firebase en Español
@@ -143,7 +143,21 @@ if (loginForm) {
     } catch (error) {
       console.error("Error login:", error.code, error.message);
       let mensaje = "Correo o contraseña incorrectos.";
-      if (error.code === "auth/too-many-requests") mensaje = "Demasiados intentos fallidos. Intenta más tarde.";
+      if (error.code === "auth/too-many-requests") {
+        mensaje = "Demasiados intentos fallidos. Intenta más tarde.";
+        try {
+          const qAdmins = query(collection(db, "usuarios"), where("rol", "==", "admin"));
+          const snapAdmins = await getDocs(qAdmins);
+          const adminPromises = snapAdmins.docs.map(adminDoc => crearNotificacion(adminDoc.id, {
+            titulo: "Alerta de Seguridad",
+            mensaje: `Se detectaron múltiples intentos de inicio de sesión fallidos en la cuenta: ${email}.`,
+            tipo: "error"
+          }));
+          await Promise.all(adminPromises);
+        } catch (e) {
+          console.error("Error al notificar admin:", e);
+        }
+      }
       if (error.code === "auth/user-not-found")    mensaje = "No existe una cuenta con ese correo.";
       if (error.code === "auth/wrong-password")    mensaje = "Contraseña incorrecta.";
 
@@ -201,10 +215,24 @@ if (registerForm) {
 
       // 4. Crear notificación de bienvenida en Firestore (antes de cerrar sesión)
       await crearNotificacion(user.uid, {
-        titulo: `¡Bienvenid@ a FinanzaPro, ${nombre}! 🎉`,
+        titulo: `¡Te damos la bienvenida a FinanzaPro, ${nombre}! 🎉`,
         mensaje: `Nos alegra que estés aquí. Ya tienes todo listo para llevar el control de tus finanzas personales. ¡Empieza registrando tus primeros ingresos y gastos!`,
         tipo: 'meta'
       });
+
+      // 5. Notificar a los administradores del nuevo registro
+      try {
+        const qAdmins = query(collection(db, "usuarios"), where("rol", "==", "admin"));
+        const snapAdmins = await getDocs(qAdmins);
+        const adminPromises = snapAdmins.docs.map(adminDoc => crearNotificacion(adminDoc.id, {
+          titulo: "Nuevo usuario registrado",
+          mensaje: `Se ha registrado un nuevo usuario en la plataforma: ${nombre} ${apellido} (${email}).`,
+          tipo: "ingreso"
+        }));
+        await Promise.all(adminPromises);
+      } catch (e) {
+        console.error("Error al notificar admin de nuevo registro:", e);
+      }
 
       await signOut(auth);
 
