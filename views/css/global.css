@@ -1803,3 +1803,18 @@ select:focus-visible {
 .notif-delete span {
     font-size: 16px;
 }
+
+/* Botón marcar como leída */
+.notif-mark-read {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #34d399;
+    padding: 4px;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+}
+.notif-mark-read:hover { color: #059669; background: #f0fdf4; }
+.notif-mark-read span { font-size: 18px; }

@@ -694,7 +694,7 @@ window.cambiarTabMeta = function(tab) {
         panelDep.style.display = '';
         panelRet.style.display = 'none';
     } else {
-        tabRet.style.background = '#ea580c';
+        tabRet.style.background = '#3b82f6';
         tabRet.style.color = '#fff';
         tabDep.style.background = 'transparent';
         tabDep.style.color = '#64748b';

@@ -426,9 +426,9 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
       <div id="panel-retirar" style="display:none;">
         <form action="#" method="POST" id="form-retirar-meta">
           <input type="hidden" id="id_meta_retiro" value="">
-          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: #fff7ed; border: 1px solid #fed7aa; margin-bottom: 16px;">
-            <span class="material-symbols-outlined" style="color: #ea580c; font-size: 20px;">savings</span>
-            <span id="info-ahorrado-meta" style="font-size: 14px; font-weight: 600; color: #ea580c;">$0</span>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: #eff6ff; border: 1px solid #bfdbfe; margin-bottom: 16px;">
+            <span class="material-symbols-outlined" style="color: #3b82f6; font-size: 20px;">savings</span>
+            <span id="info-ahorrado-meta" style="font-size: 14px; font-weight: 600; color: #3b82f6;">$0</span>
           </div>
           <div class="input-group modal-form-group">
             <label>Monto a retirar</label>
@@ -438,7 +438,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
             </div>
           </div>
           <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-retiro-meta"
-            style="background: linear-gradient(135deg, #ea580c, #f97316);">
+            style="background: linear-gradient(135deg, #2563eb, #3b82f6); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
             Retirar
           </button>
         </form>
