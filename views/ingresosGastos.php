@@ -212,10 +212,12 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
 
         <div class="modal-form-group mb-large type-selector">
           <label class="radio-label">
-            <input type="radio" name="tipo_movimiento" value="ingreso" checked> Ingreso
+            <input type="radio" name="tipo_movimiento" value="ingreso" checked>
+            <span>Ingreso</span>
           </label>
           <label class="radio-label">
-            <input type="radio" name="tipo_movimiento" value="gasto"> Gasto
+            <input type="radio" name="tipo_movimiento" value="gasto">
+            <span>Gasto</span>
           </label>
         </div>
 

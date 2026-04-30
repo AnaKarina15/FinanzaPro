@@ -18,6 +18,13 @@ onAuthStateChanged(auth, async (user) => {
                 if (sideName) sideName.textContent = nombre;
                 const avatarImg = document.querySelector(".nav-profile img");
                 if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
+
+                // Aplicar tema
+                if (d.tema_interfaz === 'oscuro') {
+                    document.body.classList.add('dark-theme');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                }
             }
         } catch(e) { console.error(e); }
         initNotificaciones(user.uid);

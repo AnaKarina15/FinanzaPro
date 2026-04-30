@@ -27,6 +27,17 @@ onAuthStateChanged(auth, async (user) => {
                 if (sideName) sideName.textContent = nombre;
                 const avatarImg = document.querySelector(".nav-profile img");
                 if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
+
+                // Aplicar tema
+                if (d.tema_interfaz === 'oscuro') {
+                    document.body.classList.add('dark-theme');
+                    Chart.defaults.color = '#94a3b8';
+                    Chart.defaults.borderColor = '#334155';
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    Chart.defaults.color = '#64748b';
+                    Chart.defaults.borderColor = '#e2e8f0';
+                }
             }
         } catch(e) { console.error(e); }
 
