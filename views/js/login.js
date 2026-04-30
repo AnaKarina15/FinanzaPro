@@ -94,39 +94,47 @@ if (loginForm) {
       // Comprobar si la cuenta está programada para eliminarse
       const userDocRef = doc(db, "usuarios", user.uid);
       const userDocSnap = await getDoc(userDocRef);
-      if (userDocSnap.exists() && userDocSnap.data().fecha_eliminacion) {
-        const fechaEliminacion = new Date(userDocSnap.data().fecha_eliminacion);
-        const ahora = new Date();
-        
-        if (ahora > fechaEliminacion) {
-          // Ya pasaron los 10 días, borrar cuenta definitivamente
-          await deleteDoc(userDocRef);
-          import("https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js").then(async ({ deleteUser }) => {
-             try { await deleteUser(user); } catch(e) { console.error(e); }
-          });
-          await signOut(auth);
-          Swal.fire("Cuenta eliminada", "Tu cuenta ha sido eliminada permanentemente porque pasaron los 10 días.", "error");
-          return;
-        } else {
-          // Aún no pasan los 10 días, preguntar al usuario
-          const result = await Swal.fire({
-            title: "¿Cancelar eliminación?",
-            text: "Tu cuenta está programada para eliminarse. Si inicias sesión, se cancelará la eliminación de tu cuenta. ¿Deseas continuar?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonColor: "#059669",
-            cancelButtonColor: "#64748b",
-            confirmButtonText: "Sí, iniciar sesión",
-            cancelButtonText: "No, salir"
-          });
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (userData.fecha_eliminacion) {
+          const fechaEliminacion = new Date(userData.fecha_eliminacion);
+          const ahora = new Date();
           
-          if (result.isConfirmed) {
-            await updateDoc(userDocRef, { fecha_eliminacion: deleteField() });
-            // Se canceló la eliminación
-          } else {
+          if (ahora > fechaEliminacion) {
+            // Ya pasaron los 10 días, borrar cuenta definitivamente
+            await deleteDoc(userDocRef);
+            import("https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js").then(async ({ deleteUser }) => {
+               try { await deleteUser(user); } catch(e) { console.error(e); }
+            });
             await signOut(auth);
+            Swal.fire("Cuenta eliminada", "Tu cuenta ha sido eliminada permanentemente porque pasaron los 10 días.", "error");
             return;
+          } else {
+            // Aún no pasan los 10 días, preguntar al usuario
+            const result = await Swal.fire({
+              title: "¿Cancelar eliminación?",
+              text: "Tu cuenta está programada para eliminarse. Si inicias sesión, se cancelará la eliminación de tu cuenta. ¿Deseas continuar?",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonColor: "#059669",
+              cancelButtonColor: "#64748b",
+              confirmButtonText: "Sí, iniciar sesión",
+              cancelButtonText: "No, salir"
+            });
+            
+            if (result.isConfirmed) {
+              await updateDoc(userDocRef, { fecha_eliminacion: deleteField() });
+              // Se canceló la eliminación
+            } else {
+              await signOut(auth);
+              return;
+            }
           }
+        }
+        
+        if (userData.rol === 'admin') {
+          window.location.href = "/FinanzaPro/views/admin.php";
+          return;
         }
       }
 
