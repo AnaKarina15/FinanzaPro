@@ -71,6 +71,13 @@ async function cargarPerfil(user) {
         const pushCb = document.querySelector('input[name="notificaciones_push"]');
         if (pushCb) pushCb.checked = data.notificaciones_push !== 0;
 
+        // Aplicar el tema visualmente
+        if (data.tema_interfaz === 'oscuro') {
+            document.body.classList.add('dark-theme');
+        } else {
+            document.body.classList.remove('dark-theme');
+        }
+
         // Header Visuals
         const hdrName = document.querySelector('.name-row h2');
         if(hdrName) hdrName.innerText = `${data.nombre || ''} ${data.apellido || ''}`.trim() || 'Sin Nombre';
@@ -173,6 +180,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 this.classList.add("active");
                 const nuevoTema = this.dataset.value;
                 document.getElementById("tema_interfaz").value = nuevoTema;
+                
+                // Aplicar el tema visualmente a la página actual
+                if (nuevoTema === 'oscuro') {
+                    document.body.classList.add('dark-theme');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                }
                 
                 // Auto-guardar tema
                 if(currentUid) {

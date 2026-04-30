@@ -82,6 +82,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (avatarImg) {
                         avatarImg.src = userData.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff`;
                     }
+
+                    // Aplicar tema
+                    if (userData.tema_interfaz === 'oscuro') {
+                        document.body.classList.add('dark-theme');
+                        Chart.defaults.color = '#94a3b8';
+                        Chart.defaults.borderColor = '#334155';
+                    } else {
+                        document.body.classList.remove('dark-theme');
+                        Chart.defaults.color = '#64748b';
+                        Chart.defaults.borderColor = '#e2e8f0';
+                    }
                 }
             } catch (err) {
                 console.error("Error obteniendo perfil:", err);

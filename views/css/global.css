@@ -877,6 +877,7 @@ select:focus-visible {
     font-size: 36px;
     color: #cbd5e1;
 }
+
 /*VARIABLES Y TEMAS*/
 :root {
     --bg: #f8fafc;
@@ -1492,7 +1493,8 @@ select:focus-visible {
 .pin-input {
     text-align: center;
     font-size: 2rem;
-    letter-spacing: 1rem; /* Separa los números */
+    letter-spacing: 1rem;
+    /* Separa los números */
     width: 100%;
     padding: 15px;
     border: 2px solid #e2e8f0;
@@ -1507,14 +1509,16 @@ select:focus-visible {
 
 /* Cuando el usuario hace clic para escribir */
 .pin-input:focus {
-    border-color: #059669; /* Verde FinanzaPro */
+    border-color: #059669;
+    /* Verde FinanzaPro */
     background-color: #ffffff;
     box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
 }
 
 /* --- ESTILOS PARA ERRORES DE FORMULARIO --- */
 .error-text {
-    display: none; /* Oculto por defecto */
+    display: none;
+    /* Oculto por defecto */
     color: #ef4444;
     font-size: 13px;
     margin-top: 6px;
@@ -1532,9 +1536,19 @@ select:focus-visible {
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    75% { transform: translateX(8px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    75% {
+        transform: translateX(8px);
+    }
 }
 
 /* ═══════════════════════════════════════════
@@ -1569,8 +1583,15 @@ select:focus-visible {
 }
 
 @keyframes pulse-badge {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
 }
 
 #notif-panel {
@@ -1580,7 +1601,7 @@ select:focus-visible {
     width: 360px;
     background: #fff;
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
     border: 1px solid #e2e8f0;
     z-index: 1000;
     overflow: hidden;
@@ -1594,8 +1615,15 @@ select:focus-visible {
 }
 
 @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .notif-panel-header {
@@ -1624,7 +1652,10 @@ select:focus-visible {
     border-radius: 6px;
     transition: background 0.2s;
 }
-#btn-marcar-todas:hover { background: #f0fdf4; }
+
+#btn-marcar-todas:hover {
+    background: #f0fdf4;
+}
 
 #notif-lista {
     max-height: 320px;
@@ -1641,7 +1672,10 @@ select:focus-visible {
     border-bottom: 1px solid #f8fafc;
     transition: background 0.15s;
 }
-.notif-item:hover { background: #f8fafc; }
+
+.notif-item:hover {
+    background: #f8fafc;
+}
 
 .notif-icon-wrap {
     width: 38px;
@@ -1652,22 +1686,34 @@ select:focus-visible {
     justify-content: center;
     flex-shrink: 0;
 }
-.notif-icon-wrap span { font-size: 18px; }
 
-.notif-content { flex: 1; min-width: 0; }
+.notif-icon-wrap span {
+    font-size: 18px;
+}
+
+.notif-content {
+    flex: 1;
+    min-width: 0;
+}
+
 .notif-titulo {
     font-size: 13px;
     font-weight: 600;
     color: #0f172a;
     margin-bottom: 2px;
 }
+
 .notif-mensaje {
     font-size: 12px;
     color: #64748b;
     line-height: 1.4;
     margin-bottom: 4px;
 }
-.notif-fecha { font-size: 11px; color: #94a3b8; }
+
+.notif-fecha {
+    font-size: 11px;
+    color: #94a3b8;
+}
 
 .notif-mark-read {
     background: none;
@@ -1680,8 +1726,15 @@ select:focus-visible {
     display: flex;
     align-items: center;
 }
-.notif-mark-read:hover { color: #059669; background: #f0fdf4; }
-.notif-mark-read span { font-size: 18px; }
+
+.notif-mark-read:hover {
+    color: #059669;
+    background: #f0fdf4;
+}
+
+.notif-mark-read span {
+    font-size: 18px;
+}
 
 #notif-empty {
     padding: 40px 20px;
@@ -1692,14 +1745,21 @@ select:focus-visible {
     color: #94a3b8;
     font-size: 13px;
 }
-#notif-empty span { font-size: 36px; color: #cbd5e1; }
+
+#notif-empty span {
+    font-size: 36px;
+    color: #cbd5e1;
+}
 
 /* Notificación ya leída — aspecto tenue */
 .notif-item.notif-leida {
     opacity: 0.78;
     background: #f8fafc;
 }
-.notif-item.notif-leida .notif-titulo { font-weight: 500; }
+
+.notif-item.notif-leida .notif-titulo {
+    font-weight: 500;
+}
 
 /* Contenedor de acciones (check + delete) */
 .notif-actions {
@@ -1717,7 +1777,10 @@ select:focus-visible {
     padding: 4px;
     color: #059669;
 }
-.notif-leida-icon span { font-size: 18px; }
+
+.notif-leida-icon span {
+    font-size: 18px;
+}
 
 /* Botón eliminar */
 .notif-delete {
@@ -1731,20 +1794,12 @@ select:focus-visible {
     display: flex;
     align-items: center;
 }
-.notif-delete:hover { color: #ef4444; background: #fef2f2; }
-.notif-delete span { font-size: 18px; }
 
-/* Botón marcar como leída */
-.notif-mark-read {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #34d399;
-    padding: 4px;
-    border-radius: 50%;
-    transition: color 0.2s, background 0.2s;
-    display: flex;
-    align-items: center;
+.notif-delete:hover {
+    color: #ef4444;
+    background: #fef2f2;
 }
-.notif-mark-read:hover { color: #059669; background: #f0fdf4; }
-.notif-mark-read span { font-size: 18px; }
+
+.notif-delete span {
+    font-size: 16px;
+}
