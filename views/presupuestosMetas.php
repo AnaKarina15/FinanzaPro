@@ -1,26 +1,4 @@
-<?php
-// Validamos una sola vez
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
-}
 
-// TEMPORAL: Como estamos usando Firebase, PHP ya no controla la sesión.
-// if (!isset($_SESSION['usuario'])) {
-//   header("Location: ../index.php");
-//   exit();
-// }
-
-// Valores por defecto temporales para no romper el HTML
-$_SESSION['nombre_usuario'] = $_SESSION['nombre_usuario'] ?? 'Cargando...';
-$_SESSION['apellido_usuario'] = $_SESSION['apellido_usuario'] ?? '';
-$_SESSION['foto_perfil'] = $_SESSION['foto_perfil'] ?? null;
-
-// Si es admin (id_rol = 1), no debe tener acceso a las vistas de usuario normal
-if (($_SESSION['id_rol'] ?? 0) == 1) {
-  header("Location: admin.php");
-  exit();
-}
-?>
 <!doctype html>
 <html lang="es">
 
@@ -61,15 +39,9 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         </a>
         <a href="perfil.php" class="nav-link nav-profile">
           <div class="avatar">
-            <?php
-            $nav_foto = $_SESSION['foto_perfil'] ?? null;
-            $nav_avatar_src = $nav_foto
-                ? '../' . htmlspecialchars($nav_foto)
-                : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff';
-            ?>
-            <img src="<?= $nav_avatar_src ?>" alt="Foto de perfil" />
+            <img src="https://ui-avatars.com/api/?name=Cargando...&background=059669&color=fff" alt="Foto de perfil" />
           </div>
-          <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
+          <span class="username">Cargando...</span>
         </a>
       </nav>
     </aside>
@@ -172,7 +144,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
       </div>
       <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">Define tu próximo gran paso financiero.</p>
       
-      <form action="../index.php?action=guardarMeta" method="POST" id="form-meta">
+      <form id="form-meta">
         <input type="hidden" name="id_meta" id="id_meta" value="">
         <div class="input-group modal-form-group">
           <label>Nombre de la Meta</label>
@@ -246,7 +218,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
       </div>
       <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">Establece límites inteligentes para tus gastos.</p>
 
-      <form action="../index.php?action=guardarPresupuesto" method="POST" id="form-presupuesto">
+      <form id="form-presupuesto">
         <input type="hidden" name="id_presupuesto" id="id_presupuesto" value="">
         <div class="input-row">
           <div class="input-group modal-form-group">
@@ -447,38 +419,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
     </div>
   </div>
 
-  <!-- MODAL RETIRAR DINERO DE META -->
-  <div class="modal-overlay" id="modalRetirarMeta">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Retirar dinero de meta</h3>
-        <button class="btn-close" id="btn-cerrar-retirar-meta">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-      <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">
-        Retiras de: <strong id="nombre-meta-retiro"></strong>
-      </p>
 
-      <form action="#" method="POST" id="form-retirar-meta">
-        <input type="hidden" id="id_meta_retiro" value="">
-        <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: #fff7ed; border: 1px solid #fed7aa; margin-bottom: 16px;">
-          <span class="material-symbols-outlined" style="color: #ea580c; font-size: 20px;">savings</span>
-          <span id="info-ahorrado-meta" style="font-size: 14px; font-weight: 600; color: #ea580c;">$0</span>
-        </div>
-        <div class="input-group modal-form-group">
-          <label>Monto a retirar</label>
-          <div class="input-container">
-            <input type="text" name="monto_retiro" id="monto_retiro" placeholder="$ 0" required autocomplete="off">
-          </div>
-        </div>
-        <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-retiro-meta"
-          style="background: linear-gradient(135deg, #ea580c, #f97316);">
-          Retirar dinero
-        </button>
-      </form>
-    </div>
-  </div>
 
   <script type="module" src="./js/presupuestosMetas.js?v=<?php echo time(); ?>"></script>
 </body>

@@ -1,26 +1,4 @@
-<?php
-// Validamos una sola vez
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
-}
 
-// TEMPORAL: Como estamos usando Firebase, PHP ya no controla la sesión.
-// if (!isset($_SESSION['usuario'])) {
-//   header("Location: ../index.php");
-//   exit();
-// }
-
-// Valores por defecto temporales para no romper el HTML
-$_SESSION['nombre_usuario'] = $_SESSION['nombre_usuario'] ?? 'Cargando...';
-$_SESSION['apellido_usuario'] = $_SESSION['apellido_usuario'] ?? '';
-$_SESSION['foto_perfil'] = $_SESSION['foto_perfil'] ?? null;
-
-// Si es admin (id_rol = 1), no debe tener acceso a las vistas de usuario normal
-if (($_SESSION['id_rol'] ?? 0) == 1) {
-  header("Location: admin.php");
-  exit();
-}
-?>
 <!doctype html>
 <html lang="es">
 
@@ -69,15 +47,9 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         </a>
         <a href="perfil.php" class="nav-link nav-profile">
           <div class="avatar">
-            <?php
-            $nav_foto = $_SESSION['foto_perfil'] ?? null;
-            $nav_avatar_src = $nav_foto
-                ? '../' . htmlspecialchars($nav_foto)
-                : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff';
-            ?>
-            <img src="<?= $nav_avatar_src ?>" alt="Foto de perfil" />
+            <img src="https://ui-avatars.com/api/?name=Cargando...&background=059669&color=fff" alt="Foto de perfil" />
           </div>
-          <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
+          <span class="username">Cargando...</span>
         </a>
       </nav>
     </aside>
@@ -112,11 +84,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         <button class="btn-secondary" id="btn-semestre-actual">
           <span class="material-symbols-outlined">calendar_today</span>
           <span id="label-semestre">
-            <?php
-              $mesActual = (int) date('n');
-              $anioActual = date('Y');
-              echo ($mesActual <= 6) ? "1er Semestre $anioActual" : "2do Semestre $anioActual";
-            ?>
+            Cargando...
           </span>
         </button>
         <button class="btn-primary" id="btn-exportar">

@@ -1,7 +1,4 @@
-<?php
-$modo_verificacion = isset($_GET['verificar']) && $_GET['verificar'] == 'true';
-$correo_a_verificar = $_GET['correo'] ?? '';
-?>
+
 <!doctype html>
 <html lang="es">
 
@@ -65,7 +62,7 @@ $correo_a_verificar = $_GET['correo'] ?? '';
       </div>
       <div class="right">
 
-        <form class="card login-form <?= $modo_verificacion ? 'hidden' : '' ?>" id="form-login-auth">
+        <form class="card login-form" id="form-login-auth">
           <div class="form-info">
             <h2 class="form-title">Bienvenido de nuevo</h2>
             <p class="form-subtitle">Ingresa tus datos para continuar</p>
@@ -237,44 +234,13 @@ $correo_a_verificar = $_GET['correo'] ?? '';
           </span>
         </form>
 
-        <form class="card verify-form <?= $modo_verificacion ? '' : 'hidden' ?>" id="form-verificar">
-          <div class="form-info" style="text-align: center;">
-            <span class="material-symbols-outlined" style="font-size: 3rem; color: #059669;">mark_email_read</span>
-            <h2 class="form-title">Verifica tu cuenta</h2>
-            <p class="form-subtitle">Hemos generado un código para <br><strong><?= htmlspecialchars($correo_a_verificar) ?></strong></p>
-          </div>
 
-          <div class="input-group" style="margin-top: 20px;">
-            <label for="codigo_pin" style="text-align: center; display: block;">Código de 6 dígitos</label>
-            <div class="input-container">
-              <input type="hidden" id="correo_verificacion" value="<?= htmlspecialchars($correo_a_verificar) ?>">
-              <input
-                type="text"
-                id="codigo_pin"
-                class="pin-input"
-                maxlength="6"
-                required
-                autocomplete="off" />
-            </div>
-          </div>
-
-          <button type="submit" class="btn-primary" style="margin-top: 20px;">Activar</button>
-
-          <span class="login-footer">
-            <p style="color: #64748b; text-align: center;">
-              ¿Revisaste tu base de datos para ver el PIN?
-              <?php if (!empty($_SESSION['pin_desarrollo'])): ?>
-                <br /><strong>PIN de prueba: <?= htmlspecialchars($_SESSION['pin_desarrollo']) ?></strong>
-              <?php endif; ?>
-            </p>
-          </span>
-        </form>
 
         <form class="card reset-form hidden" id="form-restablecer">
           <div class="form-info" style="text-align: left; position: relative; padding-bottom: 8px;">
             <button type="button" class="back-button material-symbols-outlined" id="btn-back-to-login">arrow_back</button>
             <h2 class="form-title">Restablecer contraseña</h2>
-            <p class="form-subtitle">Utiliza el PIN de seguridad para cambiar tu contraseña y volver a iniciar sesión.</p>
+            <p class="form-subtitle">Ingresa tu correo para recibir un enlace para cambiar tu contraseña.</p>
           </div>
 
           <div class="reset-step-1">

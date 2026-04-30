@@ -1,23 +1,4 @@
-<?php
-session_start();
-// TEMPORAL: Como estamos usando Firebase, PHP ya no controla la sesión.
-// if (!isset($_SESSION['usuario'])) {
-//   header("Location: ../index.php");
-//   exit();
-// }
 
-// Valores por defecto temporales para no romper el HTML
-$_SESSION['nombre_usuario'] = $_SESSION['nombre_usuario'] ?? 'Cargando...';
-$_SESSION['apellido_usuario'] = $_SESSION['apellido_usuario'] ?? '';
-$_SESSION['usuario'] = $_SESSION['usuario'] ?? 'cargando@...';
-$_SESSION['foto_perfil'] = $_SESSION['foto_perfil'] ?? null;
-
-// Obtenemos los datos frescos del usuario usando el controlador
-// require_once '../controller/UsuarioController.php';
-// $controller = new UsuarioController();
-// $usuario = $controller->obtenerDatosPerfil($_SESSION['id_usuario']);
-$usuario = []; // Placeholder temporal para no romper HTML
-?>
 <!doctype html>
 <html lang="es">
 
@@ -42,25 +23,15 @@ $usuario = []; // Placeholder temporal para no romper HTML
                 <h1 class="logo-text">FinanzaPro</h1>
             </div>
             <nav class="sidebar-nav">
-                <?php if (($_SESSION['id_rol'] ?? 0) == 1): ?>
-                <a href="admin.php" class="nav-link"><span class="material-symbols-outlined">people</span> Usuarios</a>
-                <?php else: ?>
                 <a href="dashboard.php" class="nav-link"><span class="material-symbols-outlined">grid_view</span> Dashboard</a>
                 <a href="ingresosGastos.php" class="nav-link"><span class="material-symbols-outlined">currency_exchange</span> Ingresos y Gastos</a>
                 <a href="presupuestosMetas.php" class="nav-link"><span class="material-symbols-outlined">savings</span> Presupuestos y Metas</a>
                 <a href="reportes.php" class="nav-link"><span class="material-symbols-outlined">analytics</span> Reportes y Análisis</a>
-                <?php endif; ?>
                 <a href="perfil.php" class="nav-link nav-profile active">
                     <div class="avatar">
-                        <?php
-                        $nav_foto = $_SESSION['foto_perfil'] ?? null;
-                        $nav_avatar_src = $nav_foto
-                            ? '../' . htmlspecialchars($nav_foto)
-                            : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff';
-                        ?>
-                        <img src="<?= $nav_avatar_src ?>" alt="Foto de perfil" />
+                        <img src="https://ui-avatars.com/api/?name=Cargando...&background=059669&color=fff" alt="Foto de perfil" />
                     </div>
-                    <span class="username"><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></span>
+                    <span class="username">Cargando...</span>
                 </a>
             </nav>
         </aside>
@@ -100,20 +71,16 @@ $usuario = []; // Placeholder temporal para no romper HTML
                     <div class="banner-gradient"></div>
                     <div class="profile-header-content">
                         <div class="avatar-container">
-                            <?php 
-                            $foto_perfil = $_SESSION['foto_perfil'] ?? null;
-                            $ruta_foto = $foto_perfil ? '../' . htmlspecialchars($foto_perfil) : 'https://ui-avatars.com/api/?name=' . urlencode($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) . '&background=059669&color=fff&size=130';
-                            ?>
-                            <img src="<?= $ruta_foto ?>" alt="Foto de perfil" class="profile-avatar-big" id="avatar-perfil">
+                            <img src="https://ui-avatars.com/api/?name=Cargando...&background=059669&color=fff&size=130" alt="Foto de perfil" class="profile-avatar-big" id="avatar-perfil">
                             <input type="file" id="input-foto-perfil" name="foto_perfil" accept="image/png,image/jpeg,image/jpg,image/webp" style="display: none;">
                             <button type="button" class="btn-camera" id="btn-cambiar-foto" title="Cambiar foto de perfil"><span class="material-symbols-outlined">photo_camera</span></button>
                         </div>
                         <div class="profile-summary">
                             <div class="name-row">
-                                <h2><?= htmlspecialchars($_SESSION['nombre_usuario'] . ' ' . $_SESSION['apellido_usuario']) ?></h2>
+                                <h2>Cargando...</h2>
                                 <span class="badge-verified"><span class="material-symbols-outlined">check_circle</span> Verificado</span>
                             </div>
-                            <p class="user-email"><span class="material-symbols-outlined">mail</span> <?= htmlspecialchars($_SESSION['usuario']) ?></p>
+                            <p class="user-email"><span class="material-symbols-outlined">mail</span> cargando...</p>
                         </div>
                     </div>
                 </section>
@@ -129,17 +96,17 @@ $usuario = []; // Placeholder temporal para no romper HTML
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>NOMBRE</label>
-                                        <input type="text" name="nombre" value="<?= htmlspecialchars($usuario['nombre'] ?? '') ?>" class="input-profile">
+                                        <input type="text" name="nombre" value="" class="input-profile">
                                     </div>
                                     <div class="form-group">
                                         <label>APELLIDO</label>
-                                        <input type="text" name="apellido" value="<?= htmlspecialchars($usuario['apellido'] ?? '') ?>" class="input-profile">
+                                        <input type="text" name="apellido" value="" class="input-profile">
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <label>CORREO ELECTRÓNICO</label>
-                                    <input type="email" name="correo" value="<?= htmlspecialchars($usuario['correo'] ?? '') ?>" class="input-profile" readonly>
+                                    <input type="email" name="correo" value="" class="input-profile" readonly>
                                     <a href="#" id="btn-cambiar-correo" class="link-change">Cambiar correo electrónico</a>
                                 </div>
 
@@ -147,7 +114,7 @@ $usuario = []; // Placeholder temporal para no romper HTML
                                     <label>NÚMERO DE TELÉFONO</label>
                                     <div class="phone-input-container">
                                         <div class="code-box">+57</div>
-                                        <input type="tel" name="telefono" value="<?= htmlspecialchars($usuario['telefono'] ?? '') ?>" class="input-profile readonly" id="input-telefono" placeholder="3001234567" readonly>
+                                        <input type="tel" name="telefono" value="" class="input-profile readonly" id="input-telefono" placeholder="3001234567" readonly>
                                     </div>
                                     <a href="#" class="link-change" id="btn-cambiar-telefono">Cambiar número de teléfono</a>
                                 </div>
@@ -197,9 +164,9 @@ $usuario = []; // Placeholder temporal para no romper HTML
                                         <p>Define el valor por defecto de tus reportes</p>
                                     </div>
                                     <select name="moneda_principal" class="select-profile">
-                                        <option value="COP" <?= ($usuario['moneda_principal'] ?? 'COP') == 'COP' ? 'selected' : '' ?>>COP - Peso Colombiano</option>
-                                        <option value="USD" <?= ($usuario['moneda_principal'] ?? 'COP') == 'USD' ? 'selected' : '' ?>>USD - Dólar Estadounidense</option>
-                                        <option value="EUR" <?= ($usuario['moneda_principal'] ?? 'COP') == 'EUR' ? 'selected' : '' ?>>EUR - Euro</option>
+                                        <option value="COP">COP - Peso Colombiano</option>
+                                        <option value="USD">USD - Dólar Estadounidense</option>
+                                        <option value="EUR">EUR - Euro</option>
                                         
                                     </select>
                                 </div>
@@ -209,9 +176,9 @@ $usuario = []; // Placeholder temporal para no romper HTML
                                         <p>Alterna entre modo claro y oscuro</p>
                                     </div>
                                     <div class="theme-toggle">
-                                        <button type="button" class="toggle-btn <?= ($usuario['tema_interfaz'] ?? 'claro') == 'claro' ? 'active' : '' ?>" data-value="claro">Claro</button>
-                                        <button type="button" class="toggle-btn <?= ($usuario['tema_interfaz'] ?? 'claro') == 'oscuro' ? 'active' : '' ?>" data-value="oscuro">Oscuro</button>
-                                        <input type="hidden" name="tema_interfaz" value="<?= $usuario['tema_interfaz'] ?? 'claro' ?>" id="tema_interfaz">
+                                        <button type="button" class="toggle-btn active" data-value="claro">Claro</button>
+                                        <button type="button" class="toggle-btn" data-value="oscuro">Oscuro</button>
+                                        <input type="hidden" name="tema_interfaz" value="claro" id="tema_interfaz">
                                     </div>
                                 </div>
                                 <div class="setting-item">
@@ -220,7 +187,7 @@ $usuario = []; // Placeholder temporal para no romper HTML
                                         <p>Alertas de gastos inusuales y metas</p>
                                     </div>
                                     <label class="switch">
-                                        <input type="checkbox" name="notificaciones_push" <?= ($usuario['notificaciones_push'] ?? 1) ? 'checked' : '' ?>>
+                                        <input type="checkbox" name="notificaciones_push" checked>
                                         <span class="slider"></span>
                                     </label>
                                 </div>
