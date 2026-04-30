@@ -1657,6 +1657,24 @@ select:focus-visible {
     background: #f0fdf4;
 }
 
+#btn-eliminar-todas {
+    color: #ef4444;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#btn-eliminar-todas:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
 #notif-lista {
     max-height: 320px;
     overflow-y: auto;
