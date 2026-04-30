@@ -15,10 +15,12 @@ import {
 } from "./notificaciones.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  // La moneda se actualiza cuando carga el perfil del usuario desde Firestore
+  let monedaUsuario = 'COP';
   const formatearMoneda = (valor) =>
-    new Intl.NumberFormat("es-CO", {
-      style: "currency",
-      currency: "COP",
+    new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: monedaUsuario,
       minimumFractionDigits: 0,
     }).format(valor);
 
@@ -61,6 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
               userData.fotoPerfil ||
               `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff`;
           }
+
+          // Aplicar moneda del usuario
+          monedaUsuario = userData.moneda_principal || 'COP';
 
           // Aplicar tema
           if (userData.tema_interfaz === "oscuro") {

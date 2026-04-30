@@ -5,6 +5,7 @@ import { initNotificaciones, crearNotificacion, verificarGastoInusual } from "./
 
 let currentUid = null;
 let domListo = false;
+let monedaUsuario = 'COP'; // Se actualiza con la preferencia del usuario desde Firestore
 
 // Llamar carga cuando tanto Auth como DOM estén listos
 function intentarCargar() {
@@ -27,6 +28,9 @@ onAuthStateChanged(auth, async (user) => {
                 if (sideName) sideName.textContent = nombre;
                 const avatarImg = document.querySelector(".nav-profile img");
                 if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
+
+                // Aplicar moneda del usuario
+                monedaUsuario = d.moneda_principal || 'COP';
 
                 // Aplicar tema
                 if (d.tema_interfaz === 'oscuro') {
@@ -89,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const formatearMoneda = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v);
+    const formatearMoneda = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: monedaUsuario, minimumFractionDigits: 0 }).format(v);
 
     const escapeHtml = (str) => String(str || '').replace(/[&<>"']/g, (match) => {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[match];
