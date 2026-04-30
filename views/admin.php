@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="./css/global.css?v=<?= time() ?>" />
     <link rel="stylesheet" href="./css/admin.css?v=<?= time() ?>" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="./js/notificaciones.js?v=<?= time() ?>"></script>
     <script type="module" src="./js/admin.js?v=<?= time() ?>"></script>
 </head>
 
@@ -44,9 +45,26 @@
                     <p>Gestiona el acceso a la plataforma y los roles de los usuarios.</p>
                 </div>
                 <div class="page-header-actions">
-                    <button class="btn-icon-circle" id="btn-notifications">
-                        <span class="material-symbols-outlined">notifications</span>
-                    </button>
+                    <div class="notif-wrapper">
+                        <button class="btn-icon-circle" id="btn-notificaciones" style="position: relative;">
+                            <span class="material-symbols-outlined">notifications</span>
+                            <span id="notif-badge" style="display: none;">0</span>
+                        </button>
+                        <div id="notif-panel">
+                            <div class="notif-panel-header">
+                                <h4>Notificaciones</h4>
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <button id="btn-marcar-todas">Marcar leídas</button>
+                                    <button id="btn-eliminar-todas" title="Eliminar todas"><span class="material-symbols-outlined" style="font-size:20px;">delete</span></button>
+                                </div>
+                            </div>
+                            <div id="notif-lista"></div>
+                            <div id="notif-empty">
+                                <span class="material-symbols-outlined">notifications_none</span>
+                                Sin notificaciones nuevas
+                            </div>
+                        </div>
+                    </div>
                     <button class="btn-primary btn-agregar-usuario" id="btn-agregar-usuario">
                         <span class="material-symbols-outlined">person_add</span> Agregar Usuario
                     </button>
@@ -169,7 +187,7 @@
                         <div class="modal-form-group">
                             <label for="input-rol">ROL</label>
                             <div class="input-container">
-                                <select id="input-rol" class="input-soft" required style="width: 100%; border: none; outline: none; background: transparent; padding: 12px; font-family: inherit;">
+                                <select id="input-rol" required>
                                     <option value="usuario">Usuario</option>
                                     <option value="admin">Administrador</option>
                                 </select>

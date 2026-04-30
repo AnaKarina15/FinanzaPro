@@ -37,6 +37,14 @@
     flex-direction: column;
     justify-content: space-between;
     min-height: 200px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    cursor: pointer;
+    overflow: visible;
+}
+
+.goal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.10);
 }
 
 .goal-header {
@@ -97,6 +105,14 @@
     min-height: 200px;
     justify-content: space-between;
     border: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    cursor: pointer;
+    overflow: visible;
+}
+
+.budget-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.10);
 }
 
 .budget-card.critical {
@@ -332,7 +348,7 @@
 
 .kebab-dropdown {
     position: absolute;
-    bottom: 100%;
+    top: 100%;
     right: 0;
     background-color: white;
     border: 1px solid var(--border-color);
@@ -343,7 +359,7 @@
     min-width: 140px;
     z-index: 50;
     overflow: hidden;
-    margin-bottom: 8px;
+    margin-top: 4px;
 }
 
 .kebab-dropdown.show {

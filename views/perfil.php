@@ -79,7 +79,10 @@ $usuario = []; // Placeholder temporal para no romper HTML
                     <div id="notif-panel">
                         <div class="notif-panel-header">
                             <h4>Notificaciones</h4>
-                            <button id="btn-marcar-todas">Marcar todas como leídas</button>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <button id="btn-marcar-todas">Marcar todas como leídas</button>
+                                <button id="btn-eliminar-todas" title="Eliminar todas"><span class="material-symbols-outlined" style="font-size:20px;">delete</span></button>
+                            </div>
                         </div>
                         <div id="notif-lista"></div>
                         <div id="notif-empty">

@@ -334,4 +334,29 @@ function _bindBellButton() {
             .map(d => updateDoc(doc(db, "notificaciones", d.id), { leida: true }));
         await Promise.all(promises);
     });
+
+    // Eliminar todas las notificaciones
+    document.getElementById('btn-eliminar-todas')?.addEventListener('click', async () => {
+        if (!currentUid) return;
+
+        const { default: Swal } = await import("https://cdn.jsdelivr.net/npm/sweetalert2@11/src/sweetalert2.js").catch(() => ({ default: window.Swal }));
+        const SwAlert = window.Swal;
+        const confirm = await SwAlert.fire({
+            title: '¿Eliminar todas las notificaciones?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Sí, eliminar todas',
+            cancelButtonText: 'Cancelar'
+        });
+        if (!confirm.isConfirmed) return;
+
+        const q = query(collection(db, "notificaciones"), where("usuario_id", "==", currentUid));
+        const snap = await getDocs(q);
+        const { deleteDoc: delDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
+        await Promise.all(snap.docs.map(d => delDoc(doc(db, "notificaciones", d.id))));
+        SwAlert.fire('¡Listo!', 'Todas las notificaciones han sido eliminadas.', 'success');
+    });
 }
