@@ -61,6 +61,19 @@
         </p>
       </div>
       <div class="view-buttons">
+        <button class="btn-secondary" id="btn-semestre-actual">
+          <span class="material-symbols-outlined">calendar_today</span>
+          <span id="label-semestre">
+            <?php
+              $mesActual = (int) date('n');
+              $anioActual = date('Y');
+              echo ($mesActual <= 6) ? "1er Semestre $anioActual" : "2do Semestre $anioActual";
+            ?>
+          </span>
+        </button>
+        <button class="btn-primary" id="btn-exportar">
+          <span class="material-symbols-outlined">download</span> Exportar
+        </button>
         <div class="notif-wrapper">
           <button class="btn-secondary" id="btn-notificaciones">
             <span class="material-symbols-outlined">notifications</span>
@@ -81,15 +94,6 @@
             </div>
           </div>
         </div>
-        <button class="btn-secondary" id="btn-semestre-actual">
-          <span class="material-symbols-outlined">calendar_today</span>
-          <span id="label-semestre">
-            Cargando...
-          </span>
-        </button>
-        <button class="btn-primary" id="btn-exportar">
-          <span class="material-symbols-outlined">download</span> Exportar
-        </button>
       </div>
     </header>
     <main class="main-content">

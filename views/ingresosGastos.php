@@ -56,6 +56,16 @@ date_default_timezone_set('America/Bogota');
         <h2 class="view-title">Ingresos y Gastos</h2>
       </div>
       <div class="view-buttons">
+        <button class="btn-secondary">
+          <span class="material-symbols-outlined">calendar_today</span>
+          <?php
+          $meses = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+          echo date('j') . ' ' . $meses[date('n')] . ', ' . date('Y');
+          ?>
+        </button>
+        <button class="btn-primary" id="btn-abrir-modal">
+          <span class="material-symbols-outlined">add</span> Nuevo Movimiento
+        </button>
         <div class="notif-wrapper">
           <button class="btn-secondary" id="btn-notificaciones">
             <span class="material-symbols-outlined">notifications</span>
@@ -76,16 +86,6 @@ date_default_timezone_set('America/Bogota');
             </div>
           </div>
         </div>
-        <button class="btn-secondary">
-          <span class="material-symbols-outlined">calendar_today</span>
-          <?php
-          $meses = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-          echo date('j') . ' ' . $meses[date('n')] . ', ' . date('Y');
-          ?>
-        </button>
-        <button class="btn-primary" id="btn-abrir-modal">
-          <span class="material-symbols-outlined">add</span> Nuevo Movimiento
-        </button>
       </div>
     </header>
 
