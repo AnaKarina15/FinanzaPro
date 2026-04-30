@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nombre = formMeta.querySelector('input[name="nombre"]').value;
             const fecha_limite = formMeta.querySelector('input[name="fecha_limite"]').value;
             const inputObj = formMeta.querySelector('input[name="monto_objetivo"]');
-            const monto_objetivo = parseFloat(inputObj.value.replace(/,/g, ''));
+            const monto_objetivo = parseFloat(inputObj.value.replace(/\D/g, '')) || 0;
             const id_icono = formMeta.querySelector('input[name="id_icono"]:checked')?.value || '3';
             const codigo_material = iconMap[id_icono] || 'stars';
 
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const id_presupuesto = formPresupuesto.querySelector('input[name="id_presupuesto"]').value;
             const nombre = formPresupuesto.querySelector('input[name="nombre"]').value;
             const inputLim = formPresupuesto.querySelector('input[name="monto_limite"]');
-            const monto_limite = parseFloat(inputLim.value.replace(/,/g, ''));
+            const monto_limite = parseFloat(inputLim.value.replace(/\D/g, '')) || 0;
             const id_icono = formPresupuesto.querySelector('input[name="id_icono"]:checked')?.value || '1';
             const codigo_material = iconMap[id_icono] || 'category';
             const alerta_80_porciento = formPresupuesto.querySelector('input[name="alerta_80_porciento"]').checked ? 1 : 0;
@@ -254,19 +254,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Formatear inputs de dinero al escribir
-    const moneyInputs = document.querySelectorAll('input[name="monto_limite"], input[name="monto_objetivo"]');
-    moneyInputs.forEach(input => {
+    // Formatear inputs de dinero al escribir (todos los formularios de la vista)
+    const allMoneyInputs = document.querySelectorAll(
+        'input[name="monto_limite"], input[name="monto_objetivo"], input[name="monto_abono"], input[name="monto_retiro"], input[name="monto_gasto"]'
+    );
+    allMoneyInputs.forEach(input => {
         input.type = 'text';
         input.inputMode = 'numeric';
-        input.addEventListener('input', function(e) {
-            let value = this.value.replace(/[^0-9]/g, '');
-            if(value) {
-                value = parseInt(value, 10);
-                this.value = new Intl.NumberFormat('en-US').format(value);
-            } else {
-                this.value = '';
-            }
+        input.addEventListener('input', function() {
+            let valorPuro = this.value.replace(/\D/g, '');
+            if (valorPuro === '') { this.value = ''; return; }
+            this.value = `$ ${new Intl.NumberFormat('es-CO').format(parseInt(valorPuro, 10))}`;
         });
     });
 });
@@ -384,7 +382,6 @@ function renderMetas(metas) {
                 <button class="kebab-btn" onclick="toggleKebab(this, event)"><span class="material-symbols-outlined">more_vert</span></button>
                 <div class="kebab-dropdown">
                   <button class="dropdown-item" onclick="editarMeta('${meta.id_meta}')">Editar</button>
-                  <button class="dropdown-item" onclick="abrirModalRetirarMeta('${meta.id_meta}', '${meta.nombre.replace(/'/g, "\\'")}', ${act}, event)">Retirar dinero</button>
                   <button class="dropdown-item dropdown-danger" onclick="eliminarMeta('${meta.id_meta}')">Eliminar</button>
                 </div>
               </div>
@@ -573,7 +570,7 @@ window.editarMeta = function(id) {
     const form = document.getElementById('form-meta');
     form.querySelector('input[name="id_meta"]').value = meta.id_meta;
     form.querySelector('input[name="nombre"]').value = meta.nombre;
-    form.querySelector('input[name="monto_objetivo"]').value = new Intl.NumberFormat('en-US').format(meta.monto_objetivo);
+    form.querySelector('input[name="monto_objetivo"]').value = `$ ${new Intl.NumberFormat('es-CO').format(meta.monto_objetivo)}`;
     form.querySelector('input[name="fecha_limite"]').value = meta.fecha_limite;
     
     const radio = form.querySelector(`input[name="id_icono"][value="${meta.id_icono}"]`);
@@ -591,7 +588,7 @@ window.editarPresupuesto = function(id) {
     document.getElementById('modal-titulo-presupuesto').innerText = "Editar Presupuesto";
     document.getElementById('id_presupuesto').value = p.id_presupuesto;
     document.querySelector('#form-presupuesto input[name="nombre"]').value = p.nombre;
-    document.querySelector('#form-presupuesto input[name="monto_limite"]').value = new Intl.NumberFormat('en-US').format(p.monto_limite);
+    document.querySelector('#form-presupuesto input[name="monto_limite"]').value = `$ ${new Intl.NumberFormat('es-CO').format(p.monto_limite)}`;
     
     const radioPeriodo = document.querySelector(`#form-presupuesto input[name="tipo_periodo"][value="${p.tipo_periodo || 'mensual'}"]`);
     if (radioPeriodo) {
@@ -641,13 +638,20 @@ async function calcularDisponible() {
 
 window.abrirModalAbonoMeta = async function(id_meta, nombre_meta, event) {
     if (event && event.target.closest('.kebab-menu')) return;
+
+    const meta = window.metasGlobales?.find(m => m.id_meta === id_meta);
+    const montoActual = parseFloat(meta?.monto_actual) || 0;
+    const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+
+    // Datos comunes
     document.getElementById('id_meta_abono').value = id_meta;
+    document.getElementById('id_meta_retiro').value = id_meta;
     document.getElementById('nombre-meta-abono').innerText = nombre_meta;
     document.getElementById('form-abono-meta').reset();
+    document.getElementById('form-retirar-meta').reset();
 
-    // Mostrar saldo disponible en el modal
+    // Saldo disponible para depositar
     const disponible = await calcularDisponible();
-    const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
     const infoDisponible = document.getElementById('info-disponible-abono');
     if (infoDisponible) {
         infoDisponible.innerText = `Saldo disponible: ${formatter.format(Math.max(0, disponible))}`;
@@ -655,7 +659,41 @@ window.abrirModalAbonoMeta = async function(id_meta, nombre_meta, event) {
         infoDisponible.style.color = disponible <= 0 ? '#ef4444' : '#059669';
     }
 
+    // Saldo ahorrado para retirar
+    const infoAhorrado = document.getElementById('info-ahorrado-meta');
+    if (infoAhorrado) {
+        infoAhorrado.innerText = montoActual > 0
+            ? `Ahorrado: ${formatter.format(montoActual)} — puedes retirar hasta ese monto.`
+            : 'Esta meta no tiene dinero ahorrado aún.';
+    }
+
+    // Siempre abrir en pestaña Depositar
+    cambiarTabMeta('depositar');
     document.getElementById('modalAbonoMeta').classList.add('active');
+};
+
+window.cambiarTabMeta = function(tab) {
+    const tabDep = document.getElementById('tab-depositar');
+    const tabRet = document.getElementById('tab-retirar');
+    const panelDep = document.getElementById('panel-depositar');
+    const panelRet = document.getElementById('panel-retirar');
+    if (!tabDep || !tabRet) return;
+
+    if (tab === 'depositar') {
+        tabDep.style.background = '#059669';
+        tabDep.style.color = '#fff';
+        tabRet.style.background = 'transparent';
+        tabRet.style.color = '#64748b';
+        panelDep.style.display = '';
+        panelRet.style.display = 'none';
+    } else {
+        tabRet.style.background = '#ea580c';
+        tabRet.style.color = '#fff';
+        tabDep.style.background = 'transparent';
+        tabDep.style.color = '#64748b';
+        panelRet.style.display = '';
+        panelDep.style.display = 'none';
+    }
 };
 
 window.abrirModalGastoPresupuesto = async function(categoria, event) {
@@ -764,7 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const id_meta = document.getElementById('id_meta_abono').value;
             const inputAbono = document.getElementById('monto_abono').value;
-            const montoAbono = parseFloat(inputAbono.replace(/,/g, ''));
+            const montoAbono = parseFloat(inputAbono.replace(/\D/g, '')) || 0;
 
             if (!montoAbono || montoAbono <= 0) {
                 Swal.fire('Error', 'Ingresa un monto válido mayor a 0.', 'error');
@@ -863,7 +901,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const categoria = document.getElementById('categoria_gasto').value;
             const inputGasto = document.getElementById('monto_gasto').value;
-            const montoGasto = parseFloat(inputGasto.replace(/,/g, ''));
+            const montoGasto = parseFloat(inputGasto.replace(/\D/g, '')) || 0;
             const descripcion = document.getElementById('descripcion_gasto').value;
             const disponible = parseFloat(document.getElementById('disponible_presupuesto')?.value || 0);
 
@@ -917,34 +955,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+
 // ═══════════════════════════════════════════════════════════
-// RETIRAR DINERO DE UNA META
+// RETIRAR DINERO DE META — Submit handler
 // ═══════════════════════════════════════════════════════════
-window.abrirModalRetirarMeta = function(idMeta, nombre, montoActual, event) {
-    if (event && event.target.closest('.kebab-menu')) return;
-
-    const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
-
-    document.getElementById('id_meta_retiro').value = idMeta;
-    document.getElementById('nombre-meta-retiro').innerText = nombre;
-    document.getElementById('form-retirar-meta').reset();
-
-    const infoEl = document.getElementById('info-ahorrado-meta');
-    if (infoEl) {
-        if (montoActual <= 0) {
-            infoEl.innerText = 'Esta meta no tiene dinero ahorrado.';
-        } else {
-            infoEl.innerText = `Ahorrado: ${formatter.format(montoActual)} — puedes retirar hasta ese monto.`;
-        }
-    }
-
-    document.getElementById('modalRetirarMeta').classList.add('active');
-};
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Cerrar modal retiro
+    // Cerrar modal (pestaña retirar usa el mismo modal que abono)
     document.getElementById('btn-cerrar-retirar-meta')?.addEventListener('click', () => {
-        document.getElementById('modalRetirarMeta').classList.remove('active');
+        document.getElementById('modalAbonoMeta').classList.remove('active');
     });
 
     // Submit retiro
@@ -960,7 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const idMeta = document.getElementById('id_meta_retiro').value;
             const inputRetiro = document.getElementById('monto_retiro').value;
-            const montoRetiro = parseFloat(inputRetiro.replace(/,/g, ''));
+            const montoRetiro = parseFloat(inputRetiro.replace(/\./g, '').replace(/,/g, ''));
             const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
 
             if (!montoRetiro || montoRetiro <= 0) {
@@ -995,13 +1013,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 let historial = metaData.historial || {};
                 historial[mesActual] = nuevoMonto;
 
-                await updateDoc(metaRef, {
-                    monto_actual: nuevoMonto,
-                    historial
-                });
+                await updateDoc(metaRef, { monto_actual: nuevoMonto, historial });
 
                 Swal.fire('¡Listo!', `Retiraste ${formatter.format(montoRetiro)} de tu meta.`, 'success');
-                document.getElementById('modalRetirarMeta').classList.remove('active');
+                document.getElementById('modalAbonoMeta').classList.remove('active');
                 cargarDatos();
 
             } catch (error) {

@@ -1724,7 +1724,7 @@ select:focus-visible {
     background: none;
     border: none;
     cursor: pointer;
-    color: #cbd5e1;
+    color: #f87171;
     padding: 4px;
     border-radius: 50%;
     transition: color 0.2s, background 0.2s;
@@ -1732,4 +1732,19 @@ select:focus-visible {
     align-items: center;
 }
 .notif-delete:hover { color: #ef4444; background: #fef2f2; }
-.notif-delete span { font-size: 16px; }
+.notif-delete span { font-size: 18px; }
+
+/* Botón marcar como leída */
+.notif-mark-read {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #34d399;
+    padding: 4px;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+}
+.notif-mark-read:hover { color: #059669; background: #f0fdf4; }
+.notif-mark-read span { font-size: 18px; }
