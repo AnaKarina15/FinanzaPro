@@ -21,6 +21,7 @@
 
 /* HEALTH CARD */
 .dashboard-health-card {
+  overflow: hidden;
   background: linear-gradient(135deg,
       var(--primary) 0%,
       #000000cc 100%);
