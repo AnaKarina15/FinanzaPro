@@ -353,10 +353,18 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
 
       <form action="#" method="POST" id="form-gasto-presupuesto">
         <input type="hidden" name="categoria_gasto" id="categoria_gasto" value="">
+
+        <!-- Saldo disponible (mismo estilo que metas) -->
+        <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; background:#f0fdf4; border:1px solid #bbf7d0; margin-bottom:16px;">
+          <span class="material-symbols-outlined" style="color:#059669; font-size:20px;">account_balance_wallet</span>
+          <span id="info-disponible-presupuesto" style="font-size:14px; font-weight:600; color:#059669;">Calculando saldo...</span>
+        </div>
+
         <div class="input-group modal-form-group">
           <label>Monto</label>
           <div class="input-container">
-            <input type="text" name="monto_gasto" id="monto_gasto" placeholder="$ 0" required autocomplete="off">
+            <input type="text" name="monto_gasto" id="monto_gasto" placeholder="$ 0" required autocomplete="off"
+              style="font-size:24px; font-weight:800; color:var(--text-primary); text-align:center;">
           </div>
         </div>
         <div class="input-group modal-form-group">
@@ -365,7 +373,6 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
             <input type="text" name="descripcion_gasto" id="descripcion_gasto" placeholder="Detalle del gasto (opcional)" autocomplete="off">
           </div>
         </div>
-        <p id="info-disponible-presupuesto" style="font-size: 13px; font-weight: 600; margin-bottom: 8px;"></p>
         <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-gasto-presupuesto">Registrar Gasto</button>
       </form>
     </div>

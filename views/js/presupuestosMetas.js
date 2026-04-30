@@ -722,14 +722,25 @@ window.abrirModalGastoPresupuesto = async function(categoria, event) {
     hiddenDisp.value = disponibleGeneral;
 
     const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
-    let infoEl = document.getElementById('info-disponible-presupuesto');
+    const infoEl = document.getElementById('info-disponible-presupuesto');
+    const infoContainer = infoEl?.parentElement;
     if (infoEl) {
         if (disponibleGeneral <= 0) {
-            infoEl.innerText = `Balance insuficiente: ${formatter.format(disponibleGeneral)}. No puedes registrar gastos.`;
+            infoEl.innerText = `Saldo insuficiente: ${formatter.format(disponibleGeneral)}`;
             infoEl.style.color = '#ef4444';
+            if (infoContainer) {
+                infoContainer.style.background = '#fef2f2';
+                infoContainer.style.borderColor = '#fecaca';
+                infoContainer.querySelector('.material-symbols-outlined').style.color = '#ef4444';
+            }
         } else {
             infoEl.innerText = `Saldo disponible: ${formatter.format(disponibleGeneral)}`;
             infoEl.style.color = '#059669';
+            if (infoContainer) {
+                infoContainer.style.background = '#f0fdf4';
+                infoContainer.style.borderColor = '#bbf7d0';
+                infoContainer.querySelector('.material-symbols-outlined').style.color = '#059669';
+            }
         }
     }
 
