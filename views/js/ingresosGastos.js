@@ -90,6 +90,34 @@ document.addEventListener("DOMContentLoaded", () => {
             if (valorPuro === '') { this.value = ''; inputOculto.value = ''; return; }
             this.value = `$ ${new Intl.NumberFormat('es-CO').format(valorPuro)}`;
             inputOculto.value = valorPuro;
+            // Quitar error en tiempo real
+            if (parseFloat(valorPuro) > 0) {
+                inputVisual.classList.remove("input-error");
+                const errorEl = document.getElementById("error-monto");
+                if (errorEl) errorEl.style.display = "none";
+            }
+        });
+    }
+
+    // Quitar errores en tiempo real para fecha y categoría
+    const inputFechaIG = document.getElementById("fecha");
+    if (inputFechaIG) {
+        inputFechaIG.addEventListener("input", () => {
+            if (inputFechaIG.value) {
+                inputFechaIG.classList.remove("input-error");
+                const err = document.getElementById("error-fecha");
+                if (err) err.style.display = "none";
+            }
+        });
+    }
+    const inputCategoriaIG = document.getElementById("categoria");
+    if (inputCategoriaIG) {
+        inputCategoriaIG.addEventListener("input", () => {
+            if (inputCategoriaIG.value.trim()) {
+                inputCategoriaIG.classList.remove("input-error");
+                const err = document.getElementById("error-categoria");
+                if (err) err.style.display = "none";
+            }
         });
     }
 
@@ -440,37 +468,75 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             if(!currentUid) return;
 
+            // --- VALIDACIÓN (idéntica al dashboard) ---
+            const setValidacion = (inputId, errorId, esValido) => {
+                const inputEl = document.getElementById(inputId);
+                const errorEl = document.getElementById(errorId);
+                if (esValido) {
+                    inputEl.classList.remove("input-error");
+                    if (errorEl) errorEl.style.display = "none";
+                } else {
+                    inputEl.classList.add("input-error");
+                    if (errorEl) errorEl.style.display = "block";
+                }
+            };
+
+            const montoVal = parseFloat(document.getElementById("monto").value);
+            const fechaVal = document.getElementById("fecha").value;
+            const categoriaVal = document.getElementById("categoria").value;
+            let formValido = true;
+
+            if (!montoVal || isNaN(montoVal) || montoVal <= 0) {
+                setValidacion("monto_visual", "error-monto", false);
+                formValido = false;
+            } else {
+                setValidacion("monto_visual", "error-monto", true);
+            }
+            if (!fechaVal) {
+                setValidacion("fecha", "error-fecha", false);
+                formValido = false;
+            } else {
+                setValidacion("fecha", "error-fecha", true);
+            }
+            if (!categoriaVal.trim()) {
+                setValidacion("categoria", "error-categoria", false);
+                formValido = false;
+            } else {
+                setValidacion("categoria", "error-categoria", true);
+            }
+            if (!formValido) return;
+            // ------------------------------------------
+
             const btn = formMovimiento.querySelector(".btn-modal-submit");
             btn.disabled = true;
             btn.textContent = "Guardando...";
 
             const idTransaccion = document.getElementById("id_transaccion").value;
             const tipo = formMovimiento.querySelector("input[name='tipo_movimiento']:checked").value;
-            const monto = parseFloat(document.getElementById("monto").value);
-            const fecha = document.getElementById("fecha").value;
-            const categoria = document.getElementById("categoria").value;
             const descripcion = document.getElementById("descripcion").value;
 
             try {
                 if (idTransaccion) {
                     await updateDoc(doc(db, "transacciones", idTransaccion), {
-                        tipo, monto, fecha, categoria, descripcion
+                        tipo, monto: montoVal, fecha: fechaVal, categoria: categoriaVal, descripcion
                     });
-                    Swal.fire("Éxito", "Movimiento actualizado", "success");
+                    Swal.fire({ title: "Éxito", text: "Movimiento actualizado", icon: "success", timer: 1500, showConfirmButton: false });
                 } else {
                     await addDoc(collection(db, "transacciones"), {
                         usuario_id: currentUid,
-                        tipo, monto, fecha, categoria, descripcion
+                        tipo, monto: montoVal, fecha: fechaVal, categoria: categoriaVal, descripcion,
+                        fecha_creacion: new Date()
                     });
-                    Swal.fire("Éxito", "Movimiento guardado", "success");
+                    Swal.fire({ title: "Éxito", text: "Movimiento guardado", icon: "success", timer: 1500, showConfirmButton: false });
                 }
                 document.getElementById('modalNuevoMovimiento').classList.remove('active');
                 formMovimiento.reset();
+                const iv = document.getElementById("monto_visual");
+                if (iv) iv.value = "";
                 window.cargarDatosFirestore();
-                // Verificar alertas de presupuesto y gasto inusual tras guardar
                 if (tipo === 'gasto') {
-                    _verificarAlertasPresupuesto(currentUid, categoria);
-                    verificarGastoInusual(currentUid, { monto, categoria });
+                    _verificarAlertasPresupuesto(currentUid, categoriaVal);
+                    verificarGastoInusual(currentUid, { monto: montoVal, categoria: categoriaVal });
                 }
             } catch (error) {
                 console.error("Error guardando:", error);

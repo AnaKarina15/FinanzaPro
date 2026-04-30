@@ -27,8 +27,8 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="./css/global.css" />
-  <link rel="stylesheet" href="./css/ingresosGastos.css" />
+  <link rel="stylesheet" href="./css/global.css?v=<?php echo time(); ?>" />
+  <link rel="stylesheet" href="./css/ingresosGastos.css?v=<?php echo time(); ?>" />
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -213,7 +213,7 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
       <form action="../index.php?action=guardarMovimiento" method="POST" class="formulario" id="form-movimiento">
         <input type="hidden" id="id_transaccion" name="id_transaccion" value="">
 
-        <div class="modal-form-group mb-large type-selector">
+        <div class="modal-form-group type-selector">
           <label class="radio-label">
             <input type="radio" name="tipo_movimiento" value="ingreso" checked>
             <span>Ingreso</span>
@@ -224,25 +224,27 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
           </label>
         </div>
 
-        <div class="input-group modal-form-group">
+        <div class="modal-form-group">
           <label for="monto_visual">Monto</label>
           <div class="input-container">
-            <input type="text" id="monto_visual" placeholder="$ 0" required autocomplete="off">
-            <input type="hidden" id="monto" name="monto" required>
+            <input type="text" id="monto_visual" placeholder="$ 0" autocomplete="off">
+            <input type="hidden" id="monto" name="monto">
           </div>
+          <span class="error-text" id="error-monto">Obligatorio</span>
         </div>
 
         <div class="input-row modal-form-group">
           <div class="input-group">
             <label for="fecha">Fecha</label>
             <div class="input-container">
-              <input type="date" id="fecha" name="fecha" value="<?= date('Y-m-d') ?>" required>
+              <input type="date" id="fecha" name="fecha">
             </div>
+            <span class="error-text" id="error-fecha">Obligatorio</span>
           </div>
           <div class="input-group">
             <label for="categoria">Categoría</label>
             <div class="input-container">
-              <input list="lista-categorias" id="categoria" name="categoria" placeholder="Escribe o selecciona..." autocomplete="off" required>
+              <input list="lista-categorias" id="categoria" name="categoria" placeholder="Escribe..." autocomplete="off">
               <datalist id="lista-categorias">
                 <option value="Alimentación"></option>
                 <option value="Transporte"></option>
@@ -251,20 +253,18 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
                 <option value="Salario"></option>
               </datalist>
             </div>
+            <span class="error-text" id="error-categoria">Obligatorio</span>
           </div>
         </div>
 
-        <div class="input-group modal-form-group mb-large">
+        <div class="modal-form-group">
           <label for="descripcion">Descripción</label>
           <div class="input-container">
-            <textarea id="descripcion" name="descripcion" placeholder="Ej. Compra semanal de víveres" rows="4" maxlength="120"></textarea>
-            <div class="textarea-counter" id="descripcion-counter">0/120</div>
+            <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Compra de víveres">
           </div>
         </div>
 
-        <button type="submit" class="btn-primary btn-modal-submit">
-          Guardar Transacción
-        </button>
+        <button type="submit" class="btn-modal-submit">Guardar Transacción</button>
       </form>
 
     </div>

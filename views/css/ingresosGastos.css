@@ -387,111 +387,9 @@
     color: #ef4444 !important;
 }
 
-/*  FORMULARIO EMERGENTE (MODAL)*/
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
+/*  FORMULARIO EMERGENTE (MODAL) — hereda estilos de global.css */
 
-.modal-overlay.active {
-    display: flex;
-}
-
-.modal-content {
-    background-color: var(--bg-cards);
-    width: 90%;
-    max-width: 450px;
-    padding: 32px;
-    border-radius: 24px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-    animation: modalFadeIn 0.3s ease-out;
-    box-sizing: border-box;
-    position: relative;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.btn-close {
-    background: transparent;
-    color: var(--text-secondary);
-    padding: 8px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-close:hover {
-    color: var(--text-primary);
-    background-color: var(--bg);
-}
-
-.modal-form-group {
-    margin-bottom: 16px;
-}
-
-.modal-form-group.mb-large {
-    margin-bottom: 24px;
-}
-
-.type-selector {
-    display: flex;
-    gap: 16px;
-}
-
-.radio-label {
-    flex: 1;
-    text-align: center;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    background-color: var(--bg);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
-}
-
-.radio-label input[type="radio"] {
-    display: none;
-}
-
-.radio-label:has(input[value="gasto"]:checked) {
-    background-color: #fee2e2;
-    color: #ef4444;
-    border-color: #ef4444;
-}
-
-.radio-label:has(input[value="ingreso"]:checked) {
-    background-color: #d1fae5;
-    color: #059669;
-    border-color: #059669;
-}
-
-.btn-modal-submit {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-}
-
-.modal-form-group .input-container {
-    position: relative;
-}
-
+/* Estilos de textarea específicos de esta vista */
 .modal-form-group .input-container textarea {
     width: 100%;
     min-height: 90px;
@@ -508,6 +406,12 @@
     overflow-y: auto;
 }
 
+.modal-form-group .input-container textarea:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+}
+
 .textarea-counter {
     position: absolute;
     right: 14px;
@@ -518,14 +422,4 @@
     padding: 2px 8px;
     border-radius: 999px;
     pointer-events: none;
-}
-
-.modal-form-group .input-container textarea:focus {
-    outline: none;
-    border-color: var(--text-primary);
-}
-
-@keyframes modalFadeIn {
-    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
+}

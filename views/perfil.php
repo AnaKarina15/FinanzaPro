@@ -200,13 +200,7 @@ $usuario = []; // Placeholder temporal para no romper HTML
                                         <option value="COP" <?= ($usuario['moneda_principal'] ?? 'COP') == 'COP' ? 'selected' : '' ?>>COP - Peso Colombiano</option>
                                         <option value="USD" <?= ($usuario['moneda_principal'] ?? 'COP') == 'USD' ? 'selected' : '' ?>>USD - Dólar Estadounidense</option>
                                         <option value="EUR" <?= ($usuario['moneda_principal'] ?? 'COP') == 'EUR' ? 'selected' : '' ?>>EUR - Euro</option>
-                                        <option value="MXN" <?= ($usuario['moneda_principal'] ?? 'COP') == 'MXN' ? 'selected' : '' ?>>MXN - Peso Mexicano</option>
-                                        <option value="ARS" <?= ($usuario['moneda_principal'] ?? 'COP') == 'ARS' ? 'selected' : '' ?>>ARS - Peso Argentino</option>
-                                        <option value="BRL" <?= ($usuario['moneda_principal'] ?? 'COP') == 'BRL' ? 'selected' : '' ?>>BRL - Real Brasileño</option>
-                                        <option value="PEN" <?= ($usuario['moneda_principal'] ?? 'COP') == 'PEN' ? 'selected' : '' ?>>PEN - Sol Peruano</option>
-                                        <option value="CLP" <?= ($usuario['moneda_principal'] ?? 'COP') == 'CLP' ? 'selected' : '' ?>>CLP - Peso Chileno</option>
-                                        <option value="GBP" <?= ($usuario['moneda_principal'] ?? 'COP') == 'GBP' ? 'selected' : '' ?>>GBP - Libra Esterlina</option>
-                                        <option value="VES" <?= ($usuario['moneda_principal'] ?? 'COP') == 'VES' ? 'selected' : '' ?>>VES - Bolívar Venezolano</option>
+                                        
                                     </select>
                                 </div>
                                 <div class="setting-item">
