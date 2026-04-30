@@ -88,7 +88,10 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
           <div id="notif-panel">
             <div class="notif-panel-header">
               <h4>Notificaciones</h4>
-              <button id="btn-marcar-todas">Marcar todas como leídas</button>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button id="btn-marcar-todas">Marcar todas como leídas</button>
+                <button id="btn-eliminar-todas" style="color:#ef4444;">Eliminar todas</button>
+              </div>
             </div>
             <div id="notif-lista"></div>
             <div id="notif-empty">
@@ -368,31 +371,72 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
     </div>
   </div>
 
-  <!-- MODAL AGREGAR ABONO A META -->
+  <!-- MODAL GESTIONAR META (Depositar / Retirar) -->
   <div class="modal-overlay" id="modalAbonoMeta">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 id="modal-titulo-abono-meta">Abonar a Meta</h3>
+        <h3 id="modal-titulo-abono-meta">Gestionar Meta</h3>
         <button class="btn-close" id="btn-cerrar-abono-meta">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
-      <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 24px;">Transfiere saldo disponible a: <strong id="nombre-meta-abono"></strong></p>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: -16px; margin-bottom: 16px;">
+        <strong id="nombre-meta-abono"></strong>
+      </p>
 
-      <form action="#" method="POST" id="form-abono-meta">
-        <input type="hidden" name="id_meta_abono" id="id_meta_abono" value="">
-        <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; margin-bottom: 16px;">
-          <span class="material-symbols-outlined" style="color: #059669; font-size: 20px;">account_balance_wallet</span>
-          <span id="info-disponible-abono" style="font-size: 14px; font-weight: 600; color: #059669;">Calculando saldo...</span>
-        </div>
-        <div class="input-group modal-form-group">
-          <label>Monto a transferir</label>
-          <div class="input-container">
-            <input type="text" name="monto_abono" id="monto_abono" placeholder="$ 0" required autocomplete="off">
+      <!-- Tabs tipo pill -->
+      <div style="display:flex; background:#f1f5f9; border-radius:10px; padding:4px; gap:4px; margin-bottom:20px;">
+        <button id="tab-depositar" onclick="cambiarTabMeta('depositar')"
+          style="flex:1; padding:8px 12px; border:none; border-radius:8px; background:#059669; color:#fff; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span class="material-symbols-outlined" style="font-size:16px;">arrow_downward</span> Depositar
+        </button>
+        <button id="tab-retirar" onclick="cambiarTabMeta('retirar')"
+          style="flex:1; padding:8px 12px; border:none; border-radius:8px; background:transparent; color:#64748b; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span class="material-symbols-outlined" style="font-size:16px;">arrow_upward</span> Retirar
+        </button>
+      </div>
+
+      <!-- Panel Depositar -->
+      <div id="panel-depositar">
+        <form action="#" method="POST" id="form-abono-meta">
+          <input type="hidden" name="id_meta_abono" id="id_meta_abono" value="">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; margin-bottom: 16px;">
+            <span class="material-symbols-outlined" style="color: #059669; font-size: 20px;">account_balance_wallet</span>
+            <span id="info-disponible-abono" style="font-size: 14px; font-weight: 600; color: #059669;">Calculando saldo...</span>
           </div>
-        </div>
-        <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-abono-meta">Transferir</button>
-      </form>
+          <div class="input-group modal-form-group">
+            <label>Monto a depositar</label>
+            <div class="input-container">
+              <input type="text" name="monto_abono" id="monto_abono" placeholder="$ 0" required autocomplete="off"
+                style="font-size:24px; font-weight:800; color:var(--text-primary); text-align:center;">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-abono-meta">Depositar</button>
+        </form>
+      </div>
+
+      <!-- Panel Retirar -->
+      <div id="panel-retirar" style="display:none;">
+        <form action="#" method="POST" id="form-retirar-meta">
+          <input type="hidden" id="id_meta_retiro" value="">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: #fff7ed; border: 1px solid #fed7aa; margin-bottom: 16px;">
+            <span class="material-symbols-outlined" style="color: #ea580c; font-size: 20px;">savings</span>
+            <span id="info-ahorrado-meta" style="font-size: 14px; font-weight: 600; color: #ea580c;">$0</span>
+          </div>
+          <div class="input-group modal-form-group">
+            <label>Monto a retirar</label>
+            <div class="input-container">
+              <input type="text" name="monto_retiro" id="monto_retiro" placeholder="$ 0" required autocomplete="off"
+                style="font-size:24px; font-weight:800; color:var(--text-primary); text-align:center;">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-retiro-meta"
+            style="background: linear-gradient(135deg, #ea580c, #f97316);">
+            Retirar
+          </button>
+        </form>
+      </div>
+
     </div>
   </div>
 

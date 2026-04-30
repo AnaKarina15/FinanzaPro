@@ -97,7 +97,10 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
           <div id="notif-panel">
             <div class="notif-panel-header">
               <h4>Notificaciones</h4>
-              <button id="btn-marcar-todas">Marcar todas como leídas</button>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button id="btn-marcar-todas">Marcar todas como leídas</button>
+                <button id="btn-eliminar-todas" style="color:#ef4444;">Eliminar todas</button>
+              </div>
             </div>
             <div id="notif-lista"></div>
             <div id="notif-empty">
