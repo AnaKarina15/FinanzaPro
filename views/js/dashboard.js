@@ -83,136 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error al obtener perfil:", error);
       }
 
-<<<<<<< HEAD
-    const UX_MESSAGING = {
-      "estados": [
-        {
-          "id": "E0",
-          "nombre": "Empty State",
-          "salud_financiera": "Tu viaje financiero comienza aquí. Da el primer paso con seguridad.",
-          "tips": [
-            { "variante": "A", "titulo": "Registra tu primer ingreso", "descripcion": "Añade el dinero disponible actual para tener un punto de partida claro y preciso." },
-            { "variante": "B", "titulo": "Empieza creando una meta", "descripcion": "Define un objetivo financiero a corto plazo para darle propósito a tus futuros ahorros." }
-          ]
-        },
-        {
-          "id": "E1",
-          "nombre": "Peligro",
-          "salud_financiera": "Los gastos superan tus ingresos actuales. Es momento de ajustar prioridades.",
-          "tips": [
-            { "variante": "A", "titulo": "Revisa tus suscripciones activas", "descripcion": "Cancela aquellos servicios recurrentes que ya no usas para liberar fondos de forma inmediata." },
-            { "variante": "B", "titulo": "Pausa compras no esenciales", "descripcion": "Pospón los gastos prescindibles hasta lograr estabilizar el flujo de caja durante este mes." }
-          ]
-        },
-        {
-          "id": "E2",
-          "nombre": "Ahorrador",
-          "salud_financiera": "Mantienes un ritmo excelente. Tus finanzas están bajo control y creciendo.",
-          "tips": [
-            { "variante": "A", "titulo": "Acelera tus metas actuales", "descripcion": "Transfiere el dinero excedente a tus ahorros para lograr tus objetivos mucho más rápido." },
-            { "variante": "B", "titulo": "Crea tu fondo de emergencia", "descripcion": "Aprovecha tu capacidad de ahorro mensual construyendo una reserva segura frente a posibles imprevistos." }
-          ]
-        },
-        {
-          "id": "E3",
-          "nombre": "Límite de Presupuesto",
-          "salud_financiera": "Estás cerca del límite presupuestal en una categoría. Administra con precaución.",
-          "tips": [
-            { "variante": "A", "titulo": "Modera compras en esta categoría", "descripcion": "Busca alternativas sin costo durante los próximos días para evitar sobrepasar tu tope mensual." },
-            { "variante": "B", "titulo": "Reasigna fondos de otras áreas", "descripcion": "Mueve dinero desde categorías con saldo disponible para cubrir gastos imprevistos sin generar déficit." }
-          ]
-        },
-        {
-          "id": "E4",
-          "nombre": "Meta Cumplida",
-          "salud_financiera": "¡Excelente logro! Tu constancia financiera está dando grandes resultados reales.",
-          "tips": [
-            { "variante": "A", "titulo": "Haz realidad tu objetivo", "descripcion": "Retira los fondos ahorrados y disfruta la recompensa de toda tu disciplina y esfuerzo." },
-            { "variante": "B", "titulo": "Inicia un desafío más grande", "descripcion": "Aprovecha el buen impulso financiero creando una meta más ambiciosa para seguir construyendo patrimonio." }
-          ]
-        },
-        {
-          "id": "E5",
-          "nombre": "Gasto Hormiga",
-          "salud_financiera": "Las compras frecuentes de bajo costo suman bastante. Monitorea esos consumos.",
-          "tips": [
-            { "variante": "A", "titulo": "Consolida tus compras diarias", "descripcion": "Agrupa esos pequeños gastos en una sola salida semanal para controlar mejor el presupuesto." },
-            { "variante": "B", "titulo": "Fija límites para tus antojos", "descripcion": "Asigna un monto máximo cada semana para pequeños gustos y mantenlo siempre bajo observación." }
-          ]
-        }
-      ]
-    };
-
-    const actualizarSaludYTips = (ingresos, gastos, movimientos, metas) => {
-        let estadoID = "E2"; // Default
-        
-        // Reglas de estado (jerárquicas, la última que aplique sobreescribe si es de mayor peso visual o la primera)
-        if (movimientos.length === 0) {
-            estadoID = "E0";
-        } else if (gastos > ingresos && ingresos > 0) {
-            estadoID = "E1";
-        } else {
-            // Check Meta cumplida
-            let metaCumplida = false;
-            metas.forEach(m => {
-                if (parseFloat(m.monto_actual) >= parseFloat(m.monto_objetivo)) metaCumplida = true;
-            });
-            if (metaCumplida) {
-                estadoID = "E4";
-            } else {
-                // Check gasto hormiga (más de 4 gastos pequeños)
-                let gastosPequenos = 0;
-                movimientos.forEach(m => {
-                    if (m.tipo === "gasto" && parseFloat(m.monto) < 50000) gastosPequenos++;
-                });
-                if (gastosPequenos >= 5 && gastos < ingresos) {
-                    estadoID = "E5";
-                }
-            }
-        }
-
-        const estadoObj = UX_MESSAGING.estados.find(e => e.id === estadoID) || UX_MESSAGING.estados[2];
-        
-        // Actualizar UI
-        const saludTexto = document.getElementById("salud-financiera-texto");
-        if (saludTexto) saludTexto.textContent = estadoObj.salud_financiera;
-
-        const tipsLista = document.getElementById("tips-financieros-lista");
-        if (tipsLista) {
-            tipsLista.innerHTML = "";
-            estadoObj.tips.forEach(tip => {
-                tipsLista.innerHTML += `
-                    <li class="tip-item">
-                        <small class="tip-tag">Consejo del día</small>
-                        <p><strong>${tip.titulo}</strong><br>${tip.descripcion}</p>
-                    </li>
-                `;
-            });
-        }
-    };
-
-    const cargarEstadisticasFirestore = async (uid) => {
-        try {
-            const transRef = collection(db, "transacciones");
-            // Obtenemos las transacciones del usuario
-            const q = query(transRef, where("usuario_id", "==", uid));
-            const querySnapshot = await getDocs(q);
-            
-            let ing = 0;
-            let gas = 0;
-            const movimientos = [];
-=======
       initNotificaciones(user.uid);
-      // Nombre ya viene de Firestore, no del DOM
       enviarBienvenidaSiNecesario(user.uid, _nombreUsuario);
       cargarCategoriasDePresupuestos();
       cargarEstadisticasFirestore(user.uid);
     } else {
-      // Si no hay sesión activa en Firebase, lo devolvemos al login
       window.location.href = "../index.php";
     }
   });
->>>>>>> 7da59ca5e5274308e071297dbaed3a9ad480c999
 
   const cargarCategoriasDePresupuestos = async () => {
     if (!currentUid) return;
@@ -245,6 +123,82 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // ═══════════════════════════════════════════════════════════
+  // UX WRITING — Mensajería dinámica por estado financiero
+  // ═══════════════════════════════════════════════════════════
+  const UX_MESSAGING = {
+    estados: [
+      { id: "E0", nombre: "Empty State",
+        salud_financiera: "Tu viaje financiero comienza aquí. Da el primer paso con seguridad.",
+        tips: [
+          { titulo: "Registra tu primer ingreso", descripcion: "Añade el dinero disponible actual para tener un punto de partida claro y preciso." },
+          { titulo: "Empieza creando una meta", descripcion: "Define un objetivo a corto plazo para darle propósito a tus futuros ahorros." }
+        ]
+      },
+      { id: "E1", nombre: "Peligro",
+        salud_financiera: "Los gastos superan tus ingresos actuales. Es momento de ajustar prioridades.",
+        tips: [
+          { titulo: "Revisa tus suscripciones", descripcion: "Cancela servicios recurrentes que ya no usas para liberar fondos de forma inmediata." },
+          { titulo: "Pausa compras no esenciales", descripcion: "Pospón gastos prescindibles hasta estabilizar el flujo de caja durante este mes." }
+        ]
+      },
+      { id: "E2", nombre: "Ahorrador",
+        salud_financiera: "Mantienes un ritmo excelente. Tus finanzas están bajo control y creciendo.",
+        tips: [
+          { titulo: "Acelera tus metas actuales", descripcion: "Transfiere el dinero excedente a tus ahorros para lograr tus objetivos más rápido." },
+          { titulo: "Crea tu fondo de emergencia", descripcion: "Construye una reserva segura aprovechando tu capacidad de ahorro mensual actual." }
+        ]
+      },
+      { id: "E4", nombre: "Meta Cumplida",
+        salud_financiera: "¡Excelente logro! Tu constancia financiera está dando grandes resultados reales.",
+        tips: [
+          { titulo: "Haz realidad tu objetivo", descripcion: "Retira los fondos ahorrados y disfruta la recompensa de toda tu disciplina." },
+          { titulo: "Inicia un desafío más grande", descripcion: "Crea una meta más ambiciosa para seguir construyendo patrimonio con buen impulso." }
+        ]
+      },
+      { id: "E5", nombre: "Gasto Hormiga",
+        salud_financiera: "Las compras frecuentes de bajo costo suman bastante. Monitorea esos consumos.",
+        tips: [
+          { titulo: "Consolida tus compras diarias", descripcion: "Agrupa pequeños gastos en una sola salida semanal para controlar mejor el presupuesto." },
+          { titulo: "Fija límites para tus antojos", descripcion: "Asigna un monto máximo semanal para pequeños gustos y mantenlo bajo observación." }
+        ]
+      }
+    ]
+  };
+
+  const actualizarSaludYTips = (ingresos, gastos, movimientos, metas) => {
+    let estadoID = "E2"; // Por defecto: estado saludable
+
+    if (movimientos.length === 0) {
+      estadoID = "E0";
+    } else if (gastos > ingresos && ingresos > 0) {
+      estadoID = "E1";
+    } else {
+      const metaCumplida = metas.some(m => parseFloat(m.monto_actual) >= parseFloat(m.monto_objetivo));
+      if (metaCumplida) {
+        estadoID = "E4";
+      } else {
+        const gastosPequenos = movimientos.filter(m => m.tipo === "gasto" && parseFloat(m.monto) < 50000).length;
+        if (gastosPequenos >= 5) estadoID = "E5";
+      }
+    }
+
+    const estado = UX_MESSAGING.estados.find(e => e.id === estadoID) || UX_MESSAGING.estados[2];
+
+    const saludTexto = document.getElementById("salud-financiera-texto");
+    if (saludTexto) saludTexto.textContent = estado.salud_financiera;
+
+    const tipsLista = document.getElementById("tips-financieros-lista");
+    if (tipsLista) {
+      tipsLista.innerHTML = estado.tips.map(tip => `
+        <li class="tip-item">
+          <small class="tip-tag">Consejo del día</small>
+          <p><strong>${tip.titulo}</strong><br>${tip.descripcion}</p>
+        </li>
+      `).join("");
+    }
+  };
+
   const cargarEstadisticasFirestore = async (uid) => {
     try {
       const transRef = collection(db, "transacciones");
@@ -272,10 +226,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const metasSnapshot = await getDocs(qMetas);
 
       let ahorroEnMetas = 0;
+      const metasCompletas = [];
       metasSnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         ahorroEnMetas += parseFloat(data.monto_actual) || 0;
+        metasCompletas.push(data);
       });
+
+      // Actualizar Salud Financiera y Tips dinámicos
+      actualizarSaludYTips(ing, gas, movimientos, metasCompletas);
 
       // Actualizar tarjetas superiores
       const balanceTotal = ing - gas;
@@ -316,57 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
               year: "numeric",
             });
 
-<<<<<<< HEAD
-            // Ordenar por fecha descendente (más reciente primero)
-            movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-            // Obtenemos el dinero guardado en las metas (ahorros)
-            const metasRef = collection(db, "metas");
-            const qMetas = query(metasRef, where("id_usuario", "==", uid));
-            const metasSnapshot = await getDocs(qMetas);
-            
-            let ahorroEnMetas = 0;
-            const metasCompletas = [];
-            metasSnapshot.forEach(docSnap => {
-                const data = docSnap.data();
-                ahorroEnMetas += parseFloat(data.monto_actual) || 0;
-                metasCompletas.push(data);
-            });
-
-            // Actualizar Salud y Tips
-            actualizarSaludYTips(ing, gas, movimientos, metasCompletas);
-
-            // Actualizar tarjetas superiores
-            const balanceTotal = ing - gas;
-            const disponible = balanceTotal - ahorroEnMetas;
-
-            if(document.getElementById('monto-disponible')) document.getElementById('monto-disponible').innerText = formatearMoneda(disponible);
-            if(document.getElementById('monto-total-real')) document.getElementById('monto-total-real').innerText = formatearMoneda(balanceTotal);
-            if(document.getElementById('monto-ingresos')) document.getElementById('monto-ingresos').innerText = formatearMoneda(ing);
-            if(document.getElementById('monto-gastos')) document.getElementById('monto-gastos').innerText = formatearMoneda(gas);
-
-            // Actualizar tabla de últimos movimientos
-            const tablaCuerpo = document.querySelector('.movimientos-tabla-cuerpo');
-            if (tablaCuerpo) {
-                tablaCuerpo.innerHTML = '';
-                if (movimientos.length === 0) {
-                    tablaCuerpo.innerHTML = `<tr><td colspan="4" class="empty-table-msg">Aún no tienes ningún movimiento.</td></tr>`;
-                } else {
-                    const ultimos2 = movimientos.slice(0, 2);
-                    ultimos2.forEach(mov => {
-                        const esGasto = mov.tipo === 'gasto';
-                        const colorMonto = esGasto ? 'text-danger' : 'text-success';
-                        const signo = esGasto ? '-' : '+';
-                        const iconType = esGasto ? 'shopping_bag' : 'business_center';
-                        const iconBg = esGasto ? 'icon-blue' : 'icon-green';
-                        
-                        const dateObj = new Date(mov.fecha + 'T00:00:00');
-                        const fechaFormato = dateObj.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
-
                         tablaCuerpo.innerHTML += `
-=======
-            tablaCuerpo.innerHTML += `
->>>>>>> 7da59ca5e5274308e071297dbaed3a9ad480c999
                             <tr>
                                 <td class="table-date">${fechaFormato}</td>
                                 <td class="table-desc">
@@ -381,7 +290,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         `;
           });
         }
-      }
 
       // Actualizar gráfica
       const canvas = document.querySelector(".incomes-outcomes-chart");
@@ -438,94 +346,11 @@ document.addEventListener("DOMContentLoaded", () => {
           options: { maintainAspectRatio: false },
         });
       }
-    } catch (error) {
+    }
+    }catch (error) {
       console.error("Error al cargar estadísticas:", error);
     }
   };
-
-  // (Eliminamos el viejo fetch a PHP)
-  /*
-
-            // --- ACTUALIZAR TARJETAS ---
-            const ing = parseFloat(data.totales.ingresos) || 0;
-            const gas = parseFloat(data.totales.gastos) || 0;
-            
-            if(document.getElementById('monto-disponible')) document.getElementById('monto-disponible').innerText = formatearMoneda(ing - gas);
-            if(document.getElementById('monto-ingresos')) document.getElementById('monto-ingresos').innerText = formatearMoneda(ing);
-            if(document.getElementById('monto-gastos')) document.getElementById('monto-gastos').innerText = formatearMoneda(gas);
-
-            // --- ACTUALIZAR GRÁFICA DE BARRAS ---
-            const canvas = document.querySelector(".incomes-outcomes-chart");
-            if (canvas && data.mensual) {
-                const chartExistente = Chart.getChart(canvas);
-                if (chartExistente) { chartExistente.destroy(); }
-
-                let dIngresos = new Array(12).fill(0);
-                let dGastos = new Array(12).fill(0);
-
-                if (data.mensual) {
-                    data.mensual.forEach(m => {
-                        dIngresos[parseInt(m.mes) - 1] = parseFloat(m.total_ingresos);
-                        dGastos[parseInt(m.mes) - 1] = parseFloat(m.total_gastos);
-                    });
-                }
-
-                new Chart(canvas, {
-                    type: "bar",
-                    data: {
-                        labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-                        datasets: [
-                            { label: "Ingresos", data: dIngresos, borderRadius: 32, backgroundColor: "#05966990" },
-                            { label: "Gastos", data: dGastos, borderRadius: 32, backgroundColor: "#2563eb90" }
-                        ]
-                    },
-                    options: { maintainAspectRatio: false }
-                });
-            }
-
-            // --- ACTUALIZAR TABLA DE MOVIMIENTOS ---
-            const tablaCuerpo = document.querySelector('.movimientos-tabla-cuerpo');
-            if (tablaCuerpo && data.movimientos) {
-                tablaCuerpo.innerHTML = '';
-
-                if (data.movimientos.length === 0) {
-                    tablaCuerpo.innerHTML = `<tr><td colspan="4" class="empty-table-msg">Sin actividad reciente.</td></tr>`;
-                    return;
-                }
-
-                const ultimos2 = data.movimientos.slice(0, 2);
-
-                ultimos2.forEach(mov => {
-                    const esGasto = mov.tipo === 'gasto';
-                    const colorMonto = esGasto ? 'text-danger' : 'text-success';
-                    const signo = esGasto ? '-' : '+';
-                    const iconType = esGasto ? 'shopping_bag' : 'business_center';
-                    const iconBg = esGasto ? 'icon-blue' : 'icon-green';
-
-                    const dateObj = new Date(mov.fecha + 'T00:00:00');
-                    const fechaFormato = dateObj.toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
-
-                    tablaCuerpo.innerHTML += `
-                        <tr>
-                            <td class="table-date">${fechaFormato}</td>
-                            <td class="table-desc">
-                                <div class="table-concept">
-                                    <span class="material-symbols-outlined concept-icon ${iconBg}">${iconType}</span>
-                                    <strong>${mov.descripcion}</strong>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge badge-neutral">${mov.categoria}</span>
-                            </td>
-                            <td class="${colorMonto}">
-                                ${signo}${formatearMoneda(mov.monto)}
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-        })
-    */
 
   // --- LÓGICA DEL INPUT DE MONTO (Formateo automático) ---
   const inputVisual = document.getElementById("monto_visual");
@@ -720,3 +545,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
