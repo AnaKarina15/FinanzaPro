@@ -163,9 +163,8 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         <article class="card dashboard-health-card">
           <div>
             <h3>Salud Financiera</h3>
-            <p>
-              Vas por buen camino. Este mes has ahorrado un 15% más que el
-              anterior.
+            <p id="salud-financiera-texto">
+              Analizando tu estado financiero...
             </p>
           </div>
           <span class="material-symbols-outlined bg-icon">health_and_safety</span>
@@ -192,18 +191,8 @@ if (($_SESSION['id_rol'] ?? 0) == 1) {
         </article>
         <article class="card dashboard-tips-card">
           <h3>Tips Financieros</h3>
-          <ul class="tips-list">
-            <li class="tip-item">
-              <small class="tip-tag">Regla 50/30/20</small>
-              <p>
-                Destina el 20% de tus ingresos hoy mismo a tu cuenta de
-                ahorros.
-              </p>
-            </li>
-            <li class="tip-item">
-              <small class="tip-tag">Gasto Hormiga</small>
-              <p>Reduce las suscripciones que no has usado.</p>
-            </li>
+          <ul class="tips-list" id="tips-financieros-lista">
+            <!-- Los tips se inyectarán dinámicamente -->
           </ul>
         </article>
       </div>

@@ -100,6 +100,113 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    const UX_MESSAGING = {
+      "estados": [
+        {
+          "id": "E0",
+          "nombre": "Empty State",
+          "salud_financiera": "Tu viaje financiero comienza aquí. Da el primer paso con seguridad.",
+          "tips": [
+            { "variante": "A", "titulo": "Registra tu primer ingreso", "descripcion": "Añade el dinero disponible actual para tener un punto de partida claro y preciso." },
+            { "variante": "B", "titulo": "Empieza creando una meta", "descripcion": "Define un objetivo financiero a corto plazo para darle propósito a tus futuros ahorros." }
+          ]
+        },
+        {
+          "id": "E1",
+          "nombre": "Peligro",
+          "salud_financiera": "Los gastos superan tus ingresos actuales. Es momento de ajustar prioridades.",
+          "tips": [
+            { "variante": "A", "titulo": "Revisa tus suscripciones activas", "descripcion": "Cancela aquellos servicios recurrentes que ya no usas para liberar fondos de forma inmediata." },
+            { "variante": "B", "titulo": "Pausa compras no esenciales", "descripcion": "Pospón los gastos prescindibles hasta lograr estabilizar el flujo de caja durante este mes." }
+          ]
+        },
+        {
+          "id": "E2",
+          "nombre": "Ahorrador",
+          "salud_financiera": "Mantienes un ritmo excelente. Tus finanzas están bajo control y creciendo.",
+          "tips": [
+            { "variante": "A", "titulo": "Acelera tus metas actuales", "descripcion": "Transfiere el dinero excedente a tus ahorros para lograr tus objetivos mucho más rápido." },
+            { "variante": "B", "titulo": "Crea tu fondo de emergencia", "descripcion": "Aprovecha tu capacidad de ahorro mensual construyendo una reserva segura frente a posibles imprevistos." }
+          ]
+        },
+        {
+          "id": "E3",
+          "nombre": "Límite de Presupuesto",
+          "salud_financiera": "Estás cerca del límite presupuestal en una categoría. Administra con precaución.",
+          "tips": [
+            { "variante": "A", "titulo": "Modera compras en esta categoría", "descripcion": "Busca alternativas sin costo durante los próximos días para evitar sobrepasar tu tope mensual." },
+            { "variante": "B", "titulo": "Reasigna fondos de otras áreas", "descripcion": "Mueve dinero desde categorías con saldo disponible para cubrir gastos imprevistos sin generar déficit." }
+          ]
+        },
+        {
+          "id": "E4",
+          "nombre": "Meta Cumplida",
+          "salud_financiera": "¡Excelente logro! Tu constancia financiera está dando grandes resultados reales.",
+          "tips": [
+            { "variante": "A", "titulo": "Haz realidad tu objetivo", "descripcion": "Retira los fondos ahorrados y disfruta la recompensa de toda tu disciplina y esfuerzo." },
+            { "variante": "B", "titulo": "Inicia un desafío más grande", "descripcion": "Aprovecha el buen impulso financiero creando una meta más ambiciosa para seguir construyendo patrimonio." }
+          ]
+        },
+        {
+          "id": "E5",
+          "nombre": "Gasto Hormiga",
+          "salud_financiera": "Las compras frecuentes de bajo costo suman bastante. Monitorea esos consumos.",
+          "tips": [
+            { "variante": "A", "titulo": "Consolida tus compras diarias", "descripcion": "Agrupa esos pequeños gastos en una sola salida semanal para controlar mejor el presupuesto." },
+            { "variante": "B", "titulo": "Fija límites para tus antojos", "descripcion": "Asigna un monto máximo cada semana para pequeños gustos y mantenlo siempre bajo observación." }
+          ]
+        }
+      ]
+    };
+
+    const actualizarSaludYTips = (ingresos, gastos, movimientos, metas) => {
+        let estadoID = "E2"; // Default
+        
+        // Reglas de estado (jerárquicas, la última que aplique sobreescribe si es de mayor peso visual o la primera)
+        if (movimientos.length === 0) {
+            estadoID = "E0";
+        } else if (gastos > ingresos && ingresos > 0) {
+            estadoID = "E1";
+        } else {
+            // Check Meta cumplida
+            let metaCumplida = false;
+            metas.forEach(m => {
+                if (parseFloat(m.monto_actual) >= parseFloat(m.monto_objetivo)) metaCumplida = true;
+            });
+            if (metaCumplida) {
+                estadoID = "E4";
+            } else {
+                // Check gasto hormiga (más de 4 gastos pequeños)
+                let gastosPequenos = 0;
+                movimientos.forEach(m => {
+                    if (m.tipo === "gasto" && parseFloat(m.monto) < 50000) gastosPequenos++;
+                });
+                if (gastosPequenos >= 5 && gastos < ingresos) {
+                    estadoID = "E5";
+                }
+            }
+        }
+
+        const estadoObj = UX_MESSAGING.estados.find(e => e.id === estadoID) || UX_MESSAGING.estados[2];
+        
+        // Actualizar UI
+        const saludTexto = document.getElementById("salud-financiera-texto");
+        if (saludTexto) saludTexto.textContent = estadoObj.salud_financiera;
+
+        const tipsLista = document.getElementById("tips-financieros-lista");
+        if (tipsLista) {
+            tipsLista.innerHTML = "";
+            estadoObj.tips.forEach(tip => {
+                tipsLista.innerHTML += `
+                    <li class="tip-item">
+                        <small class="tip-tag">Consejo del día</small>
+                        <p><strong>${tip.titulo}</strong><br>${tip.descripcion}</p>
+                    </li>
+                `;
+            });
+        }
+    };
+
     const cargarEstadisticasFirestore = async (uid) => {
         try {
             const transRef = collection(db, "transacciones");
@@ -127,10 +234,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const metasSnapshot = await getDocs(qMetas);
             
             let ahorroEnMetas = 0;
+            const metasCompletas = [];
             metasSnapshot.forEach(docSnap => {
                 const data = docSnap.data();
                 ahorroEnMetas += parseFloat(data.monto_actual) || 0;
+                metasCompletas.push(data);
             });
+
+            // Actualizar Salud y Tips
+            actualizarSaludYTips(ing, gas, movimientos, metasCompletas);
 
             // Actualizar tarjetas superiores
             const balanceTotal = ing - gas;

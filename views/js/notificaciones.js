@@ -59,7 +59,7 @@ export async function enviarBienvenidaSiNecesario(uid, nombre) {
         if (!snap.empty) return;
 
         await crearNotificacion(uid, {
-            titulo: `¡Bienvenid@ a FinanzaPro, ${nombre}! 🎉`,
+            titulo: `Te damos la bienvenida a FinanzaPro, ${nombre}! 🎉`,
             mensaje: `Nos alegra que estés aquí. Ya tienes todo listo para llevar el control de tus finanzas personales. ¡Empieza registrando tus primeros ingresos y gastos!`,
             tipo: 'meta'
         });
