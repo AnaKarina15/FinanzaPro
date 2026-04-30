@@ -1784,8 +1784,9 @@ select:focus-visible {
 /* Contenedor de acciones (check + delete) */
 .notif-actions {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
     flex-shrink: 0;
 }
 
@@ -1807,8 +1808,8 @@ select:focus-visible {
     background: none;
     border: none;
     cursor: pointer;
-    color: #f87171;
-    padding: 4px;
+    color: #94a3b8; /* Gris neutro para no causar ansiedad visual */
+    padding: 6px; /* Área de clic más grande (Ley de Fitts) */
     border-radius: 50%;
     transition: color 0.2s, background 0.2s;
     display: flex;
@@ -1830,7 +1831,7 @@ select:focus-visible {
     border: none;
     cursor: pointer;
     color: #34d399;
-    padding: 4px;
+    padding: 6px; /* Área de clic más grande (Ley de Fitts) */
     border-radius: 50%;
     transition: color 0.2s, background 0.2s;
     display: flex;
