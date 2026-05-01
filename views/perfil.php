@@ -249,7 +249,7 @@
                         <form id="form-cambiar-telefono">
                             <div class="modal-form-group">
                                 <label>NUEVO TELÉFONO</label>
-                                <input type="tel" name="nuevo_telefono" class="input-profile" placeholder="3001234567" pattern="^\d{10}$" maxlength="10" title="El número debe tener exactamente 10 dígitos" required>
+                                <input type="tel" name="nuevo_telefono" class="input-profile" placeholder="3001234567" maxlength="12" title="El número debe tener exactamente 10 dígitos" required>
                             </div>
                             <div class="modal-actions">
                                 <button type="button" class="btn-secondary" id="btn-cancelar-cambiar-telefono">Cancelar</button>
