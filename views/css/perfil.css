@@ -326,11 +326,11 @@ input:checked + .slider:before { transform: translateX(20px); }
     background: #059669;
     color: white;
     border: none;
-    padding: 12px 24px;
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(5, 150, 105, 0.2);
 }
+
 
 /* 7. Responsive */
 @media (max-width: 900px) {
