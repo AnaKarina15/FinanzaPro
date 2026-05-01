@@ -36,8 +36,9 @@ main {
 section {
   display: flex;
   justify-content: space-around;
-  min-height: auto;
+  height: 90vh;
   padding: 50px 50px;
+  overflow-y: scroll;
 }
 
 #login {
@@ -175,7 +176,7 @@ section {
 
 #login form {
   width: 100%;
-  padding: 65px 32px;
+  padding: 32px;
   gap: 24px;
 
   h2 {
