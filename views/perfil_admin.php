@@ -206,6 +206,26 @@
             padding-top: 8px;
         }
 
+        /* Admin editable inputs: white background + subtle border */
+        .admin-profile-layout .input-profile {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .admin-profile-layout .input-profile:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+            outline: none;
+        }
+
+        /* Admin readonly inputs: keep gray (read-only look) */
+        .admin-profile-layout .input-profile[readonly] {
+            background: #f0f4f9;
+            border-color: transparent;
+            cursor: default;
+        }
+
         @media (max-width: 640px) {
             .admin-header-content { flex-direction: column; align-items: flex-start; }
             .admin-actions-footer { flex-direction: column; }

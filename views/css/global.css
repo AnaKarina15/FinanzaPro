@@ -560,6 +560,14 @@ select:focus-visible {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.modal-actions .btn-modal-submit {
+    width: auto;
+    margin-top: 0;
 }
 
 

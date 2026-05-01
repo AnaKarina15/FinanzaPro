@@ -96,11 +96,11 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>NOMBRE</label>
-                                        <input type="text" name="nombre" value="" class="input-profile">
+                                        <input type="text" name="nombre" value="" class="input-profile" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>APELLIDO</label>
-                                        <input type="text" name="apellido" value="" class="input-profile">
+                                        <input type="text" name="apellido" value="" class="input-profile" readonly>
                                     </div>
                                 </div>
 
