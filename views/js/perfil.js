@@ -528,3 +528,32 @@ document.addEventListener('input', function (e) {
     e.target.value = value;
   }
 });
+
+// ═══════════════════════════════════════════════
+// CERRAR SESIÓN
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', () => {
+            Swal.fire({
+                title: '¿Cerrar sesión?',
+                text: "Estás a punto de salir de tu cuenta en este dispositivo.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    signOut(auth).then(() => {
+                        window.location.href = '../index.php';
+                    }).catch((error) => {
+                        Swal.fire('Error', 'No se pudo cerrar sesión.', 'error');
+                    });
+                }
+            });
+        });
+    }
+});
