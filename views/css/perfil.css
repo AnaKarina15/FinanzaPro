@@ -174,7 +174,15 @@
     text-align: center;
 }
 
-.phone-input-container .input-profile { flex: 1; }
+.phone-input-container .input-profile { flex: 1; min-width: 0; }
+
+/* Input de teléfono en el modal: sin text-align center ni padding extra para que quepan 10 dígitos */
+#form-cambiar-telefono .input-profile,
+#form-cambiar-telefono input[name="nuevo_telefono"] {
+    text-align: left;
+    letter-spacing: normal;
+    padding: 12px 12px;
+}
 
 /* Links y Botones de Acción */
 .link-change {
@@ -318,7 +326,18 @@ input:checked + .slider:before { transform: translateX(20px); }
     border-color: #fca5a5;
 }
 
-.group-btns { display: flex; gap: 12px; }
+.group-btns {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.group-btns .btn-secondary,
+.group-btns .btn-primary {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+}
 
 
 

@@ -57,7 +57,7 @@
           <input type="text" id="buscador-general" placeholder="Buscar presupuestos o metas..." autocomplete="off">
         </div>
         <div class="notif-wrapper">
-          <button class="btn-secondary" id="btn-notificaciones" style="border-radius: 50%;">
+          <button class="btn-secondary" id="btn-notificaciones">
             <span class="material-symbols-outlined">notifications</span>
             <span id="notif-badge" style="display:none;"></span>
           </button>

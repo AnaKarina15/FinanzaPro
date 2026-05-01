@@ -264,9 +264,6 @@
                             </div>
                         </div>
                     </div>
-                    <a href="admin.php" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                        <span class="material-symbols-outlined">arrow_back</span> Volver
-                    </a>
                 </div>
             </div>
 
