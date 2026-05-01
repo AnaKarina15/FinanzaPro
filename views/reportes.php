@@ -49,7 +49,7 @@
           <div class="avatar">
             <img src="https://ui-avatars.com/api/?name=Cargando...&background=059669&color=fff" alt="Foto de perfil" />
           </div>
-          <span class="username">Cargando...</span>
+          <span class="username skeleton-text"></span>
         </a>
       </nav>
     </aside>

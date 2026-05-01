@@ -240,7 +240,7 @@
 }
 
 .toggle-btn {
-    border: none;
+    border: 1px solid #e2e8f0;
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 13px;
@@ -254,6 +254,7 @@
 .toggle-btn.active {
     background: white;
     color: #059669;
+    border-color: transparent;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 

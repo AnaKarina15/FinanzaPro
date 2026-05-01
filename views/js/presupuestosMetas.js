@@ -15,7 +15,7 @@ onAuthStateChanged(auth, async (user) => {
                 const d = userDoc.data();
                 const nombre = `${d.nombre || ''} ${d.apellido || ''}`.trim();
                 const sideName = document.querySelector(".nav-profile .username");
-                if (sideName) sideName.textContent = nombre;
+                if (sideName) { sideName.textContent = nombre; sideName.classList.remove('skeleton-text'); }
                 const avatarImg = document.querySelector(".nav-profile img");
                 if (avatarImg) avatarImg.src = d.fotoPerfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
 

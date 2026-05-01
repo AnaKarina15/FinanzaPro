@@ -53,6 +53,21 @@ document.querySelectorAll(".switch-form").forEach((link) => {
   });
 });
 
+// NAV: "Iniciar Sesión" → muestra el login, limpia el registro y sube al inicio
+document.getElementById("nav-iniciar-sesion")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const loginForm = document.querySelector(".login-form");
+  const registerForm = document.querySelector(".register-form");
+  const resetForm = document.getElementById("form-restablecer");
+  loginForm?.classList.remove("hidden");
+  registerForm?.classList.add("hidden");
+  resetForm?.classList.add("hidden");
+  // Limpiar el formulario de registro
+  document.getElementById("form-register-auth")?.reset();
+  // Scroll suave al inicio de la página
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
 // ═══════════════════════════════════════════════
 // REFERENCIAS A FORMULARIOS
 // ═══════════════════════════════════════════════
@@ -391,4 +406,50 @@ const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get("login") === "error") {
   Swal.fire({ title: "Credenciales inválidas", text: "Revisa tu correo y contraseña.", icon: "error", confirmButtonColor: "#059669" });
   window.history.replaceState(null, null, window.location.pathname);
+}
+
+// ═══════════════════════════════════════════════
+// FORMATO DE TELÉFONO (MÁSCARA)
+// ═══════════════════════════════════════════════
+document.addEventListener('input', function (e) {
+  const isPhoneInput = e.target.name === 'telefono' || e.target.name === 'nuevo_telefono' || e.target.id === 'phone' || e.target.id === 'input-telefono';
+  if (isPhoneInput) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 3 && value.length <= 6) {
+      value = `${value.slice(0, 3)} ${value.slice(3)}`;
+    } else if (value.length > 6) {
+      value = `${value.slice(0, 3)} ${value.slice(3, 6)} ${value.slice(6, 10)}`;
+    }
+    e.target.value = value;
+  }
+});
+
+// ═══════════════════════════════════════════════
+// VALIDACIÓN DE CONTRASEÑA EN TIEMPO REAL
+// ═══════════════════════════════════════════════
+const regPasswordInput = document.getElementById('regster-password');
+const helperText = document.querySelector('small[for=""]');
+if (regPasswordInput && helperText) {
+  regPasswordInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    const hasLength = val.length >= 8;
+    const hasUpper = /[A-Z]/.test(val);
+    const hasLower = /[a-z]/.test(val);
+    const hasNum = /\d/.test(val);
+    const hasSymbol = /[$@$!%*?&]/.test(val);
+
+    if (hasLength && hasUpper && hasLower && hasNum && hasSymbol) {
+      helperText.textContent = "Contraseña segura y válida.";
+      helperText.style.color = "#059669";
+    } else {
+      helperText.textContent = "Falta: " + [
+        !hasLength ? "8+ caracteres" : "",
+        !hasUpper ? "1 mayúscula" : "",
+        !hasLower ? "1 minúscula" : "",
+        !hasNum ? "1 número" : "",
+        !hasSymbol ? "1 símbolo" : ""
+      ].filter(Boolean).join(", ");
+      helperText.style.color = "#ef4444";
+    }
+  });
 }

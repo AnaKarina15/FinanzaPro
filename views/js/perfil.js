@@ -80,10 +80,15 @@ async function cargarPerfil(user) {
 
         // Header Visuals
         const hdrName = document.querySelector('.name-row h2');
-        if(hdrName) hdrName.innerText = `${data.nombre || ''} ${data.apellido || ''}`.trim() || 'Sin Nombre';
+        if(hdrName) {
+            hdrName.innerText = `${data.nombre || ''} ${data.apellido || ''}`.trim() || 'Sin Nombre';
+            hdrName.classList.remove('skeleton-text');
+        }
         
         const hdrEmail = document.querySelector('.user-email');
-        if(hdrEmail) hdrEmail.innerHTML = `<span class="material-symbols-outlined">mail</span> ${user.email}`;
+        if(hdrEmail) {
+            hdrEmail.innerHTML = `<span class="material-symbols-outlined">mail</span> ${user.email}`;
+        }
         
         const avatarUrl = data.fotoPerfil || `https://ui-avatars.com/api/?name=${data.nombre}+${data.apellido}&background=059669&color=fff`;
         const avatar = document.getElementById('avatar-perfil');
@@ -91,7 +96,7 @@ async function cargarPerfil(user) {
 
         // Sidebar Visuals
         const sideName = document.querySelector(".nav-profile .username");
-        if (sideName) sideName.textContent = `${data.nombre || ''} ${data.apellido || ''}`.trim() || 'Sin Nombre';
+        if (sideName) { sideName.textContent = `${data.nombre || ''} ${data.apellido || ''}`.trim() || 'Sin Nombre'; sideName.classList.remove('skeleton-text'); }
         const avatarSidebar = document.querySelector(".nav-profile img");
         if (avatarSidebar) avatarSidebar.src = avatarUrl;
         
@@ -497,4 +502,20 @@ document.addEventListener("DOMContentLoaded", () => {
             inputFotoPerfil.value = "";
         });
     }
+});
+
+// ═══════════════════════════════════════════════
+// FORMATO DE TELÉFONO (MÁSCARA)
+// ═══════════════════════════════════════════════
+document.addEventListener('input', function (e) {
+  const isPhoneInput = e.target.name === 'telefono' || e.target.name === 'nuevo_telefono' || e.target.id === 'phone' || e.target.id === 'input-telefono';
+  if (isPhoneInput) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 3 && value.length <= 6) {
+      value = `${value.slice(0, 3)} ${value.slice(3)}`;
+    } else if (value.length > 6) {
+      value = `${value.slice(0, 3)} ${value.slice(3, 6)} ${value.slice(6, 10)}`;
+    }
+    e.target.value = value;
+  }
 });

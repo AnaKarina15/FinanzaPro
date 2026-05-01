@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const nombreCompleto = `${userData.nombre} ${userData.apellido}`.trim();
                     
                     const sideName = document.querySelector(".nav-profile .username");
-                    if (sideName) sideName.textContent = nombreCompleto;
+                    if (sideName) { sideName.textContent = nombreCompleto; sideName.classList.remove('skeleton-text'); }
                     
                     const avatarImg = document.querySelector(".nav-profile img");
                     if (avatarImg) {

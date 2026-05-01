@@ -48,7 +48,7 @@
           <div class="avatar">
             <img src="https://ui-avatars.com/api/?name=Cargando...&background=059669&color=fff" alt="Foto de perfil" />
           </div>
-          <span class="username">Cargando...</span>
+          <span class="username skeleton-text"></span>
         </a>
       </nav>
     </aside>
@@ -56,7 +56,7 @@
       <div class="view-info">
         <h2 class="view-title">Dashboard</h2>
         <p class="view-description">
-          Bienvenid@. Aquí tienes el resumen de hoy.
+          Hola,. Aquí tienes el resumen de hoy.
         </p>
       </div>
       <div class="view-buttons">
@@ -185,11 +185,17 @@
         <div class="modal-form-group type-selector">
           <label class="radio-label">
             <input type="radio" name="tipo_movimiento" value="ingreso" checked>
-            <span>Ingreso</span>
+            <span class="tipo-btn tipo-ingreso">
+              <svg class="tipo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+              Ingreso
+            </span>
           </label>
           <label class="radio-label">
             <input type="radio" name="tipo_movimiento" value="gasto">
-            <span>Gasto</span>
+            <span class="tipo-btn tipo-gasto">
+              <svg class="tipo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+              Gasto
+            </span>
           </label>
         </div>
 

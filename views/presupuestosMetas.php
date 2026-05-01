@@ -41,7 +41,7 @@
           <div class="avatar">
             <img src="https://ui-avatars.com/api/?name=Cargando...&background=059669&color=fff" alt="Foto de perfil" />
           </div>
-          <span class="username">Cargando...</span>
+          <span class="username skeleton-text"></span>
         </a>
       </nav>
     </aside>
@@ -84,7 +84,6 @@
             Presupuestos
           </h3>
           <div style="display: flex; gap: 16px; align-items: center;">
-            <a href="#" class="link-ver-todas" id="btn-ver-todos-presupuestos">Ver todos</a>
             <div class="toggle-switch" id="toggle-presupuesto-filtro">
               <button class="toggle-btn active" data-filtro="mensual">Mensual</button>
               <button class="toggle-btn" data-filtro="anual">Anual</button>
@@ -110,7 +109,6 @@
             <span class="material-symbols-outlined icon-green">stars</span> Metas de Ahorro
           </h3>
           <div style="display: flex; gap: 16px; align-items: center;">
-            <a href="#" class="link-ver-todas" id="btn-ver-todas-metas">Ver todas</a>
             <div class="toggle-switch" id="toggle-meta-filtro">
               <button class="toggle-btn" data-filtro="mensual">Mensual</button>
               <button class="toggle-btn" data-filtro="anual">Anual</button>

@@ -31,7 +31,7 @@
                     <div class="avatar">
                         <img src="https://ui-avatars.com/api/?name=Cargando...&background=059669&color=fff" alt="Foto de perfil" />
                     </div>
-                    <span class="username">Cargando...</span>
+                    <span class="username skeleton-text"></span>
                 </a>
             </nav>
         </aside>
@@ -77,10 +77,10 @@
                         </div>
                         <div class="profile-summary">
                             <div class="name-row">
-                                <h2>Cargando...</h2>
+                                <h2 class="skeleton-text" id="perfil-nombre-header">&nbsp;</h2>
                                 <span class="badge-verified"><span class="material-symbols-outlined">check_circle</span> Verificado</span>
                             </div>
-                            <p class="user-email"><span class="material-symbols-outlined">mail</span> cargando...</p>
+                            <p class="user-email" id="perfil-email-header"><span class="skeleton-text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></p>
                         </div>
                     </div>
                 </section>

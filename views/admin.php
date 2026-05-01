@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="./css/global.css?v=<?= time() ?>" />
     <link rel="stylesheet" href="./css/admin.css?v=<?= time() ?>" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="./js/notificaciones.js?v=<?= time() ?>"></script>
+    <script type="module" src="./js/notificaciones_admin.js?v=<?= time() ?>"></script>
     <script type="module" src="./js/admin.js?v=<?= time() ?>"></script>
 </head>
 
@@ -27,11 +27,11 @@
                 <a href="admin.php" class="nav-link active">
                     <span class="material-symbols-outlined">people</span> Usuarios
                 </a>
-                <a href="perfil.php" class="nav-link nav-profile">
+                <a href="perfil_admin.php" class="nav-link nav-profile" title="Mi Perfil Admin">
                     <div class="avatar">
                         <img src="https://ui-avatars.com/api/?name=Admin&background=059669&color=fff" alt="Foto de perfil" id="admin-nav-avatar" />
                     </div>
-                    <span class="username" id="admin-nav-username">Cargando...</span>
+                    <span class="username skeleton-text" id="admin-nav-username"></span>
                 </a>
             </nav>
         </aside>

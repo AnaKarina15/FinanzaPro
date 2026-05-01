@@ -28,7 +28,7 @@
     </div>
     <nav>
       <a href="#benefits" class="nav-link">Beneficios</a>
-      <a href="#login" class="nav-link">Iniciar Sesión</a>
+      <a href="#" class="nav-link" id="nav-iniciar-sesion">Iniciar Sesión</a>
     </nav>
   </header>
   <main>
@@ -170,7 +170,7 @@
                   class="input-soft input-tel"
                   placeholder="Ej. 300 456 7890"
                   pattern="^\d{10}$"
-                  maxlength="10"
+                  maxlength="12"
                   title="El número debe tener exactamente 10 dígitos"
                   required />
               </div>

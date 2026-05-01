@@ -446,13 +446,47 @@ select:focus-visible {
 .icon-green,
 .badge-green {
     background-color: #d1fae5;
-    color: #059669;
+    color: #065f46; /* Mejor contraste WCAG */
+}
+
+.icon-red,
+.badge-red {
+    background-color: #fee2e2;
+    color: #991b1b; /* Mejor contraste WCAG */
 }
 
 .badge-blue,
 .icon-blue {
     background-color: #dbeafe;
-    color: #2563eb;
+    color: #1e3a8a; /* Mejor contraste WCAG */
+}
+
+/* SKELETON LOADER */
+.skeleton-text {
+    background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    color: transparent !important;
+    border-radius: 4px;
+    user-select: none;
+    display: inline-block;
+    min-width: 80px;
+}
+
+.skeleton-text::before {
+    content: "\00a0"; /* Espacio en blanco para mantener la altura */
+}
+
+.skeleton-avatar {
+    background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    color: transparent !important;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 /* MODAL DE REGISTRO DE MOVIMIENTOS (GLOBAL)*/
@@ -535,7 +569,10 @@ select:focus-visible {
 }
 
 .radio-label span {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     padding: 12px;
     background: #f8fafc;
     border: 2px solid #f1f5f9;
@@ -552,6 +589,47 @@ select:focus-visible {
 }
 
 .radio-label input[value="gasto"]:checked+span {
+    background: #fff1f2;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+/* FLECHAS SVG DEL TIPO DE MOVIMIENTO */
+.tipo-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    color: #64748b;
+    transition: all 0.2s;
+    width: 100%;
+    cursor: pointer;
+}
+
+.tipo-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: stroke 0.2s;
+}
+
+.radio-label input[value="ingreso"]:checked ~ .tipo-btn,
+.radio-label input[value="ingreso"]:checked + .tipo-btn,
+.radio-label:has(input[value="ingreso"]:checked) .tipo-btn {
+    background: #ecfdf5;
+    border-color: #059669;
+    color: #059669;
+}
+
+.radio-label input[value="gasto"]:checked ~ .tipo-btn,
+.radio-label input[value="gasto"]:checked + .tipo-btn,
+.radio-label:has(input[value="gasto"]:checked) .tipo-btn {
     background: #fff1f2;
     border-color: #ef4444;
     color: #ef4444;
@@ -785,10 +863,14 @@ select:focus-visible {
 }
 
 #notif-lista {
-    max-height: 320px;
+    max-height: 300px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+}
+
+#notif-panel {
+    max-height: 80vh;
 }
 
 .notif-item {
@@ -1319,13 +1401,19 @@ select:focus-visible {
 .icon-green,
 .badge-green {
     background-color: #d1fae5;
-    color: #059669;
+    color: #065f46; /* Mejor contraste WCAG */
+}
+
+.icon-red,
+.badge-red {
+    background-color: #fee2e2;
+    color: #991b1b; /* Mejor contraste WCAG */
 }
 
 .badge-blue,
 .icon-blue {
     background-color: #dbeafe;
-    color: #2563eb;
+    color: #1e3a8a; /* Mejor contraste WCAG */
 }
 
 /* MODAL DE REGISTRO DE MOVIMIENTOS (GLOBAL)*/
@@ -1408,7 +1496,10 @@ select:focus-visible {
 }
 
 .radio-label span {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     padding: 12px;
     background: #f8fafc;
     border: 2px solid #f1f5f9;
@@ -1679,10 +1770,14 @@ select:focus-visible {
 }
 
 #notif-lista {
-    max-height: 320px;
+    max-height: 300px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+}
+
+#notif-panel {
+    max-height: 80vh;
 }
 
 .notif-item {

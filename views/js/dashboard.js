@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // Actualizar nombre en la barra lateral
           const sideName = document.querySelector(".nav-profile .username");
-          if (sideName) sideName.textContent = nombreCompleto;
+          if (sideName) { sideName.textContent = nombreCompleto; sideName.classList.remove('skeleton-text'); }
 
           const avatarImg = document.querySelector(".nav-profile img");
           if (avatarImg) {
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Actualizar texto de bienvenida
           const welcomeText = document.querySelector(".view-description");
           if (welcomeText) {
-            welcomeText.textContent = `Bienvenid@ ${nombreCompleto}. Aquí tienes el resumen de hoy.`;
+            welcomeText.textContent = `Hola, ${nombreCompleto}. Aquí tienes el resumen de hoy.`;
           }
         }
       } catch (error) {

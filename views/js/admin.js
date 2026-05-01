@@ -3,6 +3,7 @@ import { onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.
 import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { initNotificaciones } from "./notificaciones_admin.js";
 
 // Necesitamos la configuración de Firebase de nuevo para inicializar la segunda app
 // Vamos a extraerla de la app principal
@@ -34,7 +35,7 @@ onAuthStateChanged(auth, async (user) => {
             
             // Actualizar info del admin en UI
             const nombreCompleto = `${data.nombre} ${data.apellido}`;
-            document.getElementById('admin-nav-username').textContent = nombreCompleto;
+            const navUsr = document.getElementById('admin-nav-username'); if(navUsr) { navUsr.textContent = nombreCompleto; navUsr.classList.remove('skeleton-text'); }
             if (data.foto_perfil) {
                 document.getElementById('admin-nav-avatar').src = data.foto_perfil;
             } else {
@@ -44,6 +45,7 @@ onAuthStateChanged(auth, async (user) => {
             // Iniciar carga de datos
             await cargarUsuariosFirestore();
             inicializarEventos();
+            initNotificaciones(currentUid);
         } else {
             window.location.href = '../index.php';
         }
@@ -148,26 +150,39 @@ function renderizarTabla(listaFiltrada) {
 
         let roleClass = u.rol === 'admin' ? "role-admin" : "role-usuario";
         let rolNombre = u.rol === 'admin' ? "Administrador" : "Usuario";
+        const esActivo = u.estado !== 'inactivo';
+        
+        const isCurrent = (u.id === currentUid);
+        const tuEtiqueta = isCurrent ? ' <span style="font-size: 12px; color: #94a3b8; font-weight: 500; margin-left: 4px;">(Tú)</span>' : '';
+        
+        const estadoClass = esActivo ? 'btn-toggle-active' : 'btn-toggle-inactive';
+        const estadoIcon = esActivo ? 'toggle_on' : 'toggle_off';
+        
+        let editAttr = isCurrent ? 'disabled title="Edita tus datos desde Mi Perfil"' : 'title="Editar" onclick="editarUsuario(\'' + u.id + '\')"';
+        let toggleAttr = isCurrent ? 'disabled title="No puedes suspender tu propia cuenta"' : 'title="' + (esActivo ? 'Desactivar usuario' : 'Activar usuario') + '" onclick="toggleEstadoUsuario(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\', ' + esActivo + ')"';
 
         return `
-            <tr>
+            <tr class="${esActivo ? '' : 'row-inactive'}">
                 <td>
                     <div class="user-cell">
                         <div class="user-avatar">
                             <img src="${avatarUrl}" alt="${nombreCompleto}" />
                         </div>
-                        <span class="user-name">${escapeHtml(nombreCompleto)}</span>
+                        <div>
+                            <span class="user-name">${escapeHtml(nombreCompleto)}</span>
+                            ${!esActivo ? '<span class="badge-inactivo">Inactivo</span>' : ''}
+                        </div>
                     </div>
                 </td>
                 <td>${escapeHtml(u.email || u.correo || 'Sin correo')}</td>
-                <td><span class="role-badge ${roleClass}">${rolNombre}</span></td>
+                <td><span class="role-badge ${roleClass}">${rolNombre}</span>${tuEtiqueta}</td>
                 <td>
                     <div class="actions-cell">
-                        <button class="btn-action btn-edit" onclick="editarUsuario('${u.id}')" title="Editar">
+                        <button class="btn-action btn-edit" ${editAttr} style="${isCurrent ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
                             <span class="material-symbols-outlined">edit</span>
                         </button>
-                        <button class="btn-action btn-delete" onclick="eliminarUsuario('${u.id}', '${escapeHtml(nombreCompleto)}')" title="Eliminar (Desactivar)">
-                            <span class="material-symbols-outlined">delete</span>
+                        <button class="btn-action ${estadoClass}" ${toggleAttr} style="${isCurrent ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
+                            <span class="material-symbols-outlined">${estadoIcon}</span>
                         </button>
                     </div>
                 </td>
@@ -271,30 +286,35 @@ async function guardarUsuario(e) {
     }
 }
 
-// ========== ELIMINAR ==========
-window.eliminarUsuario = async function (id, nombre) {
+// ========== TOGGLE ESTADO (ACTIVAR / DESACTIVAR) ==========
+window.toggleEstadoUsuario = async function (id, nombre, esActivo) {
     if(id === currentUid) {
-        Swal.fire("Acción no permitida", "No puedes eliminar tu propia cuenta desde aquí.", "error");
+        Swal.fire("Acción no permitida", "No puedes modificar tu propia cuenta desde aquí.", "error");
         return;
     }
 
+    const accion = esActivo ? 'desactivar' : 'activar';
+    const nuevoEstado = esActivo ? 'inactivo' : 'activo';
+    const icon = esActivo ? 'warning' : 'question';
+    const btnColor = esActivo ? '#ef4444' : '#059669';
+
     const result = await Swal.fire({
-        title: "¿Desactivar usuario?",
-        html: `Al estar en modo cliente, Firebase no permite borrar el login de <strong>${nombre}</strong>.<br>Pero desactivaremos su perfil en la app.`,
-        icon: "warning",
+        title: `¿${esActivo ? 'Desactivar' : 'Activar'} usuario?`,
+        html: `Se ${accion}á la cuenta de <strong>${nombre}</strong> en la plataforma.`,
+        icon,
         showCancelButton: true,
-        confirmButtonColor: "#ef4444",
-        confirmButtonText: "Sí, desactivar",
+        confirmButtonColor: btnColor,
+        confirmButtonText: `Sí, ${accion}`,
         cancelButtonText: "Cancelar"
     });
 
     if (result.isConfirmed) {
         try {
-            await updateDoc(doc(db, "usuarios", id), { estado: 'inactivo' });
-            Swal.fire({ icon: "success", title: "Desactivado", timer: 2000, showConfirmButton: false });
+            await updateDoc(doc(db, "usuarios", id), { estado: nuevoEstado });
+            Swal.fire({ icon: "success", title: esActivo ? "Usuario desactivado" : "Usuario activado", timer: 2000, showConfirmButton: false });
             cargarUsuariosFirestore();
         } catch (error) {
-            Swal.fire("Error", "No se pudo desactivar", "error");
+            Swal.fire("Error", "No se pudo actualizar el estado", "error");
         }
     }
 };
@@ -309,3 +329,19 @@ function escapeHtml(text) {
         return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m];
     });
 }
+
+// ═══════════════════════════════════════════════
+// FORMATO DE TELÉFONO (MÁSCARA)
+// ═══════════════════════════════════════════════
+document.addEventListener('input', function (e) {
+  const isPhoneInput = e.target.name === 'telefono' || e.target.name === 'nuevo_telefono' || e.target.id === 'phone' || e.target.id === 'input-telefono';
+  if (isPhoneInput) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 3 && value.length <= 6) {
+      value = `${value.slice(0, 3)} ${value.slice(3)}`;
+    } else if (value.length > 6) {
+      value = `${value.slice(0, 3)} ${value.slice(3, 6)} ${value.slice(6, 10)}`;
+    }
+    e.target.value = value;
+  }
+});
