@@ -233,6 +233,23 @@
         </div>
 
         <div class="modal-form-group">
+          <label>Ícono</label>
+          <div class="icon-selector-trigger" style="position: relative;">
+            <button type="button" id="btn-select-icon" onclick="toggleIconDropdown(event)" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f3f4f6; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; width: 100%; transition: all 0.2s;">
+              <span class="material-symbols-outlined" id="selected-category-icon" style="font-size: 22px; color: var(--primary);">category</span>
+              <span style="flex: 1; text-align: left; font-size: 14px; color: var(--text-secondary);">Seleccionar ícono</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-secondary);">expand_more</span>
+            </button>
+            <div class="icon-dropdown-menu" id="icon-dropdown-menu" style="display: none; position: absolute; z-index: 1000; background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; width: 100%; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); top: 100%; left: 0; margin-top: 8px;">
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;" id="icon-grid">
+                <!-- JS will populate this -->
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="categoria_icono" name="categoria_icono" value="category">
+        </div>
+
+        <div class="modal-form-group">
           <label for="descripcion">Descripción</label>
           <div class="input-container">
             <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Compra de víveres">

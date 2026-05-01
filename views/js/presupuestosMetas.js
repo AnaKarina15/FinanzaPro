@@ -84,12 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (form) {
                 form.reset();
                 form.querySelector('input[name="id_meta"]').value = "";
-                form.querySelectorAll('.icon-option').forEach(l => l.classList.remove('active'));
-                const firstIcon = form.querySelector('.icon-option');
-                if (firstIcon) {
-                    firstIcon.classList.add('active');
-                    firstIcon.querySelector('input').checked = true;
-                }
+                // Reset icon dropdown to default
+                document.getElementById('selected-meta-icon').textContent = 'home';
+                document.getElementById('meta_icono_hidden').value = 'home';
             }
             document.getElementById('modal-titulo-meta').innerText = "Nueva Meta de Ahorro";
             document.getElementById('btn-submit-meta').innerText = "Crear Meta";
@@ -100,12 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (form) {
                 form.reset();
                 form.querySelector('input[name="id_presupuesto"]').value = "";
-                form.querySelectorAll('.icon-option').forEach(l => l.classList.remove('active'));
-                const firstIcon = form.querySelector('.icon-option');
-                if (firstIcon) {
-                    firstIcon.classList.add('active');
-                    firstIcon.querySelector('input').checked = true;
-                }
+                // Reset icon dropdown to default
+                document.getElementById('selected-presupuesto-icon').textContent = 'restaurant';
+                document.getElementById('presupuesto_icono_hidden').value = 'restaurant';
             }
             document.getElementById('modal-titulo-presupuesto').innerText = "Nuevo Presupuesto";
             document.getElementById('text-submit-presupuesto').innerText = "Asignar Presupuesto";
@@ -119,18 +113,61 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnCerrarMeta) btnCerrarMeta.addEventListener('click', closeMetaModal);
     if(btnCerrarPresupuesto) btnCerrarPresupuesto.addEventListener('click', closePresupuestoModal);
 
-    // Selección de Íconos
-    const iconOptions = document.querySelectorAll('.icon-option');
-    iconOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            iconOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
-            const radio = this.querySelector('input[type="radio"]');
-            if(radio) radio.checked = true;
+    // --- ICON DROPDOWN SYSTEM ---
+    const ALL_ICONS = [
+        'home', 'directions_car', 'flight', 'laptop_mac', 'school', 'favorite',
+        'restaurant', 'shopping_bag', 'local_hospital', 'bolt', 'sports_esports', 'checkroom',
+        'directions_bus', 'savings', 'pets', 'fitness_center', 'water_drop',
+        'credit_card', 'attach_money', 'work', 'movie', 'phone_iphone',
+        'category', 'shopping_cart', 'local_gas_station'
+    ];
+
+    function buildIconGrid(gridId, previewId, hiddenId) {
+        const grid = document.getElementById(gridId);
+        if (!grid || grid.children.length > 0) return;
+        ALL_ICONS.forEach(icon => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = `<span class="material-symbols-outlined">${icon}</span>`;
+            btn.style.cssText = 'background: none; border: 1px solid transparent; border-radius: 8px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s;';
+            btn.onmouseover = () => { btn.style.backgroundColor = 'var(--bg-hover)'; btn.style.borderColor = 'var(--border-color)'; };
+            btn.onmouseout = () => { btn.style.backgroundColor = 'transparent'; btn.style.borderColor = 'transparent'; };
+            btn.onclick = (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                document.getElementById(previewId).textContent = icon;
+                document.getElementById(hiddenId).value = icon;
+                grid.closest('.icon-dropdown-menu').style.display = 'none';
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function toggleDropdown(dropdownId, gridId, previewId, hiddenId, e) {
+        if (e) e.preventDefault();
+        const dd = document.getElementById(dropdownId);
+        if (!dd) return;
+        buildIconGrid(gridId, previewId, hiddenId);
+        dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+    }
+
+    window.toggleIconDropdownMeta = (e) => toggleDropdown('icon-dropdown-menu-meta', 'icon-grid-meta', 'selected-meta-icon', 'meta_icono_hidden', e);
+    window.toggleIconDropdownPresupuesto = (e) => toggleDropdown('icon-dropdown-menu-presupuesto', 'icon-grid-presupuesto', 'selected-presupuesto-icon', 'presupuesto_icono_hidden', e);
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+        ['icon-dropdown-menu-meta', 'icon-dropdown-menu-presupuesto'].forEach(id => {
+            const dd = document.getElementById(id);
+            if (dd && dd.style.display === 'block') {
+                const trigger = dd.closest('.icon-selector-trigger');
+                if (trigger && !trigger.contains(e.target)) {
+                    dd.style.display = 'none';
+                }
+            }
         });
     });
 
-    // Mapeo de IDs de iconos a nombres de material symbols
+    // Backward-compatible iconMap for reading old data
     const iconMap = {
         '3': 'home', '2': 'directions_car', '11': 'flight', '12': 'laptop_mac', '5': 'school', '13': 'favorite',
         '1': 'restaurant', '4': 'shopping_bag', '6': 'local_hospital', '7': 'bolt', '8': 'sports_esports', '9': 'checkroom',
@@ -153,8 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const fecha_limite = formMeta.querySelector('input[name="fecha_limite"]').value;
             const inputObj = formMeta.querySelector('input[name="monto_objetivo"]');
             const monto_objetivo = parseFloat(inputObj.value.replace(/\D/g, '')) || 0;
-            const id_icono = formMeta.querySelector('input[name="id_icono"]:checked')?.value || '3';
-            const codigo_material = iconMap[id_icono] || 'stars';
+            const hiddenIconVal = document.getElementById('meta_icono_hidden').value;
+            const codigo_material = hiddenIconVal && hiddenIconVal.length > 2 ? hiddenIconVal : (iconMap[hiddenIconVal] || 'stars');
+            const id_icono = hiddenIconVal;
 
             try {
                 if (id_meta) {
@@ -223,8 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const nombre = formPresupuesto.querySelector('input[name="nombre"]').value;
             const inputLim = formPresupuesto.querySelector('input[name="monto_limite"]');
             const monto_limite = parseFloat(inputLim.value.replace(/\D/g, '')) || 0;
-            const id_icono = formPresupuesto.querySelector('input[name="id_icono"]:checked')?.value || '1';
-            const codigo_material = iconMap[id_icono] || 'category';
+            const hiddenIconVal = document.getElementById('presupuesto_icono_hidden').value;
+            const codigo_material = hiddenIconVal && hiddenIconVal.length > 2 ? hiddenIconVal : (iconMap[hiddenIconVal] || 'category');
+            const id_icono = hiddenIconVal;
             const alerta_80_porciento = formPresupuesto.querySelector('input[name="alerta_80_porciento"]').checked ? 1 : 0;
             const tipo_periodo = formPresupuesto.querySelector('input[name="tipo_periodo"]:checked').value;
             const periodo = formPresupuesto.querySelector('input[name="periodo"]').value;
@@ -283,6 +322,7 @@ window.verTodasMetas = false;
 window.verTodosPresupuestos = false;
 window.filtroPresupuesto = 'mensual';
 window.filtroMeta = 'todas';
+window.textoBusqueda = '';
 
 async function cargarDatos() {
     if (!currentUid) return;
@@ -348,15 +388,25 @@ function renderMetas(metas) {
     const currentYear = String(now.getFullYear());
 
     let metasFiltradas = metas.filter(m => {
+        // Filtrado por buscador
+        if (window.textoBusqueda && window.textoBusqueda.trim() !== '') {
+            const txt = window.textoBusqueda.toLowerCase();
+            if (!m.nombre.toLowerCase().includes(txt)) return false;
+        }
+
         if (window.filtroMeta === 'todas') return true;
         if (!m.fecha_limite) return true; // Retrocompatibilidad
-        const mYear = m.fecha_limite.substring(0, 4);
-        const mMonth = m.fecha_limite.substring(5, 7);
+        
+        // Calcular diferencia en meses desde hoy hasta la fecha límite
+        const [year, month] = m.fecha_limite.split('-');
+        const dateLimit = new Date(year, month - 1);
+        const now = new Date();
+        const diffMonths = (dateLimit.getFullYear() - now.getFullYear()) * 12 + (dateLimit.getMonth() - now.getMonth());
         
         if (window.filtroMeta === 'mensual') {
-            return mYear === currentYear && mMonth === currentMonth;
+            return diffMonths < 12; // Menos de un año
         } else if (window.filtroMeta === 'anual') {
-            return mYear === currentYear;
+            return diffMonths >= 12; // Un año o más
         }
         return true;
     });
@@ -379,13 +429,32 @@ function renderMetas(metas) {
         const card = document.createElement('article');
         card.className = 'card goal-card cursor-pointer';
         card.setAttribute('onclick', `abrirModalAbonoMeta('${meta.id_meta}', '${meta.nombre.replace(/'/g, "\\'")}', event)`);
+        let badgeText = 'EN PROGRESO';
+        if (porcentajeNumerico >= 100) badgeText = 'LOGRADO';
+
+        const mesesStrMeta = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        let metaPeriodoFormat = meta.fecha_limite;
+        if (meta.fecha_limite) {
+            const parts = meta.fecha_limite.split('-');
+            if (parts.length >= 2) {
+                metaPeriodoFormat = `(${mesesStrMeta[parseInt(parts[1])-1]} ${parts[0]})`;
+            }
+        }
+
         card.innerHTML = `
-            <div class="goal-header">
-              <div class="icon-box icon-blue" style="background-color: #e0f2fe; color: #0284c7;">
+            <div class="goal-header" style="display: flex; align-items: center; margin-bottom: 16px;">
+              <div class="icon-box icon-blue" style="background-color: #e0f2fe; color: #0284c7; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
                 <span class="material-symbols-outlined">${meta.codigo_material || 'stars'}</span>
               </div>
-              <div class="goal-percentage text-success">${porcentajeMostrar}%</div>
-              <div class="kebab-menu">
+              <div class="goal-info" style="flex: 1;">
+                <h4 class="goal-name" style="margin: 0 0 2px 0; font-size: 16px; font-weight: 600; color: var(--text-primary);">${meta.nombre}</h4>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${metaPeriodoFormat}</div>
+                <p class="goal-status-text" style="margin: 0; font-size: 12px; font-weight: 700; color: #059669;">${porcentajeMostrar}% ALCANZADO</p>
+              </div>
+              <div class="goal-badge-container" style="margin-left: 8px;">
+                <span class="budget-badge" style="background: #f1f5f9; color: #64748b; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${badgeText}</span>
+              </div>
+              <div class="kebab-menu" style="margin-left: 8px;">
                 <button class="kebab-btn" onclick="toggleKebab(this, event)"><span class="material-symbols-outlined">more_vert</span></button>
                 <div class="kebab-dropdown">
                   <button class="dropdown-item" onclick="editarMeta('${meta.id_meta}')">Editar</button>
@@ -393,15 +462,11 @@ function renderMetas(metas) {
                 </div>
               </div>
             </div>
-            <div class="goal-body">
-              <h4 class="goal-name">${meta.nombre}</h4>
-              <p class="goal-desc">Meta para ${meta.fecha_limite}</p>
-            </div>
-            <div class="goal-footer">
-              <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width: ${widthBarra}%;"></div>
+            <div class="goal-footer" style="margin-top: auto;">
+              <div class="progress-bar-bg" style="height: 6px; border-radius: 99px; background: #e2e8f0; margin-bottom: 8px; overflow: hidden;">
+                <div class="progress-bar-fill bg-success" style="width: ${widthBarra}%; height: 100%; background: #059669; border-radius: 99px;"></div>
               </div>
-              <div class="goal-amounts">
+              <div class="goal-amounts" style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; color: var(--text-secondary);">
                 <span>${formatter.format(act)}</span>
                 <span>${formatter.format(obj)}</span>
               </div>
@@ -432,11 +497,17 @@ function renderPresupuestos(presupuestos) {
     const currentYearString = String(now.getFullYear());
     
     let presupuestosFiltrados = presupuestos.filter(p => {
+        // Filtrado por buscador
+        if (window.textoBusqueda && window.textoBusqueda.trim() !== '') {
+            const txt = window.textoBusqueda.toLowerCase();
+            if (!p.nombre.toLowerCase().includes(txt)) return false;
+        }
+
         if (window.filtroPresupuesto === 'todos') return true;
         if (window.filtroPresupuesto === 'mensual') {
-            return p.tipo_periodo === 'mensual' && p.periodo === currentMonthFormatted;
+            return p.tipo_periodo === 'mensual';
         } else {
-            return p.tipo_periodo === 'anual' && p.periodo === currentYearString;
+            return p.tipo_periodo === 'anual';
         }
     });
     
@@ -456,10 +527,14 @@ function renderPresupuestos(presupuestos) {
         let badgeText = 'ESTABLE';
         let statusText = 'BAJO CONTROL';
         
-        if (porcentaje >= 100) {
+        if (porcentaje >= 95) {
             estadoClass = 'critical';
             badgeText = 'CRÍTICO';
-            statusText = 'LÍMITE EXCEDIDO';
+            statusText = porcentaje >= 100 ? 'LÍMITE EXCEDIDO' : Math.round(porcentaje) + '% UTILIZADO';
+        } else if (porcentaje >= 85) {
+            estadoClass = 'warning';
+            badgeText = 'ADVERTENCIA';
+            statusText = porcentajeMostrar + '% UTILIZADO';
         } else if (porcentaje >= 80 && p.alerta_80_porciento == 1) {
             estadoClass = 'alert';
             badgeText = 'ALERTA';
@@ -470,6 +545,15 @@ function renderPresupuestos(presupuestos) {
         
         const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
         
+        let etiquetaPeriodo = '';
+        if (p.tipo_periodo === 'mensual' && p.periodo) {
+            const mesesStr = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const [y, m] = p.periodo.split('-');
+            etiquetaPeriodo = `(${mesesStr[parseInt(m)-1]} ${y})`;
+        } else if (p.tipo_periodo === 'anual' && p.periodo) {
+            etiquetaPeriodo = `(${p.periodo})`;
+        }
+
         const card = document.createElement('article');
         card.className = `card budget-card ${estadoClass} cursor-pointer`;
         card.setAttribute('onclick', `abrirModalGastoPresupuesto('${p.nombre.replace(/'/g, "\\'")}', event)`);
@@ -479,7 +563,8 @@ function renderPresupuestos(presupuestos) {
                 <span class="material-symbols-outlined">${p.codigo_material || 'category'}</span>
               </div>
               <div class="budget-info">
-                <h4 class="budget-name">${p.nombre}</h4>
+                <h4 class="budget-name" style="margin-bottom: 2px;">${p.nombre}</h4>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${etiquetaPeriodo}</div>
                 <p class="budget-status-text">${statusText}</p>
               </div>
               <div class="budget-badge-container">
@@ -493,14 +578,13 @@ function renderPresupuestos(presupuestos) {
                 </div>
               </div>
             </div>
-            <div class="budget-amounts">
-              <div class="amount-group">
-                <span class="amount-label">CONSUMIDO</span>
-                <span class="amount-value">${formatter.format(consumido)}</span>
+            <div style="margin-top: auto;">
+              <div class="budget-progress-bar" style="margin-bottom: 8px;">
+                <div class="progress-fill" style="width: ${Math.min(porcentaje, 100)}%;"></div>
               </div>
-              <div class="amount-group right">
-                <span class="amount-label">LÍMITE</span>
-                <span class="amount-limit">${formatter.format(limite)}</span>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; color: var(--text-secondary);">
+                <span>${formatter.format(consumido)}</span>
+                <span>${formatter.format(limite)}</span>
               </div>
             </div>
         `;
@@ -532,7 +616,7 @@ window.toggleKebab = function(btn, event) {
 window.eliminarMeta = async function(id) {
     Swal.fire({
         title: '¿Eliminar meta?',
-        text: "Esta acción no se puede deshacer.",
+        text: "Al hacerlo, la plata que tengas ahorrada para esa meta, pasará a ser dinero disponible.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#059669',
@@ -580,12 +664,10 @@ window.editarMeta = function(id) {
     form.querySelector('input[name="monto_objetivo"]').value = `$ ${new Intl.NumberFormat('es-CO').format(meta.monto_objetivo)}`;
     form.querySelector('input[name="fecha_limite"]').value = meta.fecha_limite;
     
-    const radio = form.querySelector(`input[name="id_icono"][value="${meta.id_icono}"]`);
-    if(radio) {
-        radio.checked = true;
-        form.querySelectorAll('.icon-option').forEach(l => l.classList.remove('active'));
-        radio.closest('.icon-option').classList.add('active');
-    }
+    // Set icon in dropdown
+    const metaIcon = meta.codigo_material || iconMap[meta.id_icono] || 'home';
+    document.getElementById('selected-meta-icon').textContent = metaIcon;
+    document.getElementById('meta_icono_hidden').value = metaIcon;
     document.getElementById('modalNuevaMeta').classList.add('active');
 };
 
@@ -593,6 +675,7 @@ window.editarPresupuesto = function(id) {
     const p = window.presupuestosGlobales.find(x => x.id_presupuesto === id);
     if (!p) return;
     document.getElementById('modal-titulo-presupuesto').innerText = "Editar Presupuesto";
+    document.getElementById('text-submit-presupuesto').innerText = "Guardar Presupuesto";
     document.getElementById('id_presupuesto').value = p.id_presupuesto;
     document.querySelector('#form-presupuesto input[name="nombre"]').value = p.nombre;
     document.querySelector('#form-presupuesto input[name="monto_limite"]').value = `$ ${new Intl.NumberFormat('es-CO').format(p.monto_limite)}`;
@@ -604,12 +687,10 @@ window.editarPresupuesto = function(id) {
     }
     document.querySelector('#form-presupuesto input[name="periodo"]').value = p.periodo || '';
 
-    const radio = document.querySelector(`#form-presupuesto input[name="id_icono"][value="${p.id_icono}"]`);
-    if(radio) {
-        document.querySelectorAll('#form-presupuesto .icon-option').forEach(el => el.classList.remove('active'));
-        radio.checked = true;
-        radio.closest('.icon-option').classList.add('active');
-    }
+    // Set icon in dropdown
+    const presIcon = p.codigo_material || iconMap[p.id_icono] || 'restaurant';
+    document.getElementById('selected-presupuesto-icon').textContent = presIcon;
+    document.getElementById('presupuesto_icono_hidden').value = presIcon;
     document.querySelector('#form-presupuesto input[name="alerta_80_porciento"]').checked = p.alerta_80_porciento == 1;
     document.getElementById('modalNuevoPresupuesto').classList.add('active');
 };
@@ -770,6 +851,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.filtroMeta = e.target.dataset.filtro;
                 renderMetas(window.metasGlobales);
             }
+        });
+    }
+
+    // Buscador global
+    const buscadorInput = document.getElementById('buscador-general');
+    if (buscadorInput) {
+        buscadorInput.addEventListener('input', (e) => {
+            window.textoBusqueda = e.target.value;
+            renderMetas(window.metasGlobales);
+            renderPresupuestos(window.presupuestosGlobales);
         });
     }
 

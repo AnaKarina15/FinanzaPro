@@ -137,6 +137,7 @@ date_default_timezone_set('America/Bogota');
       <article class="card movimientos-card">
         <div class="card-top movimientos-header">
           <h3 class="movimientos-title">Historial de Transacciones</h3>
+          
           <div class="search-bar-container" id="search-bar-container">
             <span class="material-symbols-outlined search-icon">search</span>
             <input type="text" id="buscar-transaccion" placeholder="Buscar por descripción, categoría o monto..." autocomplete="off">
@@ -144,10 +145,13 @@ date_default_timezone_set('America/Bogota');
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
-          <div class="table-filters">
-            <span class="filter-option filter-active" data-filter="todos">Todos</span>
-            <span class="filter-option" data-filter="ingreso">Ingresos</span>
-            <span class="filter-option" data-filter="gasto">Gastos</span>
+          
+          <div class="table-filters" style="display: flex; align-items: center; gap: 16px;">
+            <div class="toggle-switch">
+              <button class="toggle-btn active" data-filter="todos">Todos</button>
+              <button class="toggle-btn" data-filter="ingreso">Ingresos</button>
+              <button class="toggle-btn" data-filter="gasto">Gastos</button>
+            </div>
             <div class="filter-dropdown" id="filter-time-dropdown">
               <span id="filter-time-label">Este Mes</span>
               <span class="material-symbols-outlined filter-icon">expand_more</span>
@@ -239,6 +243,23 @@ date_default_timezone_set('America/Bogota');
             </div>
             <span class="error-text" id="error-categoria">Obligatorio</span>
           </div>
+        </div>
+
+        <div class="modal-form-group">
+          <label>Ícono</label>
+          <div class="icon-selector-trigger" style="position: relative;">
+            <button type="button" id="btn-select-icon" onclick="toggleIconDropdown(event)" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f3f4f6; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; width: 100%; transition: all 0.2s;">
+              <span class="material-symbols-outlined" id="selected-category-icon" style="font-size: 22px; color: var(--primary);">category</span>
+              <span style="flex: 1; text-align: left; font-size: 14px; color: var(--text-secondary);">Seleccionar ícono</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-secondary);">expand_more</span>
+            </button>
+            <div class="icon-dropdown-menu" id="icon-dropdown-menu" style="display: none; position: absolute; z-index: 1000; background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; width: 100%; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); top: 100%; left: 0; margin-top: 8px;">
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;" id="icon-grid">
+                <!-- JS will populate this -->
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="categoria_icono" name="categoria_icono" value="category">
         </div>
 
         <div class="modal-form-group">

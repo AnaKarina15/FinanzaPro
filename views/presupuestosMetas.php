@@ -52,8 +52,12 @@
         <p class="view-description">Administra tus límites de gasto y ahorros.</p>
       </div>
       <div class="view-buttons">
+        <div class="search-bar-container" style="margin-right: 12px; max-width: 300px;">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" id="buscador-general" placeholder="Buscar presupuestos o metas..." autocomplete="off">
+        </div>
         <div class="notif-wrapper">
-          <button class="btn-secondary" id="btn-notificaciones">
+          <button class="btn-secondary" id="btn-notificaciones" style="border-radius: 50%;">
             <span class="material-symbols-outlined">notifications</span>
             <span id="notif-badge" style="display:none;"></span>
           </button>
@@ -168,36 +172,19 @@
 
         <div class="input-group modal-form-group">
           <label>Elegir Ícono</label>
-          <div class="icon-selector-row">
-            <label class="icon-option active">
-              <input type="radio" name="id_icono" value="3" checked style="display:none;">
-              <span class="material-symbols-outlined">home</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="2" style="display:none;">
-              <span class="material-symbols-outlined">directions_car</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="11" style="display:none;">
-              <span class="material-symbols-outlined">flight</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="12" style="display:none;">
-              <span class="material-symbols-outlined">laptop_mac</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="5" style="display:none;">
-              <span class="material-symbols-outlined">school</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="13" style="display:none;">
-              <span class="material-symbols-outlined">favorite</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="14" style="display:none;">
-              <span class="material-symbols-outlined">directions_bus</span>
-            </label>
+          <div class="icon-selector-trigger" style="position: relative;">
+            <button type="button" id="btn-select-icon-meta" onclick="toggleIconDropdownMeta(event)" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f3f4f6; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; width: 100%; transition: all 0.2s;">
+              <span class="material-symbols-outlined" id="selected-meta-icon" style="font-size: 22px; color: #0284c7;">home</span>
+              <span style="flex: 1; text-align: left; font-size: 14px; color: var(--text-secondary);">Seleccionar ícono</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-secondary);">expand_more</span>
+            </button>
+            <div class="icon-dropdown-menu" id="icon-dropdown-menu-meta" style="display: none; position: absolute; z-index: 1000; background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; width: 100%; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); top: 100%; left: 0; margin-top: 8px;">
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;" id="icon-grid-meta">
+                <!-- JS will populate this -->
+              </div>
+            </div>
           </div>
+          <input type="hidden" name="id_icono" id="meta_icono_hidden" value="3">
         </div>
 
         <button type="submit" class="btn-primary btn-modal-submit mt-4" id="btn-submit-meta">Crear Meta</button>
@@ -258,36 +245,19 @@
 
         <div class="input-group modal-form-group">
           <label>Elegir Ícono</label>
-          <div class="icon-selector-row">
-            <label class="icon-option active">
-              <input type="radio" name="id_icono" value="1" checked style="display:none;">
-              <span class="material-symbols-outlined">restaurant</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="4" style="display:none;">
-              <span class="material-symbols-outlined">shopping_bag</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="6" style="display:none;">
-              <span class="material-symbols-outlined">local_hospital</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="8" style="display:none;">
-              <span class="material-symbols-outlined">sports_esports</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="9" style="display:none;">
-              <span class="material-symbols-outlined">checkroom</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="2" style="display:none;">
-              <span class="material-symbols-outlined">directions_car</span>
-            </label>
-            <label class="icon-option">
-              <input type="radio" name="id_icono" value="14" style="display:none;">
-              <span class="material-symbols-outlined">directions_bus</span>
-            </label>
+          <div class="icon-selector-trigger" style="position: relative;">
+            <button type="button" id="btn-select-icon-presupuesto" onclick="toggleIconDropdownPresupuesto(event)" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f3f4f6; border: 1.5px solid var(--border-color); border-radius: 12px; cursor: pointer; width: 100%; transition: all 0.2s;">
+              <span class="material-symbols-outlined" id="selected-presupuesto-icon" style="font-size: 22px; color: var(--primary);">restaurant</span>
+              <span style="flex: 1; text-align: left; font-size: 14px; color: var(--text-secondary);">Seleccionar ícono</span>
+              <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-secondary);">expand_more</span>
+            </button>
+            <div class="icon-dropdown-menu" id="icon-dropdown-menu-presupuesto" style="display: none; position: absolute; z-index: 1000; background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; width: 100%; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); top: 100%; left: 0; margin-top: 8px;">
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;" id="icon-grid-presupuesto">
+                <!-- JS will populate this -->
+              </div>
+            </div>
           </div>
+          <input type="hidden" name="id_icono" id="presupuesto_icono_hidden" value="1">
         </div>
 
         <div class="notification-toggle-box" style="margin-top: 16px;">

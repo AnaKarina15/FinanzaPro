@@ -3,7 +3,7 @@ import { onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.
 import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { initNotificaciones } from "./notificaciones_admin.js";
+import { initNotificaciones, enviarBienvenidaSiNecesario } from "./notificaciones_admin.js";
 
 // Necesitamos la configuración de Firebase de nuevo para inicializar la segunda app
 // Vamos a extraerla de la app principal
@@ -46,6 +46,7 @@ onAuthStateChanged(auth, async (user) => {
             await cargarUsuariosFirestore();
             inicializarEventos();
             initNotificaciones(currentUid);
+            enviarBienvenidaSiNecesario(currentUid, data.nombre);
         } else {
             window.location.href = '../index.php';
         }

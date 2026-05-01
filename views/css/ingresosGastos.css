@@ -102,8 +102,19 @@
 
 /* TABLA DE HISTORIAL DE MOVIMIENTOS */
 .movimientos-header {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
+    gap: 16px;
+}
+.movimientos-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    justify-content: flex-end;
 }
 
 .movimientos-title {
@@ -111,83 +122,7 @@
     white-space: nowrap;
 }
 
-/* Barra de búsqueda */
-.search-bar-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 999px;
-    background: #f8fafc;
-    border: 1.5px solid var(--border-color);
-    transition: all 0.25s ease;
-    min-width: 180px;
-    max-width: 480px;
-}
-
-.search-bar-container:focus-within {
-    border-color: #059669;
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-}
-
-.search-bar-container .search-icon {
-    font-size: 20px;
-    color: #94a3b8;
-    flex-shrink: 0;
-    transition: color 0.2s ease;
-}
-
-.search-bar-container:focus-within .search-icon {
-    color: #059669;
-}
-
-.search-bar-container input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 14px;
-    font-family: inherit;
-    color: var(--text-primary);
-    min-width: 0;
-}
-
-.search-bar-container input::placeholder {
-    color: #94a3b8;
-    font-weight: 400;
-}
-
-.search-clear-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #e2e8f0;
-    border: none;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
-    padding: 0;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
-}
-
-.search-clear-btn .material-symbols-outlined {
-    font-size: 14px;
-    color: #64748b;
-}
-
-.search-clear-btn:hover {
-    background: #cbd5e1;
-}
-
-.search-clear-btn:hover .material-symbols-outlined {
-    color: #1e293b;
-}
-
-.table-filters {
+table-filters {
     display: flex;
     align-items: center;
     gap: 16px;
@@ -211,7 +146,7 @@
     align-items: center;
     gap: 6px;
     padding: 10px 12px;
-    border-radius: 999px;
+    border-radius: 12px;
     background: #f8fafc;
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
@@ -420,6 +355,9 @@
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.9);
     padding: 2px 8px;
-    border-radius: 999px;
+    border-radius: 12px;
     pointer-events: none;
-}
+}
+
+.icon-select-dropdown.show { display: block !important; }
+.icon-option:hover { background-color: var(--bg-hover); }

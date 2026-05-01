@@ -510,6 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         const tipo = tipoInput ? tipoInput.value : "gasto";
         const descripcion = document.getElementById("descripcion").value;
+        const categoriaIconoVal = document.getElementById("categoria_icono") ? document.getElementById("categoria_icono").value : "category";
 
         const user = auth.currentUser;
         if (!user) throw new Error("No hay usuario autenticado.");
@@ -520,6 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
           monto: montoVal,
           fecha: fechaVal,
           categoria: categoriaVal,
+          codigo_material: categoriaIconoVal,
           descripcion: descripcion,
           fecha_creacion: new Date(),
         });
@@ -551,3 +553,55 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// --- SELECTOR DE ICONOS ---
+const ICON_OPTIONS = [
+    'category', 'shopping_cart', 'restaurant', 'local_gas_station', 'home',
+    'bolt', 'water_drop', 'health_and_safety', 'fitness_center', 'pets',
+    'local_library', 'flight', 'movie', 'sports_esports', 'stroller',
+    'checkroom', 'payments', 'account_balance', 'savings', 'credit_card',
+    'attach_money', 'work', 'school', 'emoji_transportation', 'phone_iphone'
+];
+
+window.toggleIconDropdown = function(e) {
+    if (e) e.preventDefault();
+    const dropdown = document.getElementById('icon-dropdown-menu');
+    if (!dropdown) return;
+    
+    const isShowing = dropdown.style.display === 'block';
+    
+    // Render icons if empty
+    const grid = document.getElementById('icon-grid');
+    if (grid && grid.children.length === 0) {
+        ICON_OPTIONS.forEach(icon => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = `<span class="material-symbols-outlined">${icon}</span>`;
+            
+            // Apply inline styles to mimic a nice hover effect
+            btn.style.cssText = 'background: none; border: 1px solid transparent; border-radius: 8px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s;';
+            btn.onmouseover = () => { btn.style.backgroundColor = 'var(--bg-hover)'; btn.style.borderColor = 'var(--border-color)'; };
+            btn.onmouseout = () => { btn.style.backgroundColor = 'transparent'; btn.style.borderColor = 'transparent'; };
+            
+            btn.onclick = (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                document.getElementById('selected-category-icon').textContent = icon;
+                document.getElementById('categoria_icono').value = icon;
+                dropdown.style.display = 'none';
+            };
+            grid.appendChild(btn);
+        });
+    }
+    
+    dropdown.style.display = isShowing ? 'none' : 'block';
+};
+
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('icon-dropdown-menu');
+    const btn = document.getElementById('btn-select-icon');
+    if (dropdown && dropdown.style.display === 'block') {
+        if (!dropdown.contains(e.target) && (!btn || !btn.contains(e.target))) {
+            dropdown.style.display = 'none';
+        }
+    }
+});
