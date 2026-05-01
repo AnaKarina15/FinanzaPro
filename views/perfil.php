@@ -191,18 +191,30 @@
                                         <span class="slider"></span>
                                     </label>
                                 </div>
+                                <p class="settings-section-title" style="margin-top:24px; color: #e11d48; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">Zona Peligrosa</p>
+                                <div class="settings-list" style="margin-top: 16px;">
+                                    <div class="setting-item" style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+                                        <div class="setting-text">
+                                            <strong>Cerrar sesión</strong>
+                                            <p>Salir de tu cuenta en este dispositivo</p>
+                                        </div>
+                                        <button class="btn-secondary" id="btn-cerrar-sesion" style="color: #475569; font-weight: 600;">
+                                            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">logout</span> Salir
+                                        </button>
+                                    </div>
+                                    <div class="setting-item" style="padding-top: 16px;">
+                                        <div class="setting-text">
+                                            <strong style="color: #e11d48;">Borrar cuenta</strong>
+                                            <p>Eliminar permanentemente todos tus datos</p>
+                                        </div>
+                                        <button class="btn-danger" id="btn-borrar-cuenta" style="font-weight: 600;">
+                                            <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">delete_forever</span> Eliminar
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </section>
                     </div>
-                </div>
-
-                <div class="profile-actions">
-                    <button class="btn-logout-text" id="btn-cerrar-sesion">
-                        <span class="material-symbols-outlined">logout</span> Cerrar Sesión
-                    </button>
-                    <button class="btn-danger" id="btn-borrar-cuenta">
-                        <span class="material-symbols-outlined">delete_forever</span> Borrar cuenta
-                    </button>
                 </div>
 
                 <div class="modal-overlay" id="modal-cambiar-correo">

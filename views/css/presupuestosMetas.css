@@ -656,7 +656,7 @@ input[list]::-webkit-calendar-picker-indicator {
     padding: 10px;
     cursor: pointer;
     transition: background 0.2s;
-    border-radius: 8px;
+    border-radius: 12px;
 }
 
 .btn-text-cancel:hover {

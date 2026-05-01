@@ -61,7 +61,7 @@ section {
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 999999px;
+  border-radius: 12px;
   border: none;
   background-color: transparent;
   color: var(--text-secondary);

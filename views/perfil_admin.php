@@ -158,7 +158,7 @@
 
         .btn-setting-action {
             padding: 8px 16px;
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
             background: #fff;
             font-size: 13px;

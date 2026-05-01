@@ -194,7 +194,7 @@
     margin-top: 10px;
     background: #f0f4f9;
     border: none;
-    border-radius: 14px; /* Unificado con los inputs */
+    border-radius: 12px; /* Unificado con los inputs */
     padding: 10px 20px;
     color: #1e293b;
     font-weight: 600;
@@ -303,7 +303,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     color: #ef4444;
     border: 1px solid #fecaca;
     padding: 12px 24px;
-    border-radius: 14px;
+    border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
     display: flex;

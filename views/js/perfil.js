@@ -135,14 +135,23 @@ document.addEventListener("DOMContentLoaded", () => {
         btnBorrarCuenta.addEventListener("click", (e) => {
             e.preventDefault();
             Swal.fire({
-                title: "¿Eliminar cuenta?",
-                text: "Tu cuenta se programará para eliminación. Si no inicias sesión en 10 días, se borrará permanentemente.",
+                title: "¿Eliminar cuenta permanentemente?",
+                html: "<p style='font-size: 14px; color: #475569; margin-bottom: 12px;'>Tu cuenta se programará para eliminación y se borrará permanentemente si no inicias sesión en 10 días.</p><p style='font-size: 14px; font-weight: 600; color: #e11d48;'>Por seguridad, escribe la palabra ELIMINAR para confirmar:</p>",
                 icon: "warning",
+                input: "text",
+                inputPlaceholder: "Escribe ELIMINAR aquí",
                 showCancelButton: true,
                 confirmButtonColor: "#ef4444",
                 cancelButtonColor: "#64748b",
                 confirmButtonText: "Sí, borrar cuenta",
                 cancelButtonText: "Cancelar",
+                preConfirm: (inputValue) => {
+                    if (inputValue !== "ELIMINAR") {
+                        Swal.showValidationMessage("Debes escribir la palabra exacta: ELIMINAR");
+                        return false;
+                    }
+                    return true;
+                }
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     if(!currentUid) return;
