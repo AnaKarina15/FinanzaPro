@@ -424,7 +424,7 @@ function renderMetas(metas) {
         if (porcentajeNumerico >= 100) porcentajeMostrar = 100;
         let widthBarra = porcentajeNumerico > 0 && porcentajeNumerico < 2 ? 2 : Math.min(100, porcentajeNumerico);
         
-        const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
         
         const card = document.createElement('article');
         card.className = 'card goal-card cursor-pointer';
@@ -543,7 +543,7 @@ function renderPresupuestos(presupuestos) {
             statusText = porcentajeMostrar + '% UTILIZADO';
         }
         
-        const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
         
         let etiquetaPeriodo = '';
         if (p.tipo_periodo === 'mensual' && p.periodo) {
@@ -893,7 +893,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let value = this.value.replace(/[^0-9]/g, '');
             if(value) {
                 value = parseInt(value, 10);
-                this.value = new Intl.NumberFormat('en-US').format(value);
+                this.value = new Intl.NumberFormat('es-CO').format(value);
             } else {
                 this.value = '';
             }
@@ -923,7 +923,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 // Calcular el saldo disponible en tiempo real
                 const disponible = await calcularDisponible();
-                const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+                const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
 
                 if (montoAbono > disponible) {
                     Swal.fire({
