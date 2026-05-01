@@ -50,7 +50,7 @@
     justify-content: center;
     width: 44px;
     height: 44px;
-    border-radius: 50%;
+    border-radius: 12px;
     border: 1px solid var(--border-color);
     background: #fff;
     color: var(--text-secondary);
@@ -541,14 +541,21 @@
     background: var(--bg);
 }
 
-.modal-actions .btn-secondary {
-    border-radius: 12px !important;
-    padding: 10px 20px !important;
-}
-
+.modal-actions .btn-secondary,
 .modal-actions .btn-primary {
     border-radius: 12px !important;
-    padding: 10px 24px !important;
+    padding: 12px 24px !important;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+}
+
+.modal-actions .btn-modal-submit {
+    width: auto;
+    margin-top: 0;
 }
 
 /* ===== EMPTY STATE ===== */
