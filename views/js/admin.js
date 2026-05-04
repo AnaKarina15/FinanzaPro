@@ -110,7 +110,11 @@ function cargarUsuariosFirestore() {
         let primeraCarga = true;
         unsubscribeUsuarios = onSnapshot(
             collection(db, "usuarios"),
+            { includeMetadataChanges: true },
             (querySnapshot) => {
+                // Ignorar si los datos vienen únicamente del caché local
+                if (querySnapshot.metadata.fromCache && !querySnapshot.metadata.hasPendingWrites) return;
+
                 todosLosUsuarios = [];
                 querySnapshot.forEach((d) => {
                     todosLosUsuarios.push({ id: d.id, ...d.data() });
