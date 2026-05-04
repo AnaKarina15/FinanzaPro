@@ -78,12 +78,14 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 40px 0;
 
   p {
     text-align: center;
   }
+}
+
+#login .left {
+  justify-content: center;
 }
 
 /* LOGIN LEFT */
@@ -160,8 +162,11 @@ section {
 
 /* FORM */
 .login-form,
-.register-form {
+.register-form,
+.reset-form {
   animation: fadeIn 0.4s;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 @keyframes fadeIn {
