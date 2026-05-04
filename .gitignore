@@ -1,6 +1,3 @@
-# Configuración de Firebase (Contiene credenciales)
-views/js/firebase-config.js
-
 # Otros
 .DS_Store
 Thumbs.db
