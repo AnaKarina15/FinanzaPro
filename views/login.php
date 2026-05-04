@@ -168,10 +168,10 @@
                   id="phone"
                   name="telefono"
                   class="input-soft input-tel"
-                  placeholder="Ej. 300 456 7890"
+                  placeholder="Ej. 3004567890"
                   pattern="^\d{10}$"
-                  maxlength="12"
-                  title="El número debe tener exactamente 10 dígitos"
+                  maxlength="10"
+                  title="El número debe tener exactamente 10 dígitos (sin espacios)"
                   required />
               </div>
             </div>
