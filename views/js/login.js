@@ -148,12 +148,12 @@ if (loginForm) {
         }
         
         if (userData.rol === 'admin') {
-          window.location.href = "admin.php";
+          window.location.href = "/views/admin.php";
           return;
         }
       }
 
-      window.location.href = "dashboard.php";
+      window.location.href = "/views/dashboard.php";
 
     } catch (error) {
       console.error("Error login:", error.code, error.message);
@@ -325,7 +325,7 @@ const handleGoogleSignIn = async () => {
         }
     }
 
-    window.location.href = "dashboard.php";
+    window.location.href = "/views/dashboard.php";
   } catch (error) {
     console.error("Error Google:", error.code, error.message);
     if (error.code !== "auth/popup-closed-by-user") {
