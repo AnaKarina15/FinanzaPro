@@ -325,6 +325,13 @@ const handleGoogleSignIn = async () => {
         }
     }
 
+    // Verificar rol para redirigir correctamente
+    const userDocSnap = await getDoc(userDocRef);
+    if (userDocSnap.exists() && userDocSnap.data().rol === "admin") {
+      window.location.href = "/views/admin.php";
+      return;
+    }
+
     window.location.href = "/views/dashboard.php";
   } catch (error) {
     console.error("Error Google:", error.code, error.message);
