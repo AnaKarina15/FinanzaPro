@@ -2,7 +2,7 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-import { collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { initNotificaciones, enviarBienvenidaSiNecesario } from "./notificaciones_admin.js";
 
 // Necesitamos la configuración de Firebase de nuevo para inicializar la segunda app
@@ -17,6 +17,7 @@ let currentUid = null;
 let todosLosUsuarios = [];
 let paginaActual = 1;
 const porPagina = 10;
+let unsubscribeUsuarios = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -97,33 +98,42 @@ function inicializarEventos() {
     });
 }
 
-// ========== CARGAR USUARIOS FIRESTORE ==========
-async function cargarUsuariosFirestore() {
+// ========== CARGAR USUARIOS FIRESTORE (TIEMPO REAL) ==========
+function cargarUsuariosFirestore() {
     const tbody = document.getElementById("users-tbody");
     tbody.innerHTML = `<tr><td colspan="4"><div class="loading-spinner"></div><p>Cargando usuarios...</p></td></tr>`;
 
-    try {
-        const querySnapshot = await getDocs(collection(db, "usuarios"));
-        todosLosUsuarios = [];
-        querySnapshot.forEach((doc) => {
-            todosLosUsuarios.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Calcular estadísticas
-        const total = todosLosUsuarios.length;
-        const activos = todosLosUsuarios.filter(u => u.estado !== 'inactivo').length;
-        // Asumiendo nuevos esta semana
-        const nuevos = 0; 
-        
-        animarNumero("stat-total", total);
-        animarNumero("stat-activos", activos);
-        document.getElementById("stat-nuevos").textContent = `+${nuevos}`;
+    // Cancelar listener anterior si existe
+    if (unsubscribeUsuarios) unsubscribeUsuarios();
 
-        renderizarTabla(todosLosUsuarios);
-    } catch (error) {
-        console.error("Error cargando usuarios:", error);
-        tbody.innerHTML = `<tr><td colspan="4"><p>Error de conexión</p></td></tr>`;
-    }
+    return new Promise((resolve) => {
+        let primeraCarga = true;
+        unsubscribeUsuarios = onSnapshot(
+            collection(db, "usuarios"),
+            (querySnapshot) => {
+                todosLosUsuarios = [];
+                querySnapshot.forEach((d) => {
+                    todosLosUsuarios.push({ id: d.id, ...d.data() });
+                });
+
+                const total   = todosLosUsuarios.length;
+                const activos = todosLosUsuarios.filter(u => u.estado !== 'inactivo').length;
+
+                animarNumero("stat-total", total);
+                animarNumero("stat-activos", activos);
+                document.getElementById("stat-nuevos").textContent = `+0`;
+
+                renderizarTabla(todosLosUsuarios);
+
+                if (primeraCarga) { primeraCarga = false; resolve(); }
+            },
+            (error) => {
+                console.error("Error tiempo real:", error);
+                tbody.innerHTML = `<tr><td colspan="4"><p>Error de conexión</p></td></tr>`;
+                resolve();
+            }
+        );
+    });
 }
 
 function animarNumero(elementId, valorFinal) {
@@ -277,7 +287,7 @@ async function guardarUsuario(e) {
         }
         
         cerrarModal();
-        cargarUsuariosFirestore();
+        // onSnapshot actualiza la tabla automáticamente
     } catch (error) {
         console.error("Error guardando:", error);
         Swal.fire("Error", "Ocurrió un error: " + error.message, "error");
@@ -313,7 +323,7 @@ window.toggleEstadoUsuario = async function (id, nombre, esActivo) {
         try {
             await updateDoc(doc(db, "usuarios", id), { estado: nuevoEstado });
             Swal.fire({ icon: "success", title: esActivo ? "Usuario desactivado" : "Usuario activado", timer: 2000, showConfirmButton: false });
-            cargarUsuariosFirestore();
+            // onSnapshot actualiza la tabla automáticamente
         } catch (error) {
             Swal.fire("Error", "No se pudo actualizar el estado", "error");
         }
