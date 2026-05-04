@@ -8,11 +8,11 @@
     <title>Perfil - FinanzaPro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./css/global.css?v=<?= time() ?>" />
-    <link rel="stylesheet" href="./css/perfil.css?v=<?= time() ?>" />
+    <link rel="stylesheet" href="./css/global.css?v=1.0.0" />
+    <link rel="stylesheet" href="./css/perfil.css?v=1.0.0" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="./js/perfil.js?v=<?= time() ?>"></script>
+    <script type="module" src="./js/perfil.js?v=1.0.0"></script>
 </head>
 
 <body>
