@@ -1,4 +1,4 @@
-import { auth, db } from './firebase-config.js';
+import { app, auth, db } from './firebase-config.js';
 import { onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -6,8 +6,7 @@ import { collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, quer
 import { initNotificaciones, enviarBienvenidaSiNecesario } from "./notificaciones_admin.js";
 
 // Necesitamos la configuración de Firebase de nuevo para inicializar la segunda app
-// Vamos a extraerla de la app principal
-const firebaseConfig = auth.app.options;
+const firebaseConfig = app.options;
 
 // Inicializamos una app secundaria solo para crear cuentas de usuario
 const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
@@ -110,11 +109,7 @@ function cargarUsuariosFirestore() {
         let primeraCarga = true;
         unsubscribeUsuarios = onSnapshot(
             collection(db, "usuarios"),
-            { includeMetadataChanges: true },
             (querySnapshot) => {
-                // Ignorar si los datos vienen únicamente del caché local
-                if (querySnapshot.metadata.fromCache && !querySnapshot.metadata.hasPendingWrites) return;
-
                 todosLosUsuarios = [];
                 querySnapshot.forEach((d) => {
                     todosLosUsuarios.push({ id: d.id, ...d.data() });
@@ -123,9 +118,18 @@ function cargarUsuariosFirestore() {
                 const total   = todosLosUsuarios.length;
                 const activos = todosLosUsuarios.filter(u => u.estado !== 'inactivo').length;
 
+                // Calcular usuarios nuevos de los últimos 7 días
+                const unaSemanaAtras = new Date();
+                unaSemanaAtras.setDate(unaSemanaAtras.getDate() - 7);
+                const nuevos = todosLosUsuarios.filter(u => {
+                    if (!u.fecha_creacion) return false;
+                    const fecha = u.fecha_creacion.toDate ? u.fecha_creacion.toDate() : new Date(u.fecha_creacion);
+                    return fecha >= unaSemanaAtras;
+                }).length;
+
                 animarNumero("stat-total", total);
                 animarNumero("stat-activos", activos);
-                document.getElementById("stat-nuevos").textContent = `+0`;
+                document.getElementById("stat-nuevos").textContent = `+${nuevos}`;
 
                 renderizarTabla(todosLosUsuarios);
 
@@ -143,7 +147,28 @@ function cargarUsuariosFirestore() {
 function animarNumero(elementId, valorFinal) {
     const el = document.getElementById(elementId);
     if (!el) return;
-    el.textContent = valorFinal; // Simplificado para que no falle
+    
+    const duration = 1000; 
+    const start = parseInt(el.textContent) || 0;
+    const end = parseInt(valorFinal) || 0;
+    
+    if (start === end) {
+        el.textContent = end;
+        return;
+    }
+    
+    const range = end - start;
+    let current = start;
+    const increment = end > start ? 1 : -1;
+    const stepTime = Math.abs(Math.floor(duration / range));
+    
+    const timer = setInterval(() => {
+        current += increment;
+        el.textContent = current;
+        if (current === end) {
+            clearInterval(timer);
+        }
+    }, stepTime > 0 ? stepTime : 10);
 }
 
 // ========== RENDERIZAR TABLA ==========
