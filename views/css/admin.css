@@ -50,7 +50,7 @@
     justify-content: center;
     width: 44px;
     height: 44px;
-    border-radius: 50%;
+    border-radius: 12px;
     border: 1px solid var(--border-color);
     background: #fff;
     color: var(--text-secondary);
@@ -533,10 +533,17 @@
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+    border-bottom-left-radius: 28px;
+    border-bottom-right-radius: 28px;
 }
 
 .modal-actions .btn-primary {
     margin: 0;
+}
+
+.modal-actions .btn-modal-submit {
+    width: auto;
+    margin-top: 0;
 }
 
 /* ===== EMPTY STATE ===== */
@@ -578,7 +585,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ===== ANIMATIONS ===== */
@@ -587,6 +596,7 @@
         opacity: 0;
         transform: translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -597,9 +607,17 @@
     animation: fadeInUp 0.4s ease forwards;
 }
 
-.stat-card:nth-child(1) { animation-delay: 0.05s; }
-.stat-card:nth-child(2) { animation-delay: 0.12s; }
-.stat-card:nth-child(3) { animation-delay: 0.19s; }
+.stat-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.stat-card:nth-child(2) {
+    animation-delay: 0.12s;
+}
+
+.stat-card:nth-child(3) {
+    animation-delay: 0.19s;
+}
 
 .users-card {
     animation: fadeInUp 0.5s ease forwards;
@@ -637,12 +655,18 @@
 .btn-toggle-active {
     color: #059669;
 }
-.btn-toggle-active:hover { background: #d1fae5; }
+
+.btn-toggle-active:hover {
+    background: #d1fae5;
+}
 
 .btn-toggle-inactive {
     color: #94a3b8;
 }
-.btn-toggle-inactive:hover { background: #f1f5f9; }
+
+.btn-toggle-inactive:hover {
+    background: #f1f5f9;
+}
 
 .btn-toggle-active span,
 .btn-toggle-inactive span {

@@ -8,11 +8,11 @@
     <title>Perfil - FinanzaPro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./css/global.css?v=<?= time() ?>" />
-    <link rel="stylesheet" href="./css/perfil.css?v=<?= time() ?>" />
+    <link rel="stylesheet" href="./css/global.css?v=1.0.0" />
+    <link rel="stylesheet" href="./css/perfil.css?v=1.0.0" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="./js/perfil.js?v=<?= time() ?>"></script>
+    <script type="module" src="./js/perfil.js?v=1.0.0"></script>
 </head>
 
 <body>
@@ -96,11 +96,11 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>NOMBRE</label>
-                                        <input type="text" name="nombre" value="" class="input-profile">
+                                        <input type="text" name="nombre" value="" class="input-profile" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>APELLIDO</label>
-                                        <input type="text" name="apellido" value="" class="input-profile">
+                                        <input type="text" name="apellido" value="" class="input-profile" readonly>
                                     </div>
                                 </div>
 
@@ -249,7 +249,7 @@
                         <form id="form-cambiar-telefono">
                             <div class="modal-form-group">
                                 <label>NUEVO TELÉFONO</label>
-                                <input type="tel" name="nuevo_telefono" class="input-profile" placeholder="3001234567" pattern="^\d{10}$" maxlength="10" title="El número debe tener exactamente 10 dígitos" required>
+                                <input type="tel" name="nuevo_telefono" class="input-profile" placeholder="3001234567" maxlength="12" title="El número debe tener exactamente 10 dígitos" required>
                             </div>
                             <div class="modal-actions">
                                 <button type="button" class="btn-secondary" id="btn-cancelar-cambiar-telefono">Cancelar</button>

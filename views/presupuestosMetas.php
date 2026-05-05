@@ -9,8 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="./css/global.css?v=<?php echo time(); ?>" />
-  <link rel="stylesheet" href="./css/presupuestosMetas.css?v=<?php echo time(); ?>" />
+  <link rel="stylesheet" href="./css/global.css?v=1.0.0" />
+  <link rel="stylesheet" href="./css/presupuestosMetas.css?v=1.0.0" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
@@ -57,7 +57,7 @@
           <input type="text" id="buscador-general" placeholder="Buscar presupuestos o metas..." autocomplete="off">
         </div>
         <div class="notif-wrapper">
-          <button class="btn-secondary" id="btn-notificaciones" style="border-radius: 50%;">
+          <button class="btn-secondary" id="btn-notificaciones">
             <span class="material-symbols-outlined">notifications</span>
             <span id="notif-badge" style="display:none;"></span>
           </button>
@@ -389,7 +389,7 @@
 
 
 
-  <script type="module" src="./js/presupuestosMetas.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="./js/presupuestosMetas.js?v=1.0.0"></script>
 </body>
 
 </html>

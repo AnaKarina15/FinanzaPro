@@ -9,11 +9,12 @@ Este proyecto fue desarrollado como parte de nuestra formación en el programa d
 ## 🚀 Características del Sistema
 
 * **Dashboard Intuitivo:** Panel de control con resumen de saldo disponible, métricas de ingresos/gastos y gráfica comparativa mensual.
-* **Ingresos y Gastos:** Registro, edición y eliminación de movimientos financieros con categorías personalizadas.
+* **Ingresos y Gastos:** Registro, edición y eliminación de movimientos financieros con categorías personalizadas y validaciones en tiempo real.
 * **Presupuestos y Metas:** Definición de límites de gasto por categoría y seguimiento de metas de ahorro con barra de progreso.
-* **Perfil de Usuario:** Gestión de datos personales, foto de perfil, cambio de contraseña y preferencias de cuenta con auto-guardado.
+* **Perfil de Usuario:** Gestión de datos personales, foto de perfil, cambio de contraseña y preferencias de cuenta con auto-guardado instantáneo.
 * **Panel de Administración:** Vista exclusiva para administradores que permite gestionar todos los usuarios de la plataforma.
-* **Autenticación Segura:** Login con email/contraseña y Google (OAuth), recuperación de contraseña y verificación de correo.
+* **Autenticación Segura y Google Auth:** Login con email/contraseña y **Google OAuth** plenamente funcional. Recuperación de contraseña y verificación de correo.
+* **UI/UX Estandarizada:** Interfaz altamente pulida, con modales simétricos, botones consistentes, formato de números telefónicos y diseño responsive en todos los módulos (Arquitectura SPA).
 
 ---
 
@@ -106,18 +107,27 @@ FinanzaPro/
 
 ---
 
-## ⚙️ Instalación y Configuración
+## ⚙️ Instalación (Entorno Local)
 
-> **No se requiere base de datos local.** La aplicación es 100% serverless.
+> **No se requiere base de datos local.** La aplicación es 100% serverless conectada a Firebase.
 
 1. Clona el repositorio
-2. Coloca el proyecto en `C:\xampp\htdocs\FinanzaPro`
-3. Asegúrate de tener Apache corriendo en XAMPP
+2. Coloca el proyecto en `C:\xampp\htdocs\FinanzaPro` (o el directorio raíz de tu servidor web).
+3. Asegúrate de tener Apache corriendo en XAMPP.
 4. Accede a `http://localhost/FinanzaPro`
 
 El proyecto se conecta automáticamente al proyecto de Firebase configurado en `views/js/firebase-config.js`.
 
-> **Para contribuidores:** Si deseas conectar tu propio proyecto Firebase, reemplaza el objeto `firebaseConfig` en `firebase-config.js` con las credenciales de tu proyecto y publica las reglas del archivo `firestore.rules` en tu consola de Firestore.
+> **Para contribuidores:** Si deseas conectar tu propio proyecto Firebase, reemplaza el objeto `firebaseConfig` en `firebase-config.js` con las credenciales de tu proyecto, y añade tu dominio local (`localhost`) a la lista de dominios autorizados en Firebase Authentication.
+
+---
+
+## ☁️ Despliegue en Producción (Render)
+
+FinanzaPro está optimizado y listo para ser desplegado en plataformas como **Render**:
+* Las rutas estáticas y redirecciones de PHP (`index.php`) y JavaScript (`window.location.href`) están configuradas para evitar errores de tipo `404 Not Found` en entornos de la nube.
+* La integración de **Google Login** está verificada para producción (asegúrate de agregar el dominio de Render a Firebase Console).
+* Soporte para ejecución en contenedores Docker estándar de PHP/Apache.
 
 ---
 

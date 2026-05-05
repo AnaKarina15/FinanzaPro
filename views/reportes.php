@@ -13,13 +13,13 @@
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
 
-  <link rel="stylesheet" href="./css/global.css?v=<?php echo time(); ?>" />
-  <link rel="stylesheet" href="./css/reportes.css?v=<?php echo time(); ?>" />
+  <link rel="stylesheet" href="./css/global.css?v=1.0.0" />
+  <link rel="stylesheet" href="./css/reportes.css?v=1.0.0" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="./js/reportes.js?v=<?php echo time(); ?>"></script>
+  <script type="module" src="./js/reportes.js?v=1.0.0"></script>
 </head>
 
 <body>

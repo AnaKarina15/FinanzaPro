@@ -12,10 +12,10 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="./css/global.css?v=<?= time() ?>" />
-  <link rel="stylesheet" href="./css/login.css?v=<?= time() ?>" />
+  <link rel="stylesheet" href="./css/global.css?v=1.0.0" />
+  <link rel="stylesheet" href="./css/login.css?v=1.0.0" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script type="module" src="./js/login.js?v=<?= time() ?>"></script>
+  <script type="module" src="./js/login.js?v=1.0.0"></script>
 </head>
 
 <body>
@@ -169,9 +169,8 @@
                   name="telefono"
                   class="input-soft input-tel"
                   placeholder="Ej. 300 456 7890"
-                  pattern="^\d{10}$"
                   maxlength="12"
-                  title="El número debe tener exactamente 10 dígitos"
+                  title="El número debe tener 10 dígitos"
                   required />
               </div>
             </div>

@@ -5,6 +5,8 @@ html {
 
 body {
   min-height: fit-content;
+  height: auto;
+  overflow-y: auto;
   position: relative;
   background-color: var(--bg);
 }
@@ -77,11 +79,14 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 
   p {
     text-align: center;
   }
+}
+
+#login .left {
+  justify-content: center;
 }
 
 /* LOGIN LEFT */
@@ -158,8 +163,11 @@ section {
 
 /* FORM */
 .login-form,
-.register-form {
+.register-form,
+.reset-form {
   animation: fadeIn 0.4s;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 @keyframes fadeIn {
@@ -176,8 +184,8 @@ section {
 
 #login form {
   width: 100%;
-  padding: 32px;
-  gap: 24px;
+  padding: 32px 32px;
+  gap: 20px;
 
   h2 {
     text-align: center;

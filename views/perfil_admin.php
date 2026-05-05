@@ -7,11 +7,11 @@
     <title>Perfil Administrador - FinanzaPro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./css/global.css?v=<?= time() ?>" />
-    <link rel="stylesheet" href="./css/admin.css?v=<?= time() ?>" />
-    <link rel="stylesheet" href="./css/perfil.css?v=<?= time() ?>" />
+    <link rel="stylesheet" href="./css/global.css?v=1.0.0" />
+    <link rel="stylesheet" href="./css/admin.css?v=1.0.0" />
+    <link rel="stylesheet" href="./css/perfil.css?v=1.0.0" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="./js/perfil_admin.js?v=<?= time() ?>"></script>
+    <script type="module" src="./js/perfil_admin.js?v=1.0.0"></script>
     <style>
         /* Admin profile overrides */
         .admin-profile-layout {
@@ -206,6 +206,26 @@
             padding-top: 8px;
         }
 
+        /* Admin editable inputs: white background + subtle border */
+        .admin-profile-layout .input-profile {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .admin-profile-layout .input-profile:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+            outline: none;
+        }
+
+        /* Admin readonly inputs: keep gray (read-only look) */
+        .admin-profile-layout .input-profile[readonly] {
+            background: #f0f4f9;
+            border-color: transparent;
+            cursor: default;
+        }
+
         @media (max-width: 640px) {
             .admin-header-content { flex-direction: column; align-items: flex-start; }
             .admin-actions-footer { flex-direction: column; }
@@ -264,9 +284,6 @@
                             </div>
                         </div>
                     </div>
-                    <a href="admin.php" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                        <span class="material-symbols-outlined">arrow_back</span> Volver
-                    </a>
                 </div>
             </div>
 

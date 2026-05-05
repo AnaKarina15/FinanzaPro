@@ -148,12 +148,12 @@ if (loginForm) {
         }
         
         if (userData.rol === 'admin') {
-          window.location.href = "/FinanzaPro/views/admin.php";
+          window.location.href = "/views/admin.php";
           return;
         }
       }
 
-      window.location.href = "/FinanzaPro/views/dashboard.php";
+      window.location.href = "/views/dashboard.php";
 
     } catch (error) {
       console.error("Error login:", error.code, error.message);
@@ -325,11 +325,23 @@ const handleGoogleSignIn = async () => {
         }
     }
 
-    window.location.href = "/FinanzaPro/views/dashboard.php";
+    // Verificar rol para redirigir correctamente
+    const userDocSnap = await getDoc(userDocRef);
+    if (userDocSnap.exists() && userDocSnap.data().rol === "admin") {
+      window.location.href = "/views/admin.php";
+      return;
+    }
+
+    window.location.href = "/views/dashboard.php";
   } catch (error) {
     console.error("Error Google:", error.code, error.message);
-    if (error.code !== "auth/popup-closed-by-user") {
-      Swal.fire("Error", "No se pudo iniciar sesión con Google.", "error");
+    if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
+      Swal.fire({
+        title: "Error al iniciar con Google",
+        html: `<b>Código:</b> <code>${error.code}</code><br><small>${error.message}</small>`,
+        icon: "error",
+        confirmButtonColor: "#059669"
+      });
     }
   }
 };

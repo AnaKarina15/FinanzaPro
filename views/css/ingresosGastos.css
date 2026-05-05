@@ -100,6 +100,39 @@
     color: var(--text-primary);
 }
 
+/* TOGGLE SWITCH — Todos / Ingresos / Gastos */
+.toggle-switch {
+    background: #f0f4f9;
+    padding: 4px;
+    border-radius: 12px;
+    display: flex;
+    gap: 4px;
+}
+
+.toggle-switch .toggle-btn {
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: #64748b;
+    transition: 0.3s;
+}
+
+.toggle-switch .toggle-btn.active {
+    background: white;
+    color: #059669;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.toggle-switch .toggle-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.6);
+    color: #334155;
+}
+
 /* TABLA DE HISTORIAL DE MOVIMIENTOS */
 .movimientos-header {
     margin-bottom: 24px;
