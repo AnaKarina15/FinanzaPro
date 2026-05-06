@@ -26,6 +26,9 @@ export function initNotificaciones(uid) {
     
     // Iniciar Firebase Cloud Messaging para notificaciones en primer plano
     _initFCM();
+
+    // Verificar presupuestos al entrar por si alguno ya se pasó
+    verificarPresupuesto(uid);
 }
 
 async function _initFCM() {
@@ -150,13 +153,16 @@ export async function verificarGastoInusual(uid, { monto, categoria }) {
 // TRIGGER: VERIFICAR PRESUPUESTOS AL INICIAR SESIÓN
 // Para presupuestos que ya estaban excedidos antes del sistema de notificaciones
 // ═══════════════════════════════════════════════════════════
-export async function verificarPresupuestosAlCargar(uid) {
+// ═══════════════════════════════════════════════════════════
+// TRIGGER: VERIFICAR PRESUPUESTOS (Unificado)
+// ═══════════════════════════════════════════════════════════
+export async function verificarPresupuesto(uid, categoriaFiltro = null) {
     if (!uid) return;
     try {
         const now = new Date();
         const mesPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-        // Obtener presupuestos y transacciones del usuario
+        // 1. Obtener presupuestos, transacciones y notificaciones existentes
         const [snapPres, snapTrans, snapNotif] = await Promise.all([
             getDocs(query(collection(db, "presupuestos"), where("id_usuario", "==", uid))),
             getDocs(query(collection(db, "transacciones"), where("usuario_id", "==", uid))),
@@ -165,45 +171,53 @@ export async function verificarPresupuestosAlCargar(uid) {
 
         const titulosExistentes = snapNotif.docs.map(d => d.data().titulo);
 
-        // Calcular gasto mensual por categoría
+        // 2. Calcular gasto mensual por categoría
         const gastoPorCat = {};
         snapTrans.docs.forEach(d => {
             const t = d.data();
-            if (t.tipo !== 'gasto' || !String(t.fecha).startsWith(mesPrefix)) return;
+            if (t.tipo !== 'gasto' || !String(t.fecha || '').startsWith(mesPrefix)) return;
             const cat = t.categoria || 'Otros';
             gastoPorCat[cat] = (gastoPorCat[cat] || 0) + (parseFloat(t.monto) || 0);
         });
 
-        // Verificar cada presupuesto
+        // 3. Verificar cada presupuesto
         for (const pDoc of snapPres.docs) {
             const p = pDoc.data();
-            const limite = parseFloat(p.monto_limite || p.limite || p.valor_limite) || 0;
+            const catP = p.nombre || p.categoria || '';
+            
+            // Si filtramos por una categoría específica (ej: al guardar un gasto), saltamos las demás
+            if (categoriaFiltro && catP !== categoriaFiltro) continue;
+
+            const limite = parseFloat(p.monto_limite || p.limite || p.valor_limite || 0);
             if (limite <= 0) continue;
 
-            // El campo que identifica la categoría puede ser 'nombre' o 'categoria'
-            const categoria = p.nombre || p.categoria || '';
-            const gasto = gastoPorCat[categoria] || 0;
+            const gasto = gastoPorCat[catP] || 0;
             const pct = (gasto / limite) * 100;
 
-            const titulo100 = `🔴 ¡Límite superado! — ${categoria}`;
-            const titulo80  = `⚠️ Alerta 80% — ${categoria}`;
+            const titulo100 = `🔴 ¡Límite superado! — ${catP}`;
+            const titulo80  = `⚠️ Alerta 80% — ${catP}`;
 
-            if (pct >= 100 && !titulosExistentes.includes(titulo100)) {
-                await crearNotificacion(uid, {
-                    titulo: titulo100,
-                    mensaje: `Has superado el límite de tu presupuesto de ${categoria} (${Math.round(pct)}% consumido). Considera reducir tus gastos.`,
-                    tipo: 'alerta'
-                });
-            } else if (pct >= 80 && pct < 100 && !titulosExistentes.includes(titulo80)) {
-                await crearNotificacion(uid, {
-                    titulo: titulo80,
-                    mensaje: `Llevas el ${Math.round(pct)}% de tu presupuesto de ${categoria}. ¡Cuidado con los gastos!`,
-                    tipo: 'alerta'
-                });
+            // Solo enviamos si no existe ya una notificación con ese título exacto este mes
+            if (pct >= 100) {
+                if (!titulosExistentes.includes(titulo100)) {
+                    await crearNotificacion(uid, {
+                        titulo: titulo100,
+                        mensaje: `Has superado el 100% de tu presupuesto de ${catP} (${gasto.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
+                        tipo: 'alerta'
+                    });
+                }
+            } else if (pct >= 80) {
+                if (!titulosExistentes.includes(titulo80)) {
+                    await crearNotificacion(uid, {
+                        titulo: titulo80,
+                        mensaje: `Llevas el ${Math.round(pct)}% de tu presupuesto de ${catP} (${gasto.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
+                        tipo: 'alerta'
+                    });
+                }
             }
         }
     } catch (e) {
-        console.error("Error verificando presupuestos al cargar:", e);
+        console.error("Error verificando presupuestos:", e);
     }
 }
 

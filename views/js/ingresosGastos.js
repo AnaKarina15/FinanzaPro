@@ -1,7 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { initNotificaciones, crearNotificacion, verificarGastoInusual } from "./notificaciones.js";
+import { initNotificaciones, crearNotificacion, verificarGastoInusual, verificarPresupuesto } from "./notificaciones.js";
 
 let currentUid = null;
 let domListo = false;
@@ -535,7 +535,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (iv) iv.value = "";
                 window.cargarDatosFirestore();
                 if (tipo === 'gasto') {
-                    _verificarAlertasPresupuesto(currentUid, categoriaVal);
+                    verificarPresupuesto(currentUid, categoriaVal);
                     verificarGastoInusual(currentUid, { monto: montoVal, categoria: categoriaVal });
                 }
             } catch (error) {
@@ -596,64 +596,7 @@ window.cargarDatosFirestore = async () => {
     }
 };
 
-// ═══════════════════════════════════════════════════════════
-// VERIFICAR ALERTA DE PRESUPUESTO (>= 80%)
-// ═══════════════════════════════════════════════════════════
-async function _verificarAlertasPresupuesto(uid, categoriaGasto) {
-    if (!uid) return;
-    try {
-        // Buscar el presupuesto de la misma categoría del gasto
-        const qPres = query(
-            collection(db, "presupuestos"),
-            where("id_usuario", "==", uid),
-            where("categoria", "==", categoriaGasto)
-        );
-        const snapPres = await getDocs(qPres);
-        if (snapPres.empty) return;
 
-        // Sumar todos los gastos de esa categoría este mes
-        const now = new Date();
-        const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
-        const qTrans = query(
-            collection(db, "transacciones"),
-            where("usuario_id", "==", uid),
-            where("tipo", "==", "gasto"),
-            where("categoria", "==", categoriaGasto)
-        );
-        const snapTrans = await getDocs(qTrans);
-        let totalGastado = 0;
-        snapTrans.forEach(d => {
-            if (String(d.data().fecha || '').startsWith(mesActual)) {
-                totalGastado += parseFloat(d.data().monto) || 0;
-            }
-        });
-
-        // Comparar con el límite del presupuesto
-        snapPres.forEach(async (pDoc) => {
-            const pData = pDoc.data();
-            const limite = parseFloat(pData.valor_limite || pData.limite || 0);
-            if (limite <= 0) return;
-            const porcentaje = (totalGastado / limite) * 100;
-
-            if (porcentaje >= 100) {
-                await crearNotificacion(uid, {
-                    titulo: `¡Límite superado! — ${categoriaGasto}`,
-                    mensaje: `Has superado el 100% de tu presupuesto de ${categoriaGasto} (${totalGastado.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
-                    tipo: 'alerta'
-                });
-            } else if (porcentaje >= 80) {
-                await crearNotificacion(uid, {
-                    titulo: `Alerta 80% — ${categoriaGasto}`,
-                    mensaje: `Llevas el ${Math.round(porcentaje)}% de tu presupuesto de ${categoriaGasto} (${totalGastado.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
-                    tipo: 'alerta'
-                });
-            }
-        });
-    } catch (e) {
-        console.error("Error verificando presupuesto:", e);
-    }
-}
 // --- SELECTOR DE ICONOS ---
 const ICON_OPTIONS = [
     'category', 'shopping_cart', 'restaurant', 'local_gas_station', 'home',
