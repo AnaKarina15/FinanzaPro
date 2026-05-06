@@ -343,8 +343,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
+                        // Obtener el registro del Service Worker explícitamente con la ruta correcta en Render
+                        const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                        
                         // Nota: Para producción, idealmente debes pasar la VAPID Key generada en Firebase Console -> Configuración del proyecto -> Cloud Messaging -> Web configuration
-                        const token = await getToken(messaging);
+                        const token = await getToken(messaging, {
+                            serviceWorkerRegistration: swRegistration
+                        });
                         
                         if (token) {
                             console.log('FCM Token:', token);

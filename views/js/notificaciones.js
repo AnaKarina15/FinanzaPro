@@ -37,7 +37,7 @@ async function _initFCM() {
         
         // Registrar Service Worker para notificaciones en segundo plano
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/FinanzaPro/firebase-messaging-sw.js')
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
             .then(function(registration) {
                 console.log('Service Worker de FCM registrado con éxito:', registration.scope);
             }).catch(function(err) {
