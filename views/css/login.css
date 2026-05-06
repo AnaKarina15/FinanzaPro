@@ -38,9 +38,7 @@ main {
 section {
   display: flex;
   justify-content: space-around;
-  height: 90vh;
   padding: 50px 50px;
-  overflow-y: scroll;
 }
 
 #login {
