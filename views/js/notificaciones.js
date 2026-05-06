@@ -46,7 +46,7 @@ async function _initFCM() {
         }
 
         // Escuchar notificaciones cuando la app está abierta
-        onMessage(messaging, (payload) => {
+        onMessage(messaging, async (payload) => {
             console.log('Notificación FCM recibida en primer plano:', payload);
             const { default: Swal } = window.Swal || await import("https://cdn.jsdelivr.net/npm/sweetalert2@11/src/sweetalert2.js");
             Swal.fire({
