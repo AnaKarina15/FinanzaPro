@@ -334,6 +334,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isActive) {
                 try {
                     const { messaging } = await import('./firebase-config.js');
+                    if (!messaging) {
+                        Swal.fire('No soportado', 'Tu navegador no soporta notificaciones push.', 'error');
+                        e.target.checked = false;
+                        return;
+                    }
                     const { getToken } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js");
                     
                     const permission = await Notification.requestPermission();

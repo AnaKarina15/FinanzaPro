@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { getMessaging } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js";
+import { getMessaging, isSupported } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js";
 
 // Tu configuración de Firebase
 const firebaseConfig = {
@@ -22,7 +22,13 @@ const db = initializeFirestore(app, {
   localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
 });
 const auth = getAuth(app);
-const messaging = getMessaging(app);
+
+let messaging = null;
+isSupported().then((supported) => {
+  if (supported) {
+    messaging = getMessaging(app);
+  }
+}).catch(console.error);
 
 // Exportamos los servicios para poder usarlos en otros archivos
 export { app, db, auth, messaging };

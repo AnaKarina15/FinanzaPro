@@ -31,6 +31,8 @@ export function initNotificaciones(uid) {
 async function _initFCM() {
     try {
         const { messaging } = await import('./firebase-config.js');
+        if (!messaging) return;
+        
         const { onMessage } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js");
         
         // Registrar Service Worker para notificaciones en segundo plano
