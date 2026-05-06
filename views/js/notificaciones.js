@@ -23,6 +23,43 @@ export function initNotificaciones(uid) {
     } else {
         _bindBellButton();
     }
+    
+    // Iniciar Firebase Cloud Messaging para notificaciones en primer plano
+    _initFCM();
+}
+
+async function _initFCM() {
+    try {
+        const { messaging } = await import('./firebase-config.js');
+        const { onMessage } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js");
+        
+        // Registrar Service Worker para notificaciones en segundo plano
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/FinanzaPro/firebase-messaging-sw.js')
+            .then(function(registration) {
+                console.log('Service Worker de FCM registrado con éxito:', registration.scope);
+            }).catch(function(err) {
+                console.log('Fallo el registro del Service Worker de FCM:', err);
+            });
+        }
+
+        // Escuchar notificaciones cuando la app está abierta
+        onMessage(messaging, (payload) => {
+            console.log('Notificación FCM recibida en primer plano:', payload);
+            const { default: Swal } = window.Swal || await import("https://cdn.jsdelivr.net/npm/sweetalert2@11/src/sweetalert2.js");
+            Swal.fire({
+                title: payload.notification.title,
+                text: payload.notification.body,
+                icon: 'info',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000
+            });
+        });
+    } catch (error) {
+        console.error("FCM no inicializado o error:", error);
+    }
 }
 
 // ═══════════════════════════════════════════════════════════

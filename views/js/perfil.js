@@ -327,7 +327,47 @@ document.addEventListener("DOMContentLoaded", () => {
         if(selMoneda) selMoneda.addEventListener('change', (e) => autoGuardar('moneda_principal', e.target.value));
         
         const pushCb = formPerfil.querySelector('input[name="notificaciones_push"]');
-        if(pushCb) pushCb.addEventListener('change', (e) => autoGuardar('notificaciones_push', e.target.checked ? 1 : 0));
+        if(pushCb) pushCb.addEventListener('change', async (e) => {
+            const isActive = e.target.checked;
+            autoGuardar('notificaciones_push', isActive ? 1 : 0);
+            
+            if (isActive) {
+                try {
+                    const { messaging } = await import('./firebase-config.js');
+                    const { getToken } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js");
+                    
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        // Nota: Para producción, idealmente debes pasar la VAPID Key generada en Firebase Console -> Configuración del proyecto -> Cloud Messaging -> Web configuration
+                        const token = await getToken(messaging);
+                        
+                        if (token) {
+                            console.log('FCM Token:', token);
+                            autoGuardar('fcm_token', token);
+                            Swal.fire({
+                                title: 'Notificaciones activadas',
+                                text: 'Recibirás alertas en segundo plano.',
+                                icon: 'success',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                        }
+                    } else {
+                        // Permission denied
+                        e.target.checked = false;
+                        autoGuardar('notificaciones_push', 0);
+                        Swal.fire('Permiso denegado', 'Debes permitir las notificaciones en tu navegador.', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Error al obtener el token FCM', error);
+                    Swal.fire('Error', 'No se pudieron activar las notificaciones push.', 'error');
+                }
+            } else {
+                autoGuardar('fcm_token', null);
+            }
+        });
 
         // El tema se engancha en la línea 125, así que voy a añadirlo arriba. Pero por si acaso, lo enganchamos al cambiar el hidden input? No, el hidden input no dispara 'change' cuando se altera por JS. Pero ya lo engancharé directamente en la parte del tema.
 
