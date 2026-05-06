@@ -10,8 +10,7 @@ import {
   addDoc,
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import {
-  initNotificaciones,
-  enviarBienvenidaSiNecesario,
+  initNotificaciones
 } from "./notificaciones.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -89,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       initNotificaciones(user.uid);
-      enviarBienvenidaSiNecesario(user.uid, _nombreUsuario);
       cargarCategoriasDePresupuestos();
       cargarEstadisticasFirestore(user.uid);
     } else {

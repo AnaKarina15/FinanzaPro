@@ -83,29 +83,7 @@ export async function crearNotificacion(uid, { titulo, mensaje, tipo = 'info' })
     }
 }
 
-// ═══════════════════════════════════════════════════════════
-// BIENVENIDA — enviar solo si el usuario no tiene ninguna aún
-// Funciona para usuarios nuevos Y usuarios ya registrados
-// ═══════════════════════════════════════════════════════════
-export async function enviarBienvenidaSiNecesario(uid, nombre) {
-    try {
-        const q = query(
-            collection(db, "notificaciones"),
-            where("usuario_id", "==", uid)
-        );
-        const snap = await getDocs(q);
-        // Si ya tiene notificaciones, no enviamos de nuevo
-        if (!snap.empty) return;
-
-        await crearNotificacion(uid, {
-            titulo: `Te damos la bienvenida a FinanzaPro, ${nombre}! 🎉`,
-            mensaje: `Nos alegra que estés aquí. Ya tienes todo listo para llevar el control de tus finanzas personales. ¡Empieza registrando tus primeros ingresos y gastos!`,
-            tipo: 'meta'
-        });
-    } catch (e) {
-        console.error("Error enviando bienvenida:", e);
-    }
-}
+// (Se eliminó enviarBienvenidaSiNecesario porque causaba un bucle si el usuario borraba todas sus notificaciones. El mensaje de bienvenida ahora solo se crea al registrarse en login.js).
 
 // ═══════════════════════════════════════════════════════════
 // TRIGGER: META DE AHORRO — al 50% y al 100%
