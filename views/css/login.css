@@ -38,7 +38,6 @@ main {
 section {
   display: flex;
   justify-content: space-around;
-  min-height: auto;
   padding: 50px 50px;
 }
 
@@ -266,4 +265,130 @@ footer {
   justify-content: space-around;
   padding: 16px;
   border-bottom: solid 1px var(--border-color);
+}
+
+/* ═══════════════════════════════════════════════ */
+/* RESPONSIVE — TABLET (≤ 900px)                  */
+/* ═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  #login {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 32px 24px;
+    min-height: auto;
+  }
+
+  #login .left {
+    text-align: center;
+    align-items: center;
+  }
+
+  .login-title {
+    font-size: 36px;
+  }
+
+  .login-text {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .login-image {
+    display: none;
+  }
+
+  section {
+    padding: 32px 24px;
+  }
+
+  .benefits-info h2 {
+    font-size: 26px;
+  }
+
+  .benefits-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ═══════════════════════════════════════════════ */
+/* RESPONSIVE — MÓVIL (≤ 576px)                   */
+/* ═══════════════════════════════════════════════ */
+@media (max-width: 576px) {
+  header {
+    justify-content: space-between;
+    padding: 12px 16px;
+  }
+
+  header nav {
+    gap: 4px;
+  }
+
+  header .nav-link {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  header .logo-text {
+    font-size: 18px;
+  }
+
+  #login {
+    padding: 24px 16px;
+    gap: 16px;
+  }
+
+  .login-title {
+    font-size: 32px;
+  }
+
+  .login-text {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  #login form {
+    padding: 24px 20px;
+    border-radius: 24px;
+  }
+
+  .form-title {
+    font-size: 20px;
+  }
+
+  .form-subtitle {
+    font-size: 13px;
+  }
+
+  .login-actions {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .input-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  section {
+    padding: 24px 16px;
+  }
+
+  .benefits-info h2 {
+    font-size: 32px;
+  }
+
+  .benefits-cards .card {
+    padding: 24px;
+  }
+
+  footer {
+    padding: 12px;
+    gap: 4px;
+  }
+
+  footer small {
+    font-size: 11px;
+  }
 }
