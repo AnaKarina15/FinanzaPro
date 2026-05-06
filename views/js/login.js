@@ -148,12 +148,12 @@ if (loginForm) {
         }
         
         if (userData.rol === 'admin') {
-          window.location.href = "/views/admin.php";
+          window.location.href = "admin.php";
           return;
         }
       }
 
-      window.location.href = "/views/dashboard.php";
+      window.location.href = "dashboard.php";
 
     } catch (error) {
       console.error("Error login:", error.code, error.message);
@@ -328,11 +328,11 @@ const handleGoogleSignIn = async () => {
     // Verificar rol para redirigir correctamente
     const userDocSnap = await getDoc(userDocRef);
     if (userDocSnap.exists() && userDocSnap.data().rol === "admin") {
-      window.location.href = "/views/admin.php";
+      window.location.href = "admin.php";
       return;
     }
 
-    window.location.href = "/views/dashboard.php";
+    window.location.href = "dashboard.php";
   } catch (error) {
     console.error("Error Google:", error.code, error.message);
     if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
