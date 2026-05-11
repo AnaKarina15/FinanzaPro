@@ -1,4 +1,4 @@
-import { db, auth } from './firebase-config.js';
+import { db, auth, getMessagingInstance } from './firebase-config.js';
 import {
     collection, query, where, getDocs, addDoc,
     updateDoc, doc, orderBy, onSnapshot, serverTimestamp
@@ -29,39 +29,78 @@ export function initNotificaciones(uid) {
     verificarPresupuesto(uid);
 }
 
+// VAPID Key (Web Push Certificate) — obtenla en:
+// Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+const VAPID_KEY = 'BP5q8ZSgj7DEHODHO26bwY520lgVx5nvemxtX2csG32yoYtg4x5dPmiJKj6cZLINX2_ib-CbbbttVLGuyNhurcE';
+
 async function _initFCM() {
+    if (!currentUid) return;
     try {
-        const { messaging } = await import('./firebase-config.js');
-        if (!messaging) return;
-        
-        const { onMessage } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js");
-        
-        // Registrar Service Worker para notificaciones en segundo plano
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('../firebase-messaging-sw.js')
-            .then(function(registration) {
-                console.log('Service Worker de FCM registrado con éxito:', registration.scope);
-            }).catch(function(err) {
-                console.log('Fallo el registro del Service Worker de FCM:', err);
-            });
+        // 1. Obtener instancia de messaging (resuelve la race condition del export null)
+        const messaging = await getMessagingInstance();
+        if (!messaging) {
+            console.warn('FCM no está soportado en este navegador/entorno.');
+            return;
         }
 
-        // Escuchar notificaciones cuando la app está abierta
-        onMessage(messaging, async (payload) => {
-            console.log('Notificación FCM recibida en primer plano:', payload);
-            const { default: Swal } = window.Swal || await import("https://cdn.jsdelivr.net/npm/sweetalert2@11/src/sweetalert2.js");
-            Swal.fire({
-                title: payload.notification.title,
-                text: payload.notification.body,
-                icon: 'info',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 5000
-            });
+        const { onMessage, getToken } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js");
+        const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
+
+        // 2. Registrar el Service Worker para notificaciones en segundo plano
+        let swRegistration = null;
+        if ('serviceWorker' in navigator) {
+            try {
+                swRegistration = await navigator.serviceWorker.register('../firebase-messaging-sw.js');
+                console.log('Service Worker FCM registrado:', swRegistration.scope);
+            } catch (err) {
+                console.warn('Error registrando Service Worker FCM:', err);
+            }
+        }
+
+        // 3. Pedir permiso de notificaciones al usuario
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            console.warn('Permiso de notificaciones denegado.');
+            return;
+        }
+
+        // 4. Obtener el token FCM y guardarlo en Firestore
+        //    El backend (functions/index.js) lo lee de usuarios/{uid}.fcm_token
+        try {
+            const tokenOptions = { vapidKey: VAPID_KEY };
+            if (swRegistration) tokenOptions.serviceWorkerRegistration = swRegistration;
+
+            const token = await getToken(messaging, tokenOptions);
+            if (token) {
+                console.log('Token FCM obtenido:', token);
+                await updateDoc(doc(db, 'usuarios', currentUid), { fcm_token: token });
+                console.log('Token FCM guardado en Firestore.');
+            } else {
+                console.warn('No se pudo obtener token FCM. Verifica la VAPID key y el Service Worker.');
+            }
+        } catch (tokenErr) {
+            console.error('Error obteniendo token FCM:', tokenErr);
+        }
+
+        // 5. Escuchar notificaciones cuando la app está en primer plano
+        onMessage(messaging, (payload) => {
+            console.log('Notificación FCM en primer plano:', payload);
+            const Swal = window.Swal;
+            if (Swal) {
+                Swal.fire({
+                    title: payload.notification?.title || 'FinanzaPro',
+                    text: payload.notification?.body || '',
+                    icon: 'info',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000
+                });
+            }
         });
+
     } catch (error) {
-        console.error("FCM no inicializado o error:", error);
+        console.error('Error inicializando FCM:', error);
     }
 }
 
@@ -368,9 +407,13 @@ function _bindBellButton() {
     document.getElementById('btn-eliminar-todas')?.addEventListener('click', async () => {
         if (!currentUid) return;
 
-        const { default: Swal } = await import("https://cdn.jsdelivr.net/npm/sweetalert2@11/src/sweetalert2.js").catch(() => ({ default: window.Swal }));
         const SwAlert = window.Swal;
-        const confirm = await SwAlert.fire({
+        if (!SwAlert) {
+            console.error('SweetAlert2 no está disponible.');
+            return;
+        }
+
+        const result = await SwAlert.fire({
             title: '¿Eliminar todas las notificaciones?',
             text: 'Esta acción no se puede deshacer.',
             icon: 'warning',
@@ -380,12 +423,17 @@ function _bindBellButton() {
             confirmButtonText: 'Sí, eliminar todas',
             cancelButtonText: 'Cancelar'
         });
-        if (!confirm.isConfirmed) return;
+        if (!result.isConfirmed) return;
 
-        const q = query(collection(db, "notificaciones"), where("usuario_id", "==", currentUid));
-        const snap = await getDocs(q);
-        const { deleteDoc: delDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
-        await Promise.all(snap.docs.map(d => delDoc(doc(db, "notificaciones", d.id))));
-        SwAlert.fire('¡Listo!', 'Todas las notificaciones han sido eliminadas.', 'success');
+        try {
+            const q = query(collection(db, "notificaciones"), where("usuario_id", "==", currentUid));
+            const snap = await getDocs(q);
+            const { deleteDoc: delDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
+            await Promise.all(snap.docs.map(d => delDoc(doc(db, "notificaciones", d.id))));
+            SwAlert.fire('¡Listo!', 'Todas las notificaciones han sido eliminadas.', 'success');
+        } catch (e) {
+            console.error('Error eliminando notificaciones:', e);
+            SwAlert.fire('Error', 'No se pudieron eliminar las notificaciones.', 'error');
+        }
     });
 }

@@ -339,9 +339,13 @@ function _bindBellButton() {
     document.getElementById('btn-eliminar-todas')?.addEventListener('click', async () => {
         if (!currentUid) return;
 
-        const { default: Swal } = await import("https://cdn.jsdelivr.net/npm/sweetalert2@11/src/sweetalert2.js").catch(() => ({ default: window.Swal }));
         const SwAlert = window.Swal;
-        const confirm = await SwAlert.fire({
+        if (!SwAlert) {
+            console.error('SweetAlert2 no está disponible.');
+            return;
+        }
+
+        const result = await SwAlert.fire({
             title: '¿Eliminar todas las notificaciones?',
             text: 'Esta acción no se puede deshacer.',
             icon: 'warning',
@@ -351,12 +355,17 @@ function _bindBellButton() {
             confirmButtonText: 'Sí, eliminar todas',
             cancelButtonText: 'Cancelar'
         });
-        if (!confirm.isConfirmed) return;
+        if (!result.isConfirmed) return;
 
-        const q = query(collection(db, "notificaciones"), where("usuario_id", "==", currentUid));
-        const snap = await getDocs(q);
-        const { deleteDoc: delDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
-        await Promise.all(snap.docs.map(d => delDoc(doc(db, "notificaciones", d.id))));
-        SwAlert.fire('¡Listo!', 'Todas las notificaciones han sido eliminadas.', 'success');
+        try {
+            const q = query(collection(db, "notificaciones"), where("usuario_id", "==", currentUid));
+            const snap = await getDocs(q);
+            const { deleteDoc: delDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
+            await Promise.all(snap.docs.map(d => delDoc(doc(db, "notificaciones", d.id))));
+            SwAlert.fire('¡Listo!', 'Todas las notificaciones han sido eliminadas.', 'success');
+        } catch (e) {
+            console.error('Error eliminando notificaciones:', e);
+            SwAlert.fire('Error', 'No se pudieron eliminar las notificaciones.', 'error');
+        }
     });
 }

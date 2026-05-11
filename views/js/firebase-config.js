@@ -23,12 +23,22 @@ const db = initializeFirestore(app, {
 });
 const auth = getAuth(app);
 
-let messaging = null;
-isSupported().then((supported) => {
-  if (supported) {
-    messaging = getMessaging(app);
-  }
-}).catch(console.error);
+// messaging se resuelve de forma asíncrona.
+// Exportamos getMessagingInstance() para que los consumidores obtengan
+// siempre la instancia correcta (evita exportar null por race condition).
+let _messagingInstance = null;
+export async function getMessagingInstance() {
+    if (_messagingInstance) return _messagingInstance;
+    try {
+        const supported = await isSupported();
+        if (supported) {
+            _messagingInstance = getMessaging(app);
+        }
+    } catch (e) {
+        console.warn("FCM no soportado en este entorno:", e);
+    }
+    return _messagingInstance;
+}
 
 // Exportamos los servicios para poder usarlos en otros archivos
-export { app, db, auth, messaging };
+export { app, db, auth };
