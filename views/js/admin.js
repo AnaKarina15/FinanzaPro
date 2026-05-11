@@ -46,7 +46,6 @@ onAuthStateChanged(auth, async (user) => {
             await cargarUsuariosFirestore();
             inicializarEventos();
             initNotificaciones(currentUid);
-            enviarBienvenidaSiNecesario(currentUid, data.nombre);
         } else {
             window.location.href = '../index.php';
         }

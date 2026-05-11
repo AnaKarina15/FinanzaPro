@@ -199,14 +199,11 @@ export async function verificarPresupuesto(uid, categoriaFiltro = null) {
         const now = new Date();
         const mesPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-        // 1. Obtener presupuestos, transacciones y notificaciones existentes
-        const [snapPres, snapTrans, snapNotif] = await Promise.all([
+        // 1. Obtener presupuestos y transacciones
+        const [snapPres, snapTrans] = await Promise.all([
             getDocs(query(collection(db, "presupuestos"), where("id_usuario", "==", uid))),
-            getDocs(query(collection(db, "transacciones"), where("usuario_id", "==", uid))),
-            getDocs(query(collection(db, "notificaciones"), where("usuario_id", "==", uid)))
+            getDocs(query(collection(db, "transacciones"), where("usuario_id", "==", uid)))
         ]);
-
-        const titulosExistentes = snapNotif.docs.map(d => d.data().titulo);
 
         // 2. Calcular gasto mensual por categoría
         const gastoPorCat = {};
@@ -222,7 +219,6 @@ export async function verificarPresupuesto(uid, categoriaFiltro = null) {
             const p = pDoc.data();
             const catP = p.nombre || p.categoria || '';
             
-            // Si filtramos por una categoría específica (ej: al guardar un gasto), saltamos las demás
             if (categoriaFiltro && catP !== categoriaFiltro) continue;
 
             const limite = parseFloat(p.monto_limite || p.limite || p.valor_limite || 0);
@@ -234,23 +230,30 @@ export async function verificarPresupuesto(uid, categoriaFiltro = null) {
             const titulo100 = `🔴 ¡Límite superado! — ${catP}`;
             const titulo80  = `⚠️ Alerta 80% — ${catP}`;
 
-            // Solo enviamos si no existe ya una notificación con ese título exacto este mes
+            let updateData = null;
+
             if (pct >= 100) {
-                if (!titulosExistentes.includes(titulo100)) {
+                if (p.notificado_mes !== mesPrefix || p.notificado_nivel < 100) {
                     await crearNotificacion(uid, {
                         titulo: titulo100,
                         mensaje: `Has superado el 100% de tu presupuesto de ${catP} (${gasto.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
                         tipo: 'alerta'
                     });
+                    updateData = { notificado_mes: mesPrefix, notificado_nivel: 100 };
                 }
             } else if (pct >= 80) {
-                if (!titulosExistentes.includes(titulo80)) {
+                if (p.notificado_mes !== mesPrefix || p.notificado_nivel < 80) {
                     await crearNotificacion(uid, {
                         titulo: titulo80,
                         mensaje: `Llevas el ${Math.round(pct)}% de tu presupuesto de ${catP} (${gasto.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
                         tipo: 'alerta'
                     });
+                    updateData = { notificado_mes: mesPrefix, notificado_nivel: 80 };
                 }
+            }
+
+            if (updateData) {
+                await updateDoc(doc(db, "presupuestos", pDoc.id), updateData);
             }
         }
     } catch (e) {
