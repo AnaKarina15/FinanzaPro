@@ -203,6 +203,41 @@
             </form>
         </div>
     </div>
+
+    <!-- MODAL: Enviar Notificación a Usuario -->
+    <div class="modal-overlay" id="modal-notificacion">
+        <div class="modal-content modal-admin modal-notif">
+            <div class="modal-header">
+                <h3 id="modal-notif-titulo">Enviar Notificación</h3>
+                <button class="btn-close" type="button" id="btn-cerrar-modal-notif">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="form-notificacion">
+                <input type="hidden" id="input-notif-uid" value="" />
+                <div class="modal-body">
+                    <div class="modal-form-group">
+                        <label for="input-notif-titulo">TÍTULO</label>
+                        <div class="input-container">
+                            <input type="text" id="input-notif-titulo" placeholder="Título de la notificación" required />
+                        </div>
+                    </div>
+                    <div class="modal-form-group">
+                        <label for="input-notif-mensaje">MENSAJE</label>
+                        <div class="input-container">
+                            <textarea id="input-notif-mensaje" rows="4" placeholder="Escribe el mensaje de la notificación..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btn-cancelar-notif">Cancelar</button>
+                    <button type="submit" class="btn-primary btn-modal-submit" id="btn-enviar-notif">
+                        <span class="material-symbols-outlined" style="font-size:18px;">send</span> Enviar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

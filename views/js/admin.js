@@ -3,7 +3,7 @@ import { onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.
 import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { initNotificaciones, enviarBienvenidaSiNecesario } from "./notificaciones_admin.js";
+import { initNotificaciones, enviarBienvenidaSiNecesario, crearNotificacion } from "./notificaciones_admin.js";
 
 // Necesitamos la configuración de Firebase de nuevo para inicializar la segunda app
 const firebaseConfig = app.options;
@@ -66,6 +66,14 @@ function inicializarEventos() {
         if (e.target === e.currentTarget) cerrarModal();
     });
 
+    // Eventos modal notificación
+    document.getElementById("btn-cerrar-modal-notif").addEventListener("click", cerrarModalNotif);
+    document.getElementById("btn-cancelar-notif").addEventListener("click", cerrarModalNotif);
+    document.getElementById("form-notificacion").addEventListener("submit", enviarNotificacion);
+    document.getElementById("modal-notificacion").addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) cerrarModalNotif();
+    });
+
     document.getElementById("search-input").addEventListener("input", (e) => {
         const querySearch = e.target.value.toLowerCase();
         const filtrados = todosLosUsuarios.filter(u => 
@@ -93,7 +101,10 @@ function inicializarEventos() {
     });
 
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") cerrarModal();
+        if (e.key === "Escape") {
+            cerrarModal();
+            cerrarModalNotif();
+        }
     });
 }
 
@@ -200,6 +211,7 @@ function renderizarTabla(listaFiltrada) {
         
         let editAttr = isCurrent ? 'disabled title="Edita tus datos desde Mi Perfil"' : 'title="Editar" onclick="editarUsuario(\'' + u.id + '\')"';
         let toggleAttr = isCurrent ? 'disabled title="No puedes suspender tu propia cuenta"' : 'title="' + (esActivo ? 'Desactivar usuario' : 'Activar usuario') + '" onclick="toggleEstadoUsuario(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\', ' + esActivo + ')"';
+        let notifAttr = 'title="Enviar notificación" onclick="abrirModalNotificacion(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\')"';
 
         return `
             <tr class="${esActivo ? '' : 'row-inactive'}">
@@ -220,6 +232,9 @@ function renderizarTabla(listaFiltrada) {
                     <div class="actions-cell">
                         <button class="btn-action btn-edit" ${editAttr} style="${isCurrent ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
                             <span class="material-symbols-outlined">edit</span>
+                        </button>
+                        <button class="btn-action btn-notif" ${notifAttr}>
+                            <span class="material-symbols-outlined">notification_add</span>
                         </button>
                         <button class="btn-action ${estadoClass}" ${toggleAttr} style="${isCurrent ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
                             <span class="material-symbols-outlined">${estadoIcon}</span>
@@ -361,6 +376,47 @@ window.toggleEstadoUsuario = async function (id, nombre, esActivo) {
 
 function cerrarModal() {
     document.getElementById("modal-usuario").classList.remove("active");
+}
+
+// ========== MODAL NOTIFICACIÓN: ABRIR ==========
+window.abrirModalNotificacion = function (uid, nombre) {
+    document.getElementById("modal-notif-titulo").textContent = `Enviar Notificación a ${nombre}`;
+    document.getElementById("input-notif-uid").value = uid;
+    document.getElementById("form-notificacion").reset();
+    document.getElementById("modal-notificacion").classList.add("active");
+    document.getElementById("input-notif-titulo").focus();
+};
+
+// ========== MODAL NOTIFICACIÓN: CERRAR ==========
+function cerrarModalNotif() {
+    document.getElementById("modal-notificacion").classList.remove("active");
+}
+
+// ========== MODAL NOTIFICACIÓN: ENVIAR ==========
+async function enviarNotificacion(e) {
+    e.preventDefault();
+
+    const uid = document.getElementById("input-notif-uid").value;
+    const titulo = document.getElementById("input-notif-titulo").value.trim();
+    const mensaje = document.getElementById("input-notif-mensaje").value.trim();
+    const btn = document.getElementById("btn-enviar-notif");
+
+    if (!uid || !titulo || !mensaje) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">hourglass_top</span> Enviando...';
+
+    try {
+        await crearNotificacion(uid, { titulo, mensaje, tipo: 'info' });
+        cerrarModalNotif();
+        Swal.fire({ icon: 'success', title: 'Notificación enviada', text: 'La notificación fue enviada correctamente.', timer: 2500, showConfirmButton: false });
+    } catch (error) {
+        console.error('Error enviando notificación:', error);
+        Swal.fire('Error', 'No se pudo enviar la notificación: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">send</span> Enviar';
+    }
 }
 
 function escapeHtml(text) {
