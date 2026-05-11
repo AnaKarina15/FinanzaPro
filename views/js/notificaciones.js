@@ -14,8 +14,6 @@ let unsubscribeNotif = null;
 export function initNotificaciones(uid) {
     currentUid = uid;
     _escucharNotificaciones();
-    // Verificar presupuestos excedidos en cada carga de vista
-    verificarPresupuestosAlCargar(uid);
 
     // Garantizar que el DOM esté listo antes de bindear botones
     if (document.readyState === 'loading') {
@@ -40,7 +38,7 @@ async function _initFCM() {
         
         // Registrar Service Worker para notificaciones en segundo plano
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            navigator.serviceWorker.register('../firebase-messaging-sw.js')
             .then(function(registration) {
                 console.log('Service Worker de FCM registrado con éxito:', registration.scope);
             }).catch(function(err) {
