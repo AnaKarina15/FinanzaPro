@@ -271,9 +271,21 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (id_presupuesto) {
                     const presRef = doc(db, "presupuestos", id_presupuesto);
+                    
+                    const docSnap = await getDoc(presRef);
+                    const oldNombre = docSnap.exists() ? docSnap.data().nombre : null;
+
                     await updateDoc(presRef, {
                         nombre, monto_limite, id_icono, codigo_material, alerta_80_porciento, tipo_periodo, periodo
                     });
+
+                    if (oldNombre && oldNombre !== nombre) {
+                        const qTrans = query(collection(db, "transacciones"), where("usuario_id", "==", currentUid), where("categoria", "==", oldNombre));
+                        const snapshotTrans = await getDocs(qTrans);
+                        const updatePromises = snapshotTrans.docs.map(tDoc => updateDoc(tDoc.ref, { categoria: nombre }));
+                        await Promise.all(updatePromises);
+                    }
+
                     Swal.fire('¡Éxito!', 'Presupuesto actualizado', 'success');
                 } else {
                     await addDoc(collection(db, "presupuestos"), {
