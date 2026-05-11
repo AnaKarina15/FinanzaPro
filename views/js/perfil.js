@@ -333,7 +333,8 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (isActive) {
                 try {
-                    const { messaging } = await import('./firebase-config.js');
+                    const { getMessagingInstance } = await import('./firebase-config.js');
+                    const messaging = await getMessagingInstance();
                     if (!messaging) {
                         Swal.fire('No soportado', 'Tu navegador no soporta notificaciones push.', 'error');
                         e.target.checked = false;
@@ -343,11 +344,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
-                        // Obtener el registro del Service Worker explícitamente con la ruta correcta
                         const swRegistration = await navigator.serviceWorker.register('../firebase-messaging-sw.js');
                         
-                        // Nota: Para producción, idealmente debes pasar la VAPID Key generada en Firebase Console -> Configuración del proyecto -> Cloud Messaging -> Web configuration
                         const token = await getToken(messaging, {
+                            vapidKey: 'BP5q8ZSgj7DEHODHO26bwY520lgVx5nvemxtX2csG32yoYtg4x5dPmiJKj6cZLINX2_ib-CbbbttVLGuyNhurcE',
                             serviceWorkerRegistration: swRegistration
                         });
                         
@@ -365,7 +365,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             });
                         }
                     } else {
-                        // Permission denied
                         e.target.checked = false;
                         autoGuardar('notificaciones_push', 0);
                         Swal.fire('Permiso denegado', 'Debes permitir las notificaciones en tu navegador.', 'warning');
