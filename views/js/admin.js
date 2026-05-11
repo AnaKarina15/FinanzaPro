@@ -380,9 +380,9 @@ function cerrarModal() {
 
 // ========== MODAL NOTIFICACIÓN: ABRIR ==========
 window.abrirModalNotificacion = function (uid, nombre) {
+    document.getElementById("form-notificacion").reset();
     document.getElementById("modal-notif-titulo").textContent = `Enviar Notificación a ${nombre}`;
     document.getElementById("input-notif-uid").value = uid;
-    document.getElementById("form-notificacion").reset();
     document.getElementById("modal-notificacion").classList.add("active");
     document.getElementById("input-notif-titulo").focus();
 };
