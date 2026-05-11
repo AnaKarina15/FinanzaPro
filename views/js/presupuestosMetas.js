@@ -1099,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const idMeta = document.getElementById('id_meta_retiro').value;
             const inputRetiro = document.getElementById('monto_retiro').value;
-            const montoRetiro = parseFloat(inputRetiro.replace(/\./g, '').replace(/,/g, ''));
+            const montoRetiro = parseFloat(inputRetiro.replace(/\D/g, '')) || 0;
             const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
 
             if (!montoRetiro || montoRetiro <= 0) {
