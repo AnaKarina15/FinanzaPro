@@ -197,7 +197,8 @@ export async function verificarPresupuesto(uid, categoriaFiltro = null) {
     if (!uid) return;
     try {
         const now = new Date();
-        const mesPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const currentMonthFormatted = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const currentYearString = String(now.getFullYear());
 
         // 1. Obtener presupuestos y transacciones
         const [snapPres, snapTrans] = await Promise.all([
@@ -205,16 +206,9 @@ export async function verificarPresupuesto(uid, categoriaFiltro = null) {
             getDocs(query(collection(db, "transacciones"), where("usuario_id", "==", uid)))
         ]);
 
-        // 2. Calcular gasto mensual por categoría
-        const gastoPorCat = {};
-        snapTrans.docs.forEach(d => {
-            const t = d.data();
-            if (t.tipo !== 'gasto' || !String(t.fecha || '').startsWith(mesPrefix)) return;
-            const cat = t.categoria || 'Otros';
-            gastoPorCat[cat] = (gastoPorCat[cat] || 0) + (parseFloat(t.monto) || 0);
-        });
+        const transacciones = snapTrans.docs.map(d => d.data());
 
-        // 3. Verificar cada presupuesto
+        // 2. Verificar cada presupuesto
         for (const pDoc of snapPres.docs) {
             const p = pDoc.data();
             const catP = p.nombre || p.categoria || '';
@@ -224,31 +218,53 @@ export async function verificarPresupuesto(uid, categoriaFiltro = null) {
             const limite = parseFloat(p.monto_limite || p.limite || p.valor_limite || 0);
             if (limite <= 0) continue;
 
-            const gasto = gastoPorCat[catP] || 0;
+            // Retrocompatibilidad
+            if (!p.tipo_periodo) {
+                p.tipo_periodo = 'mensual';
+                p.periodo = currentMonthFormatted;
+            }
+
+            // Calcular gasto de acuerdo al periodo del presupuesto
+            let gasto = 0;
+            transacciones.forEach(t => {
+                if (t.tipo === 'gasto' && (t.categoria === catP || t.categoria === p.nombre)) {
+                    const tMonth = t.fecha ? String(t.fecha).substring(0, 7) : ''; // YYYY-MM
+                    const tYear = t.fecha ? String(t.fecha).substring(0, 4) : '';  // YYYY
+                    
+                    if (p.tipo_periodo === 'mensual' && tMonth === p.periodo) {
+                        gasto += parseFloat(t.monto) || 0;
+                    } else if (p.tipo_periodo === 'anual' && tYear === p.periodo) {
+                        gasto += parseFloat(t.monto) || 0;
+                    }
+                }
+            });
+
             const pct = (gasto / limite) * 100;
 
             const titulo100 = `🔴 ¡Límite superado! — ${catP}`;
             const titulo80  = `⚠️ Alerta 80% — ${catP}`;
 
             let updateData = null;
+            const periodoActual = p.periodo || currentMonthFormatted;
 
             if (pct >= 100) {
-                if (p.notificado_mes !== mesPrefix || p.notificado_nivel < 100) {
+                if (p.notificado_mes !== periodoActual || p.notificado_nivel < 100) {
                     await crearNotificacion(uid, {
                         titulo: titulo100,
                         mensaje: `Has superado el 100% de tu presupuesto de ${catP} (${gasto.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
                         tipo: 'alerta'
                     });
-                    updateData = { notificado_mes: mesPrefix, notificado_nivel: 100 };
+                    updateData = { notificado_mes: periodoActual, notificado_nivel: 100 };
                 }
             } else if (pct >= 80) {
-                if (p.notificado_mes !== mesPrefix || p.notificado_nivel < 80) {
+                // Respetar preferencia del usuario si la bandera existe (0 = false)
+                if (p.alerta_80_porciento !== 0 && (p.notificado_mes !== periodoActual || p.notificado_nivel < 80)) {
                     await crearNotificacion(uid, {
                         titulo: titulo80,
                         mensaje: `Llevas el ${Math.round(pct)}% de tu presupuesto de ${catP} (${gasto.toLocaleString('es-CO')} / ${limite.toLocaleString('es-CO')}).`,
                         tipo: 'alerta'
                     });
-                    updateData = { notificado_mes: mesPrefix, notificado_nivel: 80 };
+                    updateData = { notificado_mes: periodoActual, notificado_nivel: 80 };
                 }
             }
 

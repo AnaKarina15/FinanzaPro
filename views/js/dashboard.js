@@ -10,7 +10,9 @@ import {
   addDoc,
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import {
-  initNotificaciones
+  initNotificaciones,
+  verificarPresupuesto,
+  verificarGastoInusual
 } from "./notificaciones.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -540,6 +542,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Recargar estadísticas automáticamente
         cargarEstadisticasFirestore(user.uid);
+        
+        if (tipo === "gasto") {
+            verificarPresupuesto(user.uid, categoriaVal);
+            verificarGastoInusual(user.uid, { monto: montoVal, categoria: categoriaVal });
+        }
       } catch (error) {
         console.error("Error al guardar:", error);
         Swal.fire("Error", "No se pudo guardar el movimiento", "error");

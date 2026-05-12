@@ -1,7 +1,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { initNotificaciones, verificarProgresoMeta } from "./notificaciones.js";
+import { initNotificaciones, verificarProgresoMeta, verificarPresupuesto, verificarGastoInusual } from "./notificaciones.js";
 
 let currentUid = null;
 
@@ -59,14 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         menu.addEventListener('click', (e) => e.stopPropagation());
     });
 
-    // Lógica para toggle de Mensual / Anual
-    const toggleBtns = document.querySelectorAll('.toggle-btn');
-    toggleBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            toggleBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        });
-    });
+    // Eliminada lógica genérica de toggle-btn para evitar conflictos entre filtros
 
     // --- LÓGICA DE MODALES ---
     const modalNuevaMeta = document.getElementById('modalNuevaMeta');
@@ -409,26 +402,19 @@ function renderMetas(metas) {
         if (window.filtroMeta === 'todas') return true;
         if (!m.fecha_limite) return true; // Retrocompatibilidad
         
-        // Calcular diferencia en meses desde hoy hasta la fecha límite
         const [year, month] = m.fecha_limite.split('-');
         const dateLimit = new Date(year, month - 1);
         const now = new Date();
-        const diffMonths = (dateLimit.getFullYear() - now.getFullYear()) * 12 + (dateLimit.getMonth() - now.getMonth());
         
-        if (window.filtroMeta === 'mensual') {
-            return diffMonths < 12; // Menos de un año
-        } else if (window.filtroMeta === 'anual') {
-            return diffMonths >= 12; // Un año o más
+        if (window.filtroMeta === 'este_mes') {
+            return dateLimit.getFullYear() === now.getFullYear() && dateLimit.getMonth() === now.getMonth();
+        } else if (window.filtroMeta === 'este_anio') {
+            return dateLimit.getFullYear() === now.getFullYear();
         }
         return true;
     });
 
-    let metasAMostrar = metasFiltradas;
-    if (!window.verTodasMetas && metasFiltradas.length > 3) {
-        metasAMostrar = metasFiltradas.slice(0, 3);
-    }
-    
-    metasAMostrar.forEach(meta => {
+    metasFiltradas.forEach(meta => {
         const obj = parseFloat(meta.monto_objetivo) || 0;
         const act = parseFloat(meta.monto_actual) || 0;
         let porcentajeNumerico = obj > 0 ? (act / obj) * 100 : 0;
@@ -488,15 +474,6 @@ function renderMetas(metas) {
     });
     grid.appendChild(btnNuevo);
     
-    const btnVerTodas = document.getElementById('btn-ver-todas-metas');
-    if (btnVerTodas) {
-        if (metasFiltradas.length <= 3) {
-            btnVerTodas.style.display = 'none';
-        } else {
-            btnVerTodas.style.display = 'inline-block';
-            btnVerTodas.innerText = window.verTodasMetas ? 'Ver menos' : 'Ver todas';
-        }
-    }
 }
 
 function renderPresupuestos(presupuestos) {
@@ -523,12 +500,7 @@ function renderPresupuestos(presupuestos) {
         }
     });
     
-    let presupuestosAMostrar = presupuestosFiltrados;
-    if (!window.verTodosPresupuestos && presupuestosFiltrados.length > 3) {
-        presupuestosAMostrar = presupuestosFiltrados.slice(0, 3);
-    }
-    
-    presupuestosAMostrar.forEach(p => {
+    presupuestosFiltrados.forEach(p => {
         const limite = parseFloat(p.monto_limite) || 0;
         const consumido = parseFloat(p.monto_consumido) || 0;
         const porcentaje = limite > 0 ? (consumido / limite) * 100 : 0;
@@ -604,15 +576,6 @@ function renderPresupuestos(presupuestos) {
     });
     grid.appendChild(btnNuevo);
     
-    const btnVerTodos = document.getElementById('btn-ver-todos-presupuestos');
-    if (btnVerTodos) {
-        if (presupuestosFiltrados.length <= 3) {
-            btnVerTodos.style.display = 'none';
-        } else {
-            btnVerTodos.style.display = 'inline-block';
-            btnVerTodos.innerText = window.verTodosPresupuestos ? 'Ver menos' : 'Ver todos';
-        }
-    }
 }
 
 // Funciones globales
@@ -883,7 +846,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 toggleContainer.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
                 e.target.classList.add('active');
                 window.filtroPresupuesto = e.target.dataset.filtro;
-                cargarDatos();
+                renderPresupuestos(window.presupuestosGlobales);
             }
         });
     }
@@ -1066,6 +1029,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 Swal.fire('¡Éxito!', 'Gasto registrado correctamente', 'success');
                 document.getElementById('modalGastoPresupuesto').classList.remove('active');
                 cargarDatos();
+                verificarPresupuesto(currentUid, categoria);
+                verificarGastoInusual(currentUid, { monto: montoGasto, categoria: categoria });
             } catch (error) {
                 console.error("Error al registrar gasto:", error);
                 Swal.fire('Error', 'No se pudo registrar el gasto', 'error');

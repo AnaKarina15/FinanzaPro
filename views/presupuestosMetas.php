@@ -114,8 +114,8 @@
           </h3>
           <div style="display: flex; gap: 16px; align-items: center;">
             <div class="toggle-switch" id="toggle-meta-filtro">
-              <button class="toggle-btn" data-filtro="mensual">Mensual</button>
-              <button class="toggle-btn" data-filtro="anual">Anual</button>
+              <button class="toggle-btn" data-filtro="este_mes">Este mes</button>
+              <button class="toggle-btn" data-filtro="este_anio">Este año</button>
               <button class="toggle-btn active" data-filtro="todas">Todas</button>
             </div>
           </div>
