@@ -13,7 +13,8 @@
 }
 
 .profile-app-header {
-    max-width: 1132px; /* 1100px content + 32px padding from .app-header */
+    max-width: 1132px;
+    /* 1100px content + 32px padding from .app-header */
     margin: 0 auto;
     width: 100%;
 }
@@ -35,7 +36,7 @@
 .banner-gradient {
     height: 140px;
     background: linear-gradient(135deg, #dcfce7 0%, #def1ff 100%),
-                radial-gradient(#05966915 1px, transparent 1px);
+        radial-gradient(#05966915 1px, transparent 1px);
     background-size: auto, 20px 20px;
 }
 
@@ -119,10 +120,23 @@
     margin-bottom: 24px;
 }
 
-.icon-green { color: #059669; background: #ecfdf5; padding: 8px; border-radius: 10px; }
-.icon-blue { color: #2563eb; background: #eff6ff; padding: 8px; border-radius: 10px; }
+.icon-green {
+    color: #059669;
+    background: #ecfdf5;
+    padding: 8px;
+    border-radius: 10px;
+}
 
-.form-group { margin-bottom: 20px; }
+.icon-blue {
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 8px;
+    border-radius: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
 
 .form-row {
     display: grid;
@@ -153,7 +167,8 @@
 }
 
 .input-profile.readonly {
-    cursor: default; /* Eliminamos el fondo y color repetido porque ya los hereda */
+    cursor: default;
+    /* Eliminamos el fondo y color repetido porque ya los hereda */
 }
 
 /* Teléfono */
@@ -174,7 +189,10 @@
     text-align: center;
 }
 
-.phone-input-container .input-profile { flex: 1; min-width: 0; }
+.phone-input-container .input-profile {
+    flex: 1;
+    min-width: 0;
+}
 
 /* Input de teléfono en el modal: sin text-align center ni padding extra para que quepan 10 dígitos */
 #form-cambiar-telefono .input-profile,
@@ -196,13 +214,15 @@
     text-decoration: none;
 }
 
-.link-change:hover { text-decoration: underline; }
+.link-change:hover {
+    text-decoration: underline;
+}
 
 .btn-change-pass {
-    margin-top: 10px;
     background: #f0f4f9;
     border: none;
-    border-radius: 12px; /* Unificado con los inputs */
+    border-radius: 12px;
+    /* Unificado con los inputs */
     padding: 10px 20px;
     color: #1e293b;
     font-weight: 600;
@@ -213,7 +233,9 @@
     font-size: 14px;
 }
 
-.btn-change-pass:hover { background: #e2e8f0; }
+.btn-change-pass:hover {
+    background: #e2e8f0;
+}
 
 /* 4. Preferencias y Toggles */
 .setting-item {
@@ -224,10 +246,21 @@
     border-bottom: 1px solid #f1f5f9;
 }
 
-.setting-item:last-child { border-bottom: none; }
+.setting-item:last-child {
+    border-bottom: none;
+}
 
-.setting-text strong { display: block; color: #1e293b; font-size: 15px; margin-bottom: 4px; }
-.setting-text p { color: #64748b; font-size: 13px; }
+.setting-text strong {
+    display: block;
+    color: #1e293b;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.setting-text p {
+    color: #64748b;
+    font-size: 13px;
+}
 
 .select-profile {
     background: #f0f4f9;
@@ -263,22 +296,54 @@
     background: white;
     color: #059669;
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Switch Push */
-.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-.switch input { opacity: 0; width: 0; height: 0; }
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
 .slider {
-    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #cbd5e1; transition: .4s; border-radius: 34px;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .4s;
+    border-radius: 34px;
 }
+
 .slider:before {
-    position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-    background-color: white; transition: .4s; border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
 }
-input:checked + .slider { background-color: #059669; }
-input:checked + .slider:before { transform: translateX(20px); }
+
+input:checked+.slider {
+    background-color: #059669;
+}
+
+input:checked+.slider:before {
+    transform: translateX(20px);
+}
 
 /* 5. Footer de Acciones */
 .profile-actions {
@@ -353,7 +418,17 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 /* 7. Responsive */
 @media (max-width: 900px) {
-    .profile-grid { grid-template-columns: 1fr; }
-    .profile-header-content { flex-direction: column; align-items: center; text-align: center; }
-    .form-row { grid-template-columns: 1fr; }
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-header-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
 }
