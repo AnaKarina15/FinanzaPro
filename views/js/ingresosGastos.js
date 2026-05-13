@@ -604,7 +604,22 @@ window.cargarDatosFirestore = async () => {
             }
         });
 
-        movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        movimientos.sort((a, b) => {
+            const dateA = new Date(a.fecha + 'T00:00:00');
+            const dateB = new Date(b.fecha + 'T00:00:00');
+            if (dateB - dateA !== 0) return dateB - dateA;
+
+            // Si la fecha es igual, ordenar por fecha_creacion (Timestamp o Date)
+            const getMillis = (obj) => {
+                if (!obj) return 0;
+                // Si es un Timestamp de Firestore
+                if (typeof obj.toMillis === 'function') return obj.toMillis();
+                if (typeof obj.seconds === 'number') return obj.seconds * 1000 + (obj.nanoseconds || 0) / 1000000;
+                // Si es un objeto Date o un string de fecha
+                return new Date(obj).getTime() || 0;
+            };
+            return getMillis(b.fecha_creacion) - getMillis(a.fecha_creacion);
+        });
 
         document.getElementById('total-ingresos-view').innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(ing);
         document.getElementById('total-gastos-view').innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(gas);
