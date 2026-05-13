@@ -133,7 +133,21 @@ function cargarUsuariosFirestore() {
                 unaSemanaAtras.setDate(unaSemanaAtras.getDate() - 7);
                 const nuevos = todosLosUsuarios.filter(u => {
                     if (!u.fecha_creacion) return false;
-                    const fecha = u.fecha_creacion.toDate ? u.fecha_creacion.toDate() : new Date(u.fecha_creacion);
+                    let fecha;
+                    if (u.fecha_creacion.toDate) {
+                        fecha = u.fecha_creacion.toDate(); // Firestore Timestamp
+                    } else if (u.fecha_creacion.seconds) {
+                        fecha = new Date(u.fecha_creacion.seconds * 1000); // Objeto timestamp sin prototipo
+                    } else if (typeof u.fecha_creacion === 'string') {
+                        // Intentar parsear si es string
+                        fecha = new Date(u.fecha_creacion);
+                    } else if (u.fecha_creacion instanceof Date) {
+                        fecha = u.fecha_creacion;
+                    } else {
+                        fecha = new Date(u.fecha_creacion);
+                    }
+                    
+                    if (isNaN(fecha.getTime())) return false;
                     return fecha >= unaSemanaAtras;
                 }).length;
 
