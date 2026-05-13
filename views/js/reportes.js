@@ -348,14 +348,14 @@ function renderProgresoMetas(metas) {
         return;
     }
 
-    // Sort by progress desc
+    // Sort by current amount desc (same as line chart) to keep colors consistent
     const metasMapped = metas.map(m => {
         const obj = parseFloat(m.monto_objetivo) || 0;
         const act = parseFloat(m.monto_actual) || 0;
         const pct = obj > 0 ? Math.min((act / obj) * 100, 100) : 0;
         return { ...m, pct, obj, act };
     });
-    metasMapped.sort((a, b) => b.pct - a.pct);
+    metasMapped.sort((a, b) => b.act - a.act);
 
     const colors = ["#059669", "#3b82f6", "#ef4444", "#f59e0b"];
 
@@ -460,10 +460,11 @@ function renderCharts(transacciones, metas) {
     // Datos Ahorro (Simulación histórica para las top 2 metas)
     const ctxAhorro = document.getElementById('ahorroChart');
     if (ctxAhorro) {
+        // Same sorting as renderProgresoMetas to keep colors consistent
         const topMetas = [...metas].sort((a, b) => (parseFloat(b.monto_actual)||0) - (parseFloat(a.monto_actual)||0)).slice(0, 2);
         
         const datasetsAhorro = [];
-        const colors = ['#059669', '#3b82f6'];
+        const colors = ["#059669", "#3b82f6", "#ef4444", "#f59e0b"];
         const fills = ['rgba(5, 150, 105, 0.1)', 'transparent'];
         const dash = [[], [5, 5]];
 
