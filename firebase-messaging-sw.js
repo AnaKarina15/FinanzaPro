@@ -13,14 +13,64 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
+// ═══════════════════════════════════════════════════════════
+// NOTIFICACIONES EN SEGUNDO PLANO
+// Se activa cuando la pestaña NO está en primer plano
+// ═══════════════════════════════════════════════════════════
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  const notificationTitle = payload.notification.title;
+  console.log('[SW] Mensaje en segundo plano recibido:', payload);
+
+  // Si el payload ya trae "notification", el navegador la muestra automáticamente.
+  // onBackgroundMessage se invoca para payloads data-only O para personalizar la notificación.
+  const title = payload.notification?.title || payload.data?.titulo || 'FinanzaPro';
+  const body  = payload.notification?.body  || payload.data?.mensaje || 'Tienes una nueva alerta.';
+  const tipo  = payload.data?.tipo || 'info';
+
+  // Mapear tipo → ícono emoji para que aparezca en la notificación del sistema
+  const badges = { alerta: '⚠️', meta: '🏆', info: 'ℹ️' };
+  const badgeEmoji = badges[tipo] || 'ℹ️';
+
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/FinanzaPro/views/img/logo.png', // Fallback icon path (you can adjust if needed)
-    data: payload.data
+    body: body,
+    icon: '/FinanzaPro/views/css/icon-192.png',  // Ícono de la app (generado abajo)
+    badge: '/FinanzaPro/views/css/icon-192.png',
+    tag: `finanzapro-${tipo}-${Date.now()}`,       // Evita apilar notificaciones iguales
+    renotify: true,
+    vibrate: [200, 100, 200],                      // Vibración en móviles
+    data: {
+      tipo: tipo,
+      url: '/FinanzaPro/views/dashboard.php'       // URL al hacer clic
+    },
+    actions: [
+      { action: 'open', title: 'Ver ahora' },
+      { action: 'dismiss', title: 'Descartar' }
+    ]
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  return self.registration.showNotification(title, notificationOptions);
+});
+
+// ═══════════════════════════════════════════════════════════
+// CLIC EN LA NOTIFICACIÓN — abre la app
+// ═══════════════════════════════════════════════════════════
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'dismiss') return;
+
+  // URL objetivo: la que viene en data, o el dashboard por defecto
+  const targetUrl = event.notification.data?.url || '/FinanzaPro/views/dashboard.php';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Si ya hay una pestaña abierta de FinanzaPro, enfocarla
+      for (const client of clientList) {
+        if (client.url.includes('/FinanzaPro/') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Si no hay ninguna pestaña abierta, abrir una nueva
+      return clients.openWindow(targetUrl);
+    })
+  );
 });

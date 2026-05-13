@@ -341,6 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         return;
                     }
                     const { getToken } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js");
+                    const { arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
                     
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
@@ -352,8 +353,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         });
                         
                         if (token) {
-                            console.log('FCM Token:', token);
+                            console.log('FCM Token:', token.substring(0, 30) + '...');
                             autoGuardar('fcm_token', token);
+                            // Multi-device: agregar al array de tokens
+                            await updateDoc(doc(db, 'usuarios', currentUid), {
+                                fcm_tokens: arrayUnion(token)
+                            });
                             Swal.fire({
                                 title: 'Notificaciones activadas',
                                 text: 'Recibirás alertas en segundo plano.',

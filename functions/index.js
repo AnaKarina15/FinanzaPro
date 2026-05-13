@@ -50,29 +50,107 @@ db.collection('notificaciones').onSnapshot(async (snapshot) => {
                     return;
                 }
 
-                const token = userData.fcm_token;
-                if (!token) {
-                    console.log(`Usuario ${uid} no tiene token FCM.`);
+                // Soportar múltiples tokens (fcm_tokens array) o token único (fcm_token string)
+                let tokens = [];
+                if (Array.isArray(userData.fcm_tokens) && userData.fcm_tokens.length > 0) {
+                    tokens = userData.fcm_tokens;
+                } else if (userData.fcm_token) {
+                    tokens = [userData.fcm_token];
+                }
+
+                if (tokens.length === 0) {
+                    console.log(`Usuario ${uid} no tiene token(es) FCM.`);
                     return;
                 }
 
-                // Armar y enviar el push
-                const message = {
-                    notification: {
-                        title: notifData.titulo || "FinanzaPro",
-                        body: notifData.mensaje || "Tienes una nueva alerta."
-                    },
+                // Armar el mensaje push
+                // Usamos SOLO "data" (no "notification") para que el Service Worker
+                // SIEMPRE maneje la notificación — incluso en segundo plano.
+                // Cuando se envía "notification", Chrome la muestra automáticamente
+                // pero NO permite personalizarla desde onBackgroundMessage.
+                const baseMessage = {
                     data: {
+                        titulo: notifData.titulo || "FinanzaPro",
+                        mensaje: notifData.mensaje || "Tienes una nueva alerta.",
                         tipo: notifData.tipo || "info"
                     },
-                    token: token
+                    // Configuración específica para web push
+                    webpush: {
+                        headers: {
+                            Urgency: 'high'
+                        },
+                        notification: {
+                            title: notifData.titulo || "FinanzaPro",
+                            body: notifData.mensaje || "Tienes una nueva alerta.",
+                            icon: '/FinanzaPro/views/css/icon-192.png',
+                            badge: '/FinanzaPro/views/css/icon-192.png',
+                            requireInteraction: true,
+                            vibrate: [200, 100, 200]
+                        },
+                        fcm_options: {
+                            link: '/FinanzaPro/views/dashboard.php'
+                        }
+                    },
+                    // Configuración para Android (si usan Chrome móvil)
+                    android: {
+                        priority: 'high',
+                        notification: {
+                            title: notifData.titulo || "FinanzaPro",
+                            body: notifData.mensaje || "Tienes una nueva alerta.",
+                            icon: 'ic_notification',
+                            color: '#059669',
+                            defaultSound: true,
+                            defaultVibrateTimings: true,
+                            channelId: 'finanzapro_alerts'
+                        }
+                    }
                 };
 
-                const response = await admin.messaging().send(message);
-                console.log("Push enviado con éxito:", response);
+                // Enviar a cada token del usuario
+                const invalidTokens = [];
+
+                for (const token of tokens) {
+                    try {
+                        const message = { ...baseMessage, token: token };
+                        const response = await admin.messaging().send(message);
+                        console.log(`Push enviado a ${uid} (token: ${token.substring(0, 20)}...):`, response);
+                    } catch (sendError) {
+                        console.error(`Error enviando push a token ${token.substring(0, 20)}...:`, sendError.code || sendError.message);
+                        
+                        // Si el token es inválido o expiró, marcarlo para limpieza
+                        if (
+                            sendError.code === 'messaging/invalid-registration-token' ||
+                            sendError.code === 'messaging/registration-token-not-registered' ||
+                            sendError.code === 'messaging/invalid-argument'
+                        ) {
+                            invalidTokens.push(token);
+                        }
+                    }
+                }
+
+                // Limpiar tokens inválidos de Firestore
+                if (invalidTokens.length > 0) {
+                    console.log(`Limpiando ${invalidTokens.length} token(es) inválido(s) del usuario ${uid}.`);
+                    const updateData = {};
+                    
+                    if (Array.isArray(userData.fcm_tokens)) {
+                        // Filtrar tokens inválidos del array
+                        const validTokens = userData.fcm_tokens.filter(t => !invalidTokens.includes(t));
+                        updateData.fcm_tokens = validTokens;
+                    }
+                    
+                    // Si el token único es inválido, limpiarlo
+                    if (userData.fcm_token && invalidTokens.includes(userData.fcm_token)) {
+                        updateData.fcm_token = admin.firestore.FieldValue.delete();
+                    }
+
+                    if (Object.keys(updateData).length > 0) {
+                        await db.collection("usuarios").doc(uid).update(updateData);
+                    }
+                }
 
             } catch (error) {
-                console.error("Error enviando push:", error);
+                console.error("Error procesando notificación push:", error);
             }
         }
     });

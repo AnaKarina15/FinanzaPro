@@ -36,7 +36,13 @@ const VAPID_KEY = 'BP5q8ZSgj7DEHODHO26bwY520lgVx5nvemxtX2csG32yoYtg4x5dPmiJKj6cZ
 async function _initFCM() {
     if (!currentUid) return;
     try {
-        // 1. Obtener instancia de messaging (resuelve la race condition del export null)
+        // 1. Verificar soporte del navegador
+        if (!('serviceWorker' in navigator) || !('Notification' in window)) {
+            console.warn('Este navegador no soporta notificaciones push.');
+            return;
+        }
+
+        // 2. Obtener instancia de messaging (resuelve la race condition del export null)
         const messaging = await getMessagingInstance();
         if (!messaging) {
             console.warn('FCM no está soportado en este navegador/entorno.');
@@ -44,37 +50,53 @@ async function _initFCM() {
         }
 
         const { onMessage, getToken } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-messaging.js");
-        const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
+        const { doc, updateDoc, getDoc, arrayUnion } = await import("https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js");
 
-        // 2. Registrar el Service Worker para notificaciones en segundo plano
+        // 3. Registrar el Service Worker para notificaciones en segundo plano
+        //    Scope debe cubrir las páginas de la app (/FinanzaPro/)
         let swRegistration = null;
-        if ('serviceWorker' in navigator) {
-            try {
-                swRegistration = await navigator.serviceWorker.register('../firebase-messaging-sw.js');
-                console.log('Service Worker FCM registrado:', swRegistration.scope);
-            } catch (err) {
-                console.warn('Error registrando Service Worker FCM:', err);
+        try {
+            swRegistration = await navigator.serviceWorker.register('../firebase-messaging-sw.js');
+            console.log('Service Worker FCM registrado. Scope:', swRegistration.scope);
+            
+            // Esperar a que el SW esté activo antes de pedir token
+            if (swRegistration.installing) {
+                await new Promise((resolve) => {
+                    swRegistration.installing.addEventListener('statechange', (e) => {
+                        if (e.target.state === 'activated') resolve();
+                    });
+                });
             }
-        }
-
-        // 3. Pedir permiso de notificaciones al usuario
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-            console.warn('Permiso de notificaciones denegado.');
+        } catch (err) {
+            console.warn('Error registrando Service Worker FCM:', err);
             return;
         }
 
-        // 4. Obtener el token FCM y guardarlo en Firestore
-        //    El backend (functions/index.js) lo lee de usuarios/{uid}.fcm_token
+        // 4. Pedir permiso de notificaciones al usuario
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            console.warn('Permiso de notificaciones denegado por el usuario.');
+            return;
+        }
+
+        // 5. Obtener el token FCM y guardarlo en Firestore
+        //    Se guarda como:
+        //    - fcm_token (string)  → compatibilidad hacia atrás
+        //    - fcm_tokens (array)  → soporte multi-dispositivo (PC + móvil)
         try {
             const tokenOptions = { vapidKey: VAPID_KEY };
             if (swRegistration) tokenOptions.serviceWorkerRegistration = swRegistration;
 
             const token = await getToken(messaging, tokenOptions);
             if (token) {
-                console.log('Token FCM obtenido:', token);
-                await updateDoc(doc(db, 'usuarios', currentUid), { fcm_token: token });
-                console.log('Token FCM guardado en Firestore.');
+                console.log('Token FCM obtenido:', token.substring(0, 30) + '...');
+
+                // Guardar token único (backward compat) + agregarlo al array de tokens
+                await updateDoc(doc(db, 'usuarios', currentUid), {
+                    fcm_token: token,
+                    fcm_tokens: arrayUnion(token)
+                });
+                console.log('Token FCM guardado en Firestore (single + multi-device).');
             } else {
                 console.warn('No se pudo obtener token FCM. Verifica la VAPID key y el Service Worker.');
             }
@@ -82,14 +104,19 @@ async function _initFCM() {
             console.error('Error obteniendo token FCM:', tokenErr);
         }
 
-        // 5. Escuchar notificaciones cuando la app está en primer plano
+        // 6. Escuchar notificaciones cuando la app está en primer plano
+        //    (cuando la pestaña ESTÁ activa, el SW no muestra la notificación del sistema,
+        //     sino que se maneja aquí con un toast de SweetAlert)
         onMessage(messaging, (payload) => {
             console.log('Notificación FCM en primer plano:', payload);
+            const title = payload.notification?.title || payload.data?.titulo || 'FinanzaPro';
+            const body  = payload.notification?.body  || payload.data?.mensaje || '';
+            
             const Swal = window.Swal;
             if (Swal) {
                 Swal.fire({
-                    title: payload.notification?.title || 'FinanzaPro',
-                    text: payload.notification?.body || '',
+                    title: title,
+                    text: body,
                     icon: 'info',
                     toast: true,
                     position: 'top-end',
