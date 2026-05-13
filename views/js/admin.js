@@ -4,6 +4,7 @@ import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { collection, onSnapshot, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { initNotificaciones, enviarBienvenidaSiNecesario, crearNotificacion } from "./notificaciones_admin.js";
+import { initPresencia } from "./presencia.js";
 
 // Necesitamos la configuración de Firebase de nuevo para inicializar la segunda app
 const firebaseConfig = app.options;
