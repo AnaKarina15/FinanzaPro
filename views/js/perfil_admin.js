@@ -34,7 +34,7 @@ onAuthStateChanged(auth, async (user) => {
     if (navUsr) { navUsr.textContent = nombre; navUsr.classList.remove('skeleton-text'); }
 
     const navAvatar = document.getElementById('admin-nav-avatar');
-    const avatarUrl = data.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
+    const avatarUrl = data.fotoPerfil || data.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombre)}&background=059669&color=fff`;
     if (navAvatar) navAvatar.src = avatarUrl;
 
     // Header card

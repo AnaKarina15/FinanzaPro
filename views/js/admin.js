@@ -38,8 +38,8 @@ onAuthStateChanged(auth, async (user) => {
             // Actualizar info del admin en UI
             const nombreCompleto = `${data.nombre} ${data.apellido}`;
             const navUsr = document.getElementById('admin-nav-username'); if(navUsr) { navUsr.textContent = nombreCompleto; navUsr.classList.remove('skeleton-text'); }
-            if (data.foto_perfil) {
-                document.getElementById('admin-nav-avatar').src = data.foto_perfil;
+            if (data.fotoPerfil || data.foto_perfil) {
+                document.getElementById('admin-nav-avatar').src = data.fotoPerfil || data.foto_perfil;
             } else {
                 document.getElementById('admin-nav-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff`;
             }
@@ -257,7 +257,7 @@ function renderizarTabla(listaFiltrada) {
 
     tbody.innerHTML = paginados.map((u, i) => {
         const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Sin Nombre';
-        const avatarUrl = u.foto_perfil ? u.foto_perfil : `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff&size=80`;
+        const avatarUrl = (u.fotoPerfil || u.foto_perfil) ? (u.fotoPerfil || u.foto_perfil) : `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreCompleto)}&background=059669&color=fff&size=80`;
 
         let roleClass = u.rol === 'admin' ? "role-admin" : "role-usuario";
         let rolNombre = u.rol === 'admin' ? "Administrador" : "Usuario";
