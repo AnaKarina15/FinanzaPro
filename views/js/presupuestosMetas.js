@@ -495,11 +495,13 @@ function renderPresupuestos(presupuestos) {
         }
 
         if (window.filtroPresupuesto === 'todos') return true;
+        
         if (window.filtroPresupuesto === 'mensual') {
-            return p.tipo_periodo === 'mensual';
-        } else {
-            return p.tipo_periodo === 'anual';
+            return p.tipo_periodo === 'mensual' && p.periodo === currentMonthFormatted;
+        } else if (window.filtroPresupuesto === 'anual') {
+            return p.tipo_periodo === 'anual' && p.periodo === currentYearString;
         }
+        return true;
     });
     
     presupuestosFiltrados.forEach(p => {
