@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="./css/global.css?v=1.0.0" />
     <link rel="stylesheet" href="./css/admin.css?v=1.0.0" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="./js/notificaciones_admin.js?v=1.0.0"></script>
-    <script type="module" src="./js/admin.js?v=1.0.0"></script>
+    <script type="module" src="./js/notificaciones_admin.js?v=1.0.1"></script>
+    <script type="module" src="./js/admin.js?v=1.0.1"></script>
 </head>
 
 <body>

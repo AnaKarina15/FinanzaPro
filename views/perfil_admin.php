@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="./css/admin.css?v=1.0.0" />
     <link rel="stylesheet" href="./css/perfil.css?v=1.0.0" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="./js/perfil_admin.js?v=1.0.0"></script>
+    <script type="module" src="./js/perfil_admin.js?v=1.0.1"></script>
     <style>
         /* Admin profile overrides */
         .admin-profile-layout {
