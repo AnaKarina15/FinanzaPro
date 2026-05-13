@@ -558,6 +558,9 @@ window.cargarDatosFirestore = async () => {
         const q = query(collection(db, "transacciones"), where("usuario_id", "==", currentUid));
         const querySnapshot = await getDocs(q);
         
+        const now = new Date();
+        const mesActual = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
         let ing = 0;
         let gas = 0;
         const movimientos = [];
@@ -568,15 +571,18 @@ window.cargarDatosFirestore = async () => {
             const data = docSnap.data();
             movimientos.push({ id: docSnap.id, ...data });
             
-            if (data.tipo === "ingreso") {
-                ing += data.monto;
-                if (!catIngresos[data.categoria]) catIngresos[data.categoria] = 0;
-                catIngresos[data.categoria] += data.monto;
-            }
-            if (data.tipo === "gasto") {
-                gas += data.monto;
-                if (!catGastos[data.categoria]) catGastos[data.categoria] = 0;
-                catGastos[data.categoria] += data.monto;
+            // Solo sumar para el resumen si es del mes actual
+            if (data.fecha && data.fecha.startsWith(mesActual)) {
+                if (data.tipo === "ingreso") {
+                    ing += data.monto;
+                    if (!catIngresos[data.categoria]) catIngresos[data.categoria] = 0;
+                    catIngresos[data.categoria] += data.monto;
+                }
+                if (data.tipo === "gasto") {
+                    gas += data.monto;
+                    if (!catGastos[data.categoria]) catGastos[data.categoria] = 0;
+                    catGastos[data.categoria] += data.monto;
+                }
             }
         });
 
