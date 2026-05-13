@@ -11,7 +11,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { doc, setDoc, getDoc, updateDoc, deleteField, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { doc, setDoc, getDoc, getDocFromServer, updateDoc, deleteField, deleteDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { crearNotificacion } from "./notificaciones.js";
 
 // Idioma de Firebase en Español
@@ -106,9 +106,9 @@ if (loginForm) {
         return;
       }
 
-      // Comprobar si la cuenta está programada para eliminarse
+      // Comprobar si la cuenta está programada para eliminarse o inactiva (ignorando caché local)
       const userDocRef = doc(db, "usuarios", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      const userDocSnap = await getDocFromServer(userDocRef);
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
         if (userData.fecha_eliminacion) {
@@ -147,6 +147,12 @@ if (loginForm) {
           }
         }
         
+        if (userData.estado === 'inactivo') {
+          await signOut(auth);
+          Swal.fire("Cuenta suspendida", "Tu cuenta ha sido desactivada por un administrador. Contacta con soporte para más información.", "error");
+          return;
+        }
+
         if (userData.rol === 'admin') {
           window.location.href = "admin.php";
           return;
@@ -289,7 +295,7 @@ const handleGoogleSignIn = async () => {
     const user   = result.user;
 
     const userDocRef = doc(db, "usuarios", user.uid);
-    const userDoc    = await getDoc(userDocRef);
+    const userDoc    = await getDocFromServer(userDocRef);
 
     if (!userDoc.exists()) {
       const nombres = user.displayName ? user.displayName.split(" ") : ["Usuario", ""];
@@ -325,11 +331,19 @@ const handleGoogleSignIn = async () => {
         }
     }
 
-    // Verificar rol para redirigir correctamente
-    const userDocSnap = await getDoc(userDocRef);
-    if (userDocSnap.exists() && userDocSnap.data().rol === "admin") {
-      window.location.href = "admin.php";
-      return;
+    // Verificar estado y rol para redirigir correctamente
+    const userDocSnap = await getDocFromServer(userDocRef);
+    if (userDocSnap.exists()) {
+      const uData = userDocSnap.data();
+      if (uData.estado === 'inactivo') {
+        await signOut(auth);
+        Swal.fire("Cuenta suspendida", "Tu cuenta ha sido desactivada por un administrador. Contacta con soporte para más información.", "error");
+        return;
+      }
+      if (uData.rol === "admin") {
+        window.location.href = "admin.php";
+        return;
+      }
     }
 
     window.location.href = "dashboard.php";
@@ -417,6 +431,9 @@ if (formReset) {
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get("login") === "error") {
   Swal.fire({ title: "Credenciales inválidas", text: "Revisa tu correo y contraseña.", icon: "error", confirmButtonColor: "#059669" });
+  window.history.replaceState(null, null, window.location.pathname);
+} else if (urlParams.get("login") === "suspendido") {
+  Swal.fire({ title: "Cuenta suspendida", text: "Tu cuenta ha sido desactivada por un administrador. Contacta con soporte para más información.", icon: "error", confirmButtonColor: "#e11d48" });
   window.history.replaceState(null, null, window.location.pathname);
 }
 

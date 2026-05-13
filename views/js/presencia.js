@@ -10,11 +10,12 @@
  */
 
 import { db, auth } from './firebase-config.js';
-import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { doc, updateDoc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 
 let _uid = null;
 let _heartbeatInterval = null;
+let _unsubscribeStatus = null;
 const HEARTBEAT_MS = 2 * 60 * 1000; // 2 minutos
 
 // ── Marcar ONLINE ──────────────────────────────
@@ -99,10 +100,28 @@ export function initPresencia(uid) {
     marcarOnline(uid);
     iniciarHeartbeat(uid);
     registrarListeners(uid);
+    
+    // Escuchar el estado de la cuenta en tiempo real
+    if (_unsubscribeStatus) _unsubscribeStatus();
+    _unsubscribeStatus = onSnapshot(doc(db, "usuarios", uid), async (docSnap) => {
+        if (docSnap.exists()) {
+            const userData = docSnap.data();
+            if (userData.estado === 'inactivo') {
+                // Cuenta desactivada por un admin -> Cerrar sesión forzosamente
+                await cerrarPresencia();
+                await signOut(auth);
+                // Si ya estamos en la carpeta views (dashboard, etc), redirigir directo a login.php
+                window.location.href = 'login.php?login=suspendido';
+            }
+        }
+    });
 }
 
-// ── Para signOut manual ────────────────────────
 export async function cerrarPresencia() {
+    if (_unsubscribeStatus) {
+        _unsubscribeStatus();
+        _unsubscribeStatus = null;
+    }
     detenerHeartbeat();
     if (_uid) {
         await marcarOffline(_uid);
