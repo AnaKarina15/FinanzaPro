@@ -334,9 +334,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- RENDERIZADO DE GRÁFICAS Y LEYENDAS ---
-    window.renderizarDonaYleyenda = function(canvasId, centerId, legendId, dataset, totalGlobal, colores, tipo) {
+    const catColors = {
+        "Alimentación": { fill: "#ef4444" },
+        "Transporte": { fill: "#3b82f6" },
+        "Renta": { fill: "#f97316" },
+        "Vivienda": { fill: "#f97316" },
+        "Ocio": { fill: "#a855f7" },
+        "Ocio y Vida Social": { fill: "#a855f7" },
+        "Servicios Públicos": { fill: "#eab308" },
+        "Servicios y Celular": { fill: "#eab308" },
+        "Material Académico": { fill: "#06b6d4" },
+        "Aseo y Personales": { fill: "#ec4899" },
+        "Salario": { fill: "#22c55e" },
+        "Ayuda Familiar": { fill: "#14b8a6" },
+        "Freelance": { fill: "#10b981" }
+    };
+
+    window.renderizarDonaYleyenda = (canvasId, centerLabelId, legendId, dataset, totalGlobal, colores) => {
         const canvas = document.getElementById(canvasId);
-        const centerLabel = document.getElementById(centerId);
+        const centerLabel = document.getElementById(centerLabelId);
         const legendContainer = document.getElementById(legendId);
 
         if (!canvas) return;
@@ -360,9 +376,11 @@ document.addEventListener("DOMContentLoaded", () => {
         centerLabel.innerText = formatearMoneda(totalGlobal);
         legendContainer.innerHTML = '';
 
+        const finalColors = [];
         dataset.forEach((cat, index) => {
             let porcentaje = ((parseFloat(cat.total) / totalGlobal) * 100).toFixed(0);
-            const colorDot = colores[index % colores.length];
+            const colorDot = (catColors[cat.nombre] && catColors[cat.nombre].fill) || colores[index % colores.length];
+            finalColors.push(colorDot);
             
             legendContainer.innerHTML += `
                 <div class="legend-item">
@@ -378,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
             type: 'doughnut',
             data: {
                 labels: dataset.map(c => c.nombre),
-                datasets: [{ data: dataset.map(c => parseFloat(c.total)), backgroundColor: colores, borderWidth: 0 }]
+                datasets: [{ data: dataset.map(c => parseFloat(c.total)), backgroundColor: finalColors, borderWidth: 0 }]
             },
             options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
         });
@@ -593,8 +611,8 @@ window.cargarDatosFirestore = async () => {
 
         const mapCategorias = (obj) => Object.keys(obj).map(k => ({ nombre: k, total: obj[k] })).sort((a,b) => b.total - a.total);
 
-        window.renderizarDonaYleyenda('graficaIngresos', 'center-ingresos', 'legend-ingresos-list', mapCategorias(catIngresos), ing, ['#059669', '#34d399', '#6ee7b7', '#a7f3d0'], 'ingreso');
-        window.renderizarDonaYleyenda('graficaGastos', 'center-gastos', 'legend-gastos-list', mapCategorias(catGastos), gas, ['#ef4444', '#f97316', '#eab308', '#cbd5e1'], 'gasto');
+        window.renderizarDonaYleyenda('graficaIngresos', 'center-ingresos', 'legend-ingresos-list', mapCategorias(catIngresos), ing, ['#059669', '#10b981', '#14b8a6', '#06b6d4'], 'ingreso');
+        window.renderizarDonaYleyenda('graficaGastos', 'center-gastos', 'legend-gastos-list', mapCategorias(catGastos), gas, ['#ef4444', '#f97316', '#eab308', '#8b5cf6', '#ec4899'], 'gasto');
 
         window.movimientosGlobales = movimientos;
         window.aplicarFiltros();
