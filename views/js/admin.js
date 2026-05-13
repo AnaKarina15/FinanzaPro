@@ -22,7 +22,7 @@ let unsubscribeUsuarios = null;
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUid = user.uid;
-        
+        initPresencia(user.uid);
         // Verificar si es admin
         const docSnap = await getDoc(doc(db, "usuarios", currentUid));
         if (docSnap.exists()) {
