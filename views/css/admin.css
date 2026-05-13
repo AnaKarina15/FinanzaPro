@@ -723,7 +723,7 @@
     opacity: 0.5;
 }
 
-.badge-inactivo {
+.badge-deshabilitado {
     display: inline-block;
     font-size: 10px;
     font-weight: 700;

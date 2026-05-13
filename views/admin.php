@@ -109,6 +109,13 @@
                 <div class="users-card-header">
                     <h2>Directorio de Usuarios</h2>
                     <div class="users-card-actions">
+                        <select id="filter-status" class="input-soft" style="width: auto; padding: 8px 12px; height: 38px;">
+                            <option value="todos">Todos los usuarios</option>
+                            <option value="en_linea">En línea</option>
+                            <option value="desconectados">Desconectados</option>
+                            <option value="nuevos">Nuevos (Esta semana)</option>
+                            <option value="inactivo">Deshabilitados</option>
+                        </select>
                         <div class="search-box">
                             <span class="material-symbols-outlined search-icon">search</span>
                             <input type="text" id="search-input" placeholder="Buscar usuario..." />

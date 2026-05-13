@@ -14,6 +14,7 @@ const secondaryAuth = getAuth(secondaryApp);
 
 let currentUid = null;
 let todosLosUsuarios = [];
+let listaActualFiltrada = [];
 let paginaActual = 1;
 const porPagina = 10;
 let unsubscribeUsuarios = null;
@@ -73,29 +74,69 @@ function inicializarEventos() {
         if (e.target === e.currentTarget) cerrarModalNotif();
     });
 
-    document.getElementById("search-input").addEventListener("input", (e) => {
-        const querySearch = e.target.value.toLowerCase();
-        const filtrados = todosLosUsuarios.filter(u => 
-            u.nombre.toLowerCase().includes(querySearch) || 
-            u.apellido.toLowerCase().includes(querySearch) || 
-            u.email.toLowerCase().includes(querySearch)
-        );
+    window.aplicarFiltrosYRenderizar = function() {
+        const querySearch = document.getElementById("search-input").value.toLowerCase();
+        const filterStatus = document.getElementById("filter-status") ? document.getElementById("filter-status").value : 'todos';
+
+        listaActualFiltrada = todosLosUsuarios.filter(u => {
+            const matchesSearch = (u.nombre || '').toLowerCase().includes(querySearch) || 
+                                  (u.apellido || '').toLowerCase().includes(querySearch) || 
+                                  (u.email || u.correo || '').toLowerCase().includes(querySearch);
+            if (!matchesSearch) return false;
+
+            if (filterStatus === 'en_linea') return u.en_linea === true;
+            if (filterStatus === 'desconectados') return u.en_linea !== true && u.estado !== 'inactivo';
+            if (filterStatus === 'inactivo') return u.estado === 'inactivo';
+            if (filterStatus === 'nuevos') {
+                const unaSemanaAtras = new Date();
+                unaSemanaAtras.setDate(unaSemanaAtras.getDate() - 7);
+                if (!u.fecha_creacion) return false;
+                let fecha;
+                if (u.fecha_creacion.toDate) {
+                    fecha = u.fecha_creacion.toDate(); 
+                } else if (u.fecha_creacion.seconds) {
+                    fecha = new Date(u.fecha_creacion.seconds * 1000); 
+                } else if (typeof u.fecha_creacion === 'string') {
+                    fecha = new Date(u.fecha_creacion);
+                } else if (u.fecha_creacion instanceof Date) {
+                    fecha = u.fecha_creacion;
+                } else {
+                    fecha = new Date(u.fecha_creacion);
+                }
+                if (isNaN(fecha.getTime())) return false;
+                return fecha >= unaSemanaAtras;
+            }
+            return true;
+        });
+
+        renderizarTabla(listaActualFiltrada);
+    };
+
+    document.getElementById("search-input").addEventListener("input", () => {
         paginaActual = 1;
-        renderizarTabla(filtrados);
+        aplicarFiltrosYRenderizar();
     });
+
+    const filterStatusEl = document.getElementById("filter-status");
+    if (filterStatusEl) {
+        filterStatusEl.addEventListener("change", () => {
+            paginaActual = 1;
+            aplicarFiltrosYRenderizar();
+        });
+    }
 
     document.getElementById("btn-prev").addEventListener("click", () => {
         if (paginaActual > 1) {
             paginaActual--;
-            renderizarTabla(todosLosUsuarios);
+            renderizarTabla(listaActualFiltrada);
         }
     });
 
     document.getElementById("btn-next").addEventListener("click", () => {
-        const totalPaginas = Math.ceil(todosLosUsuarios.length / porPagina);
+        const totalPaginas = Math.ceil(listaActualFiltrada.length / porPagina);
         if (paginaActual < totalPaginas) {
             paginaActual++;
-            renderizarTabla(todosLosUsuarios);
+            renderizarTabla(listaActualFiltrada);
         }
     });
 
@@ -155,7 +196,12 @@ function cargarUsuariosFirestore() {
                 animarNumero("stat-activos", activos);
                 document.getElementById("stat-nuevos").textContent = `+${nuevos}`;
 
-                renderizarTabla(todosLosUsuarios);
+                if (window.aplicarFiltrosYRenderizar) {
+                    window.aplicarFiltrosYRenderizar();
+                } else {
+                    listaActualFiltrada = todosLosUsuarios;
+                    renderizarTabla(listaActualFiltrada);
+                }
 
                 if (primeraCarga) { primeraCarga = false; resolve(); }
             },
@@ -223,7 +269,7 @@ function renderizarTabla(listaFiltrada) {
         const estadoIcon = esActivo ? 'toggle_on' : 'toggle_off';
         
         let editAttr = isCurrent ? 'disabled title="Edita tus datos desde Mi Perfil"' : 'title="Editar" onclick="editarUsuario(\'' + u.id + '\')"';
-        let toggleAttr = isCurrent ? 'disabled title="No puedes suspender tu propia cuenta"' : 'title="' + (esActivo ? 'Desactivar usuario' : 'Activar usuario') + '" onclick="toggleEstadoUsuario(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\', ' + esActivo + ')"';
+        let toggleAttr = isCurrent ? 'disabled title="No puedes suspender tu propia cuenta"' : 'title="' + (esActivo ? 'Deshabilitar usuario' : 'Habilitar usuario') + '" onclick="toggleEstadoUsuario(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\', ' + esActivo + ')"';
         let notifAttr = 'title="Enviar notificación" onclick="abrirModalNotificacion(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\')"';
 
         // Indicador En Línea
@@ -240,7 +286,7 @@ function renderizarTabla(listaFiltrada) {
                         </div>
                         <div>
                             <span class="user-name">${escapeHtml(nombreCompleto)}</span>
-                            ${!esActivo ? '<span class="badge-inactivo">Inactivo</span>' : ''}
+                            ${!esActivo ? '<span class="badge-deshabilitado">Deshabilitado</span>' : ''}
                         </div>
                     </div>
                 </td>
@@ -372,13 +418,13 @@ window.toggleEstadoUsuario = async function (id, nombre, esActivo) {
         return;
     }
 
-    const accion = esActivo ? 'desactivar' : 'activar';
-    const nuevoEstado = esActivo ? 'inactivo' : 'activo';
-    const icon = esActivo ? 'warning' : 'question';
+    const accion = esActivo ? 'deshabilitar' : 'habilitar';
     const btnColor = esActivo ? '#ef4444' : '#059669';
+    const icon = esActivo ? 'warning' : 'question';
+    const nuevoEstado = esActivo ? "inactivo" : "activo";
 
     const result = await Swal.fire({
-        title: `¿${esActivo ? 'Desactivar' : 'Activar'} usuario?`,
+        title: `¿${esActivo ? 'Deshabilitar' : 'Habilitar'} usuario?`,
         html: `Se ${accion}á la cuenta de <strong>${nombre}</strong> en la plataforma.`,
         icon,
         showCancelButton: true,
@@ -390,7 +436,7 @@ window.toggleEstadoUsuario = async function (id, nombre, esActivo) {
     if (result.isConfirmed) {
         try {
             await updateDoc(doc(db, "usuarios", id), { estado: nuevoEstado });
-            Swal.fire({ icon: "success", title: esActivo ? "Usuario desactivado" : "Usuario activado", timer: 2000, showConfirmButton: false });
+            Swal.fire({ icon: "success", title: esActivo ? "Usuario deshabilitado" : "Usuario habilitado", timer: 2000, showConfirmButton: false });
             // onSnapshot actualiza la tabla automáticamente
         } catch (error) {
             Swal.fire("Error", "No se pudo actualizar el estado", "error");
