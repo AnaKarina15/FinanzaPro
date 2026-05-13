@@ -405,7 +405,17 @@ async function guardarUsuario(e) {
         // onSnapshot actualiza la tabla automáticamente
     } catch (error) {
         console.error("Error guardando:", error);
-        Swal.fire("Error", "Ocurrió un error: " + error.message, "error");
+        let mensaje = "Ocurrió un error: " + error.message;
+        
+        if (error.code === 'auth/email-already-in-use') {
+            mensaje = "El correo ya está registrado en otra cuenta.";
+        } else if (error.code === 'auth/invalid-email') {
+            mensaje = "El correo electrónico no es válido.";
+        } else if (error.code === 'auth/weak-password') {
+            mensaje = "La contraseña es demasiado débil.";
+        }
+
+        Swal.fire("Error", mensaje, "error");
     } finally {
         btn.disabled = false;
         btn.textContent = "Guardar Usuario";
