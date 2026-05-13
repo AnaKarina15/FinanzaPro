@@ -105,13 +105,33 @@ async function _initFCM() {
         }
 
         // 6. Escuchar notificaciones cuando la app está en primer plano
-        //    (cuando la pestaña ESTÁ activa, el SW no muestra la notificación del sistema,
-        //     sino que se maneja aquí con un toast de SweetAlert)
+        //    FCM no muestra la notificación del sistema automáticamente cuando la pestaña
+        //    está activa; la mostramos manualmente con swRegistration.showNotification()
+        //    para que aparezca igual que en segundo plano.
         onMessage(messaging, (payload) => {
             console.log('Notificación FCM en primer plano:', payload);
             const title = payload.notification?.title || payload.data?.titulo || 'FinanzaPro';
             const body  = payload.notification?.body  || payload.data?.mensaje || '';
-            
+            const tipo  = payload.data?.tipo || 'info';
+
+            // ── Notificación nativa del sistema (igual que en segundo plano) ──
+            if (swRegistration && Notification.permission === 'granted') {
+                swRegistration.showNotification(title, {
+                    body: body,
+                    icon: '/FinanzaPro/views/css/icon-192.png',
+                    badge: '/FinanzaPro/views/css/icon-192.png',
+                    tag: `finanzapro-fg-${tipo}-${Date.now()}`,
+                    renotify: true,
+                    vibrate: [200, 100, 200],
+                    data: { url: '/FinanzaPro/views/dashboard.php' },
+                    actions: [
+                        { action: 'open',    title: 'Ver ahora'  },
+                        { action: 'dismiss', title: 'Descartar'  }
+                    ]
+                });
+            }
+
+            // ── Toast de SweetAlert dentro de la app (complementario) ──
             const Swal = window.Swal;
             if (Swal) {
                 Swal.fire({
