@@ -271,7 +271,7 @@ function renderizarTabla(listaFiltrada) {
         
         let editAttr = isCurrent ? 'disabled title="Edita tus datos desde Mi Perfil"' : 'title="Editar" onclick="editarUsuario(\'' + u.id + '\')"';
         let toggleAttr = isCurrent ? 'disabled title="No puedes suspender tu propia cuenta"' : 'title="' + (esActivo ? 'Deshabilitar usuario' : 'Habilitar usuario') + '" onclick="toggleEstadoUsuario(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\', ' + esActivo + ')"';
-        let notifAttr = 'title="Enviar notificación" onclick="abrirModalNotificacion(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\')"';
+        let notifAttr = isCurrent ? 'disabled title="No puedes enviarte notificaciones a ti mismo"' : 'title="Enviar notificación" onclick="abrirModalNotificacion(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\')"';
 
         // Indicador En Línea
         const isOnline = u.en_linea === true;
@@ -304,7 +304,7 @@ function renderizarTabla(listaFiltrada) {
                         <button class="btn-action btn-edit" ${editAttr} style="${isCurrent ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
                             <span class="material-symbols-outlined">edit</span>
                         </button>
-                        <button class="btn-action btn-notif" ${notifAttr}>
+                        <button class="btn-action btn-notif" ${notifAttr} style="${isCurrent ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
                             <span class="material-symbols-outlined">notification_add</span>
                         </button>
                         <button class="btn-action ${estadoClass}" ${toggleAttr} style="${isCurrent ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
