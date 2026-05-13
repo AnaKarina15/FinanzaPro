@@ -1,5 +1,6 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { initPresencia } from "./presencia.js";
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { initNotificaciones, verificarProgresoMeta, verificarPresupuesto, verificarGastoInusual } from "./notificaciones.js";
 
@@ -8,6 +9,7 @@ let currentUid = null;
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUid = user.uid;
+        initPresencia(user.uid);
         // Actualizar sidebar desde Firestore
         try {
             const userDoc = await getDoc(doc(db, "usuarios", user.uid));

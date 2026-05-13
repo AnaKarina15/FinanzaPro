@@ -735,3 +735,41 @@
     margin-left: 6px;
     vertical-align: middle;
 }
+
+/* ===== ONLINE STATUS ===== */
+.online-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.online-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #cbd5e1; /* Offline */
+    display: inline-block;
+    position: relative;
+}
+
+.online-dot.active {
+    background-color: #10b981; /* Online */
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    animation: pulse-online 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+.online-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.online-dot.active + .online-text {
+    color: #059669;
+}
+
+@keyframes pulse-online {
+    to {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+}

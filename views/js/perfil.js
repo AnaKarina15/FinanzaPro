@@ -2,12 +2,14 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut, updatePassword, verifyBeforeUpdateEmail, sendPasswordResetEmail, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { getDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { initNotificaciones } from "./notificaciones.js";
+import { initPresencia, cerrarPresencia } from "./presencia.js";
 
 let currentUid = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUid = user.uid;
+        initPresencia(user.uid);
         initNotificaciones(user.uid);
         cargarPerfil(user);
     } else {
@@ -122,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 cancelButtonText: "Cancelar",
             }).then(async (result) => {
                 if (result.isConfirmed) {
+                    await cerrarPresencia();
                     await signOut(auth);
                     window.location.href = '../index.php';
                 }
@@ -173,6 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             icon: "info",
                             confirmButtonColor: "#059669"
                         }).then(async () => {
+                            await cerrarPresencia();
                             await signOut(auth);
                             window.location.href = '../index.php';
                         });
@@ -599,8 +603,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 cancelButtonColor: '#64748b',
                 confirmButtonText: 'Sí, salir',
                 cancelButtonText: 'Cancelar'
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
+                    await cerrarPresencia();
                     signOut(auth).then(() => {
                         window.location.href = '../index.php';
                     }).catch((error) => {

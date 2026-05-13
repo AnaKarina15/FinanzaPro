@@ -126,7 +126,7 @@ function cargarUsuariosFirestore() {
                 });
 
                 const total   = todosLosUsuarios.length;
-                const activos = todosLosUsuarios.filter(u => u.estado !== 'inactivo').length;
+                const activos = todosLosUsuarios.filter(u => u.en_linea === true).length; // Ahora cuenta usuarios en linea
 
                 // Calcular usuarios nuevos de los últimos 7 días
                 const unaSemanaAtras = new Date();
@@ -212,6 +212,11 @@ function renderizarTabla(listaFiltrada) {
         let toggleAttr = isCurrent ? 'disabled title="No puedes suspender tu propia cuenta"' : 'title="' + (esActivo ? 'Desactivar usuario' : 'Activar usuario') + '" onclick="toggleEstadoUsuario(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\', ' + esActivo + ')"';
         let notifAttr = 'title="Enviar notificación" onclick="abrirModalNotificacion(\'' + u.id + '\', \'' + escapeHtml(nombreCompleto) + '\')"';
 
+        // Indicador En Línea
+        const isOnline = u.en_linea === true;
+        const onlineText = isOnline ? 'En línea' : 'Desconectado';
+        const onlineDotClass = isOnline ? 'online-dot active' : 'online-dot';
+
         return `
             <tr class="${esActivo ? '' : 'row-inactive'}">
                 <td>
@@ -227,6 +232,12 @@ function renderizarTabla(listaFiltrada) {
                 </td>
                 <td>${escapeHtml(u.email || u.correo || 'Sin correo')}</td>
                 <td><span class="role-badge ${roleClass}">${rolNombre}</span>${tuEtiqueta}</td>
+                <td>
+                    <div class="online-status">
+                        <span class="${onlineDotClass}"></span>
+                        <span class="online-text">${onlineText}</span>
+                    </div>
+                </td>
                 <td>
                     <div class="actions-cell">
                         <button class="btn-action btn-edit" ${editAttr} style="${isCurrent ? 'opacity: 0.4; cursor: not-allowed;' : ''}">

@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { initPresencia } from "./presencia.js";
 import {
   doc,
   getDoc,
@@ -46,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUid = user.uid;
+      initPresencia(user.uid);
       try {
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
         if (userDoc.exists()) {

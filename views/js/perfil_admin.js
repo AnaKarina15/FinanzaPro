@@ -2,6 +2,7 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { initNotificaciones } from "./notificaciones_admin.js";
+import { initPresencia, cerrarPresencia } from "./presencia.js";
 
 let currentUid = null;
 let currentUser = null;
@@ -14,6 +15,7 @@ onAuthStateChanged(auth, async (user) => {
 
     currentUser = user;
     currentUid = user.uid;
+    initPresencia(user.uid);
 
     const docSnap = await getDoc(doc(db, "usuarios", currentUid));
     if (!docSnap.exists()) { window.location.href = '../index.php'; return; }
@@ -179,6 +181,7 @@ document.getElementById('btn-gestionar-sesiones')?.addEventListener('click', () 
         cancelButtonText: 'Cancelar',
     }).then(async (result) => {
         if (result.isConfirmed) {
+            await cerrarPresencia();
             await signOut(auth);
             window.location.href = '../index.php';
         }
@@ -198,6 +201,7 @@ document.getElementById('btn-cerrar-sesion-admin')?.addEventListener('click', as
         cancelButtonText: 'Cancelar',
     });
     if (result.isConfirmed) {
+        await cerrarPresencia();
         await signOut(auth);
         window.location.href = '../index.php';
     }

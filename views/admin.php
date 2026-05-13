@@ -122,6 +122,7 @@
                                 <th>USUARIO</th>
                                 <th>CORREO</th>
                                 <th>ROL</th>
+                                <th>ESTADO</th>
                                 <th>ACCIONES</th>
                             </tr>
                         </thead>
