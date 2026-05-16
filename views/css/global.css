@@ -747,6 +747,28 @@ select:focus-visible {
     text-align: center;
 }
 
+/* --- ESTILOS PARA DROPDOWN DE ICONOS --- */
+.icon-selector-trigger {
+    position: relative;
+}
+
+.icon-dropdown-menu {
+    display: none; /* JS will override this on toggle */
+    position: absolute;
+    z-index: 50; /* over the submit button */
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px;
+    width: 100%;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    max-height: 15rem; /* ~240px */
+    overflow-y: auto;
+}
+
 /* --- ESTILOS PARA EL INPUT DEL PIN --- */
 .pin-input {
     text-align: center;
