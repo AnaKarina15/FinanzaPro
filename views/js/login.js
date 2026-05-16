@@ -457,10 +457,17 @@ document.addEventListener('input', function (e) {
 // VALIDACIÓN DE CONTRASEÑA EN TIEMPO REAL
 // ═══════════════════════════════════════════════
 const regPasswordInput = document.getElementById('regster-password');
-const helperText = document.querySelector('small[for=""]');
+const helperText = document.getElementById('password-helper');
 if (regPasswordInput && helperText) {
   regPasswordInput.addEventListener('input', (e) => {
     const val = e.target.value;
+    
+    // Si el campo está vacío, no mostrar nada
+    if (val.length === 0) {
+      helperText.textContent = "";
+      return;
+    }
+
     const hasLength = val.length >= 8;
     const hasUpper = /[A-Z]/.test(val);
     const hasLower = /[a-z]/.test(val);

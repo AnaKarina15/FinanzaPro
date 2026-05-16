@@ -204,7 +204,7 @@
                 visibility
               </button>
             </div>
-            <small for="">Mínimo 8 caracteres, una mayúscula, una minúscula y un número</small>
+            <small for="" id="password-helper"></small>
           </div>
           <div class="login-actions">
             <label class="checkbox-container">
