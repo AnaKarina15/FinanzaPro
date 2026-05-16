@@ -582,6 +582,7 @@
 }
 
 .input-container-blue {
+    position: relative;
     display: flex;
     align-items: center;
     background-color: #e0e7ff;

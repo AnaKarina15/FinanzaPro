@@ -4,6 +4,11 @@ import { initPresencia } from "./presencia.js";
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import { initNotificaciones, verificarProgresoMeta, verificarPresupuesto, verificarGastoInusual } from "./notificaciones.js";
 
+// Normalizar texto (quitar tildes y pasar a minúsculas)
+const normalizar = (texto) => {
+    return String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+};
+
 let currentUid = null;
 
 onAuthStateChanged(auth, async (user) => {
@@ -320,6 +325,62 @@ document.addEventListener('DOMContentLoaded', () => {
             this.value = `$ ${new Intl.NumberFormat('es-CO').format(parseInt(valorPuro, 10))}`;
         });
     });
+    // --- CATEGORY SUGGESTIONS SYSTEM ---
+    const SUGGESTED_CATEGORIES = ['Alimentación', 'Transporte', 'Ocio', 'Servicios Públicos', 'Salud', 'Educación', 'Hogar', 'Mascotas'];
+    
+    const renderCategorySuggestions = (filter = "") => {
+        const dropdown = document.getElementById('lista-categorias-presupuesto-custom');
+        if (!dropdown) return;
+
+        const term = normalizar(filter);
+        const allCats = new Set(SUGGESTED_CATEGORIES);
+        // Add existing ones
+        if (window.presupuestosGlobales) {
+            window.presupuestosGlobales.forEach(p => allCats.add(p.nombre));
+        }
+
+        const seen = new Set();
+        const filtered = Array.from(allCats).filter(cat => {
+            const normCat = normalizar(cat);
+            if (seen.has(normCat)) return false;
+            seen.add(normCat);
+            return normCat.includes(term);
+        });
+
+        dropdown.innerHTML = '';
+        filtered.forEach(cat => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-option';
+            div.textContent = cat;
+            div.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const input = document.getElementById('categoria-presupuesto');
+                input.value = cat;
+                dropdown.style.display = 'none';
+            };
+            dropdown.appendChild(div);
+        });
+
+        if (filtered.length > 0 && document.activeElement.id === 'categoria-presupuesto') {
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = 'none';
+        }
+    };
+
+    const inputCatPres = document.getElementById('categoria-presupuesto');
+    const dropdownCatPres = document.getElementById('lista-categorias-presupuesto-custom');
+    if (inputCatPres) {
+        inputCatPres.addEventListener('focus', () => renderCategorySuggestions(inputCatPres.value));
+        inputCatPres.addEventListener('input', () => renderCategorySuggestions(inputCatPres.value));
+        document.addEventListener('click', (e) => {
+            if (!inputCatPres.contains(e.target) && !dropdownCatPres.contains(e.target)) {
+                dropdownCatPres.style.display = 'none';
+            }
+        });
+    }
+
 });
 
 // --- CARGA DE DATOS ---

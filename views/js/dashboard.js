@@ -19,6 +19,11 @@ import {
 document.addEventListener("DOMContentLoaded", () => {
   // La moneda se actualiza cuando carga el perfil del usuario desde Firestore
   let monedaUsuario = 'COP';
+  
+  // Normalizar texto (quitar tildes y pasar a minúsculas)
+  const normalizar = (texto) => {
+    return String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  };
   const formatearMoneda = (valor) =>
     new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -127,21 +132,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const dropdown = document.getElementById('lista-categorias-custom');
     if (!dropdown || !window.allCategories) return;
 
-    const term = filter.toLowerCase().trim();
-    const filtered = Array.from(window.allCategories).filter(cat => 
-        cat.toLowerCase().includes(term)
-    );
+    const term = normalizar(filter);
+    
+    // Desduplicar usando normalización
+    const seen = new Set();
+    const filtered = Array.from(window.allCategories).filter(cat => {
+        const normCat = normalizar(cat);
+        if (seen.has(normCat)) return false;
+        seen.add(normCat);
+        return normCat.includes(term);
+    });
 
     dropdown.innerHTML = '';
     filtered.forEach(cat => {
         const div = document.createElement('div');
         div.className = 'dropdown-option';
         div.textContent = cat;
-        div.onclick = () => {
+        div.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const input = document.getElementById('categoria');
             input.value = cat;
             dropdown.style.display = 'none';
-            // Trigger input event to clear errors
             input.dispatchEvent(new Event('input'));
         };
         dropdown.appendChild(div);

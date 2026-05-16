@@ -209,13 +209,8 @@
           <div class="input-group modal-form-group">
             <label>Nombre de la Categoría</label>
             <div class="input-container">
-              <input list="lista-categorias-presupuesto" name="nombre" placeholder="Ej. Salud, Educación..." required autocomplete="off">
-              <datalist id="lista-categorias-presupuesto">
-                  <option value="Alimentación"></option>
-                  <option value="Transporte"></option>
-                  <option value="Ocio"></option>
-                  <option value="Servicios Públicos"></option>
-              </datalist>
+              <input type="text" id="categoria-presupuesto" name="nombre" placeholder="Ej. Salud, Educación..." required autocomplete="off">
+              <div id="lista-categorias-presupuesto-custom" class="custom-dropdown-menu"></div>
             </div>
           </div>
 

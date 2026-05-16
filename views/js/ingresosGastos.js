@@ -8,6 +8,11 @@ let currentUid = null;
 let domListo = false;
 let monedaUsuario = 'COP'; // Se actualiza con la preferencia del usuario desde Firestore
 
+// Normalizar texto (quitar tildes y pasar a minúsculas)
+const normalizar = (texto) => {
+    return String(texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+};
+
 // Llamar carga cuando tanto Auth como DOM estén listos
 function intentarCargar() {
     if (currentUid && domListo) {
@@ -76,26 +81,34 @@ const renderCategoryOptions = (filter = "") => {
     const dropdown = document.getElementById('lista-categorias-custom');
     if (!dropdown || !window.allCategories) return;
 
-    const term = filter.toLowerCase().trim();
-    const filtered = Array.from(window.allCategories).filter(cat => 
-        cat.toLowerCase().includes(term)
-    );
+    const term = normalizar(filter);
+    
+    // Desduplicar usando normalización
+    const seen = new Set();
+    const filtered = Array.from(window.allCategories).filter(cat => {
+        const normCat = normalizar(cat);
+        if (seen.has(normCat)) return false;
+        seen.add(normCat);
+        return normCat.includes(term);
+    });
 
     dropdown.innerHTML = '';
     filtered.forEach(cat => {
         const div = document.createElement('div');
         div.className = 'dropdown-option';
         div.textContent = cat;
-        div.onclick = () => {
+        div.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const input = document.getElementById('categoria');
             input.value = cat;
             dropdown.style.display = 'none';
-            // Trigger input event to clear errors
             input.dispatchEvent(new Event('input'));
         };
         dropdown.appendChild(div);
     });
 
+    // Mostrar siempre que haya opciones y el input sea el activo
     if (filtered.length > 0 && document.activeElement.id === 'categoria') {
         dropdown.style.display = 'block';
     } else {
