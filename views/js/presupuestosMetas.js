@@ -363,7 +363,7 @@ async function cargarDatos() {
             
             let consumido = 0;
             transacciones.forEach(t => {
-                if (t.tipo === 'gasto' && t.categoria === p.nombre) {
+                if (t.tipo === 'gasto' && t.categoria && p.nombre && t.categoria.trim().toLowerCase() === p.nombre.trim().toLowerCase()) {
                     const tMonth = t.fecha.substring(0, 7); // YYYY-MM
                     const tYear = t.fecha.substring(0, 4);  // YYYY
                     
@@ -503,11 +503,13 @@ function renderPresupuestos(presupuestos) {
         }
 
         if (window.filtroPresupuesto === 'todos') return true;
+        
         if (window.filtroPresupuesto === 'mensual') {
-            return p.tipo_periodo === 'mensual';
-        } else {
-            return p.tipo_periodo === 'anual';
+            return p.tipo_periodo === 'mensual' && p.periodo === currentMonthFormatted;
+        } else if (window.filtroPresupuesto === 'anual') {
+            return p.tipo_periodo === 'anual' && p.periodo === currentYearString;
         }
+        return true;
     });
     
     presupuestosFiltrados.forEach(p => {
@@ -717,11 +719,11 @@ window.abrirModalAbonoMeta = async function(id_meta, nombre_meta, event) {
     const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
 
     // Datos comunes
+    document.getElementById('form-abono-meta').reset();
+    document.getElementById('form-retirar-meta').reset();
     document.getElementById('id_meta_abono').value = id_meta;
     document.getElementById('id_meta_retiro').value = id_meta;
     document.getElementById('nombre-meta-abono').innerText = nombre_meta;
-    document.getElementById('form-abono-meta').reset();
-    document.getElementById('form-retirar-meta').reset();
 
     // Saldo disponible para depositar
     const disponible = await calcularDisponible();
@@ -771,9 +773,9 @@ window.cambiarTabMeta = function(tab) {
 
 window.abrirModalGastoPresupuesto = async function(categoria, event) {
     if (event && event.target.closest('.kebab-menu')) return;
+    document.getElementById('form-gasto-presupuesto').reset();
     document.getElementById('categoria_gasto').value = categoria;
     document.getElementById('nombre-categoria-presupuesto').innerText = categoria;
-    document.getElementById('form-gasto-presupuesto').reset();
 
     // Calcular el saldo disponible general (ingresos - gastos - ahorros)
     const disponibleGeneral = await calcularDisponible();
@@ -993,7 +995,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const btnSubmit = document.getElementById('btn-submit-gasto-presupuesto');
             btnSubmit.disabled = true;
 
-            const categoria = document.getElementById('categoria_gasto').value;
+            const categoria = document.getElementById('categoria_gasto').value.trim();
             const inputGasto = document.getElementById('monto_gasto').value;
             const montoGasto = parseFloat(inputGasto.replace(/\D/g, '')) || 0;
             const descripcion = document.getElementById('descripcion_gasto').value;

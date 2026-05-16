@@ -19,10 +19,10 @@ service cloud.firestore {
       allow read: if request.auth != null &&
                      (request.auth.uid == uid || isAdmin());
 
-      // Crear: solo al registrarse (el UID debe coincidir) y no puede ser admin
-      allow create: if request.auth != null &&
-                       request.auth.uid == uid && 
-                       (!('rol' in request.resource.data) || request.resource.data.rol != 'admin');
+      allow create: if request.auth != null && (
+                        (request.auth.uid == uid && (!('rol' in request.resource.data) || request.resource.data.rol != 'admin')) ||
+                        isAdmin()
+                      );
 
       // Actualizar: solo el propio usuario o un admin
       // Un usuario NO puede cambiar su propio rol

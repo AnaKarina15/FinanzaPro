@@ -334,9 +334,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- RENDERIZADO DE GRÁFICAS Y LEYENDAS ---
-    window.renderizarDonaYleyenda = function(canvasId, centerId, legendId, dataset, totalGlobal, colores, tipo) {
+    const catColors = {
+        "Alimentación": { fill: "#ef4444" },
+        "Transporte": { fill: "#3b82f6" },
+        "Renta": { fill: "#f97316" },
+        "Vivienda": { fill: "#f97316" },
+        "Ocio": { fill: "#a855f7" },
+        "Ocio y Vida Social": { fill: "#a855f7" },
+        "Servicios Públicos": { fill: "#eab308" },
+        "Servicios y Celular": { fill: "#eab308" },
+        "Material Académico": { fill: "#06b6d4" },
+        "Aseo y Personales": { fill: "#ec4899" },
+        "Salario": { fill: "#22c55e" },
+        "Ayuda Familiar": { fill: "#14b8a6" },
+        "Freelance": { fill: "#10b981" }
+    };
+
+    window.renderizarDonaYleyenda = (canvasId, centerLabelId, legendId, dataset, totalGlobal, colores) => {
         const canvas = document.getElementById(canvasId);
-        const centerLabel = document.getElementById(centerId);
+        const centerLabel = document.getElementById(centerLabelId);
         const legendContainer = document.getElementById(legendId);
 
         if (!canvas) return;
@@ -360,9 +376,11 @@ document.addEventListener("DOMContentLoaded", () => {
         centerLabel.innerText = formatearMoneda(totalGlobal);
         legendContainer.innerHTML = '';
 
+        const finalColors = [];
         dataset.forEach((cat, index) => {
             let porcentaje = ((parseFloat(cat.total) / totalGlobal) * 100).toFixed(0);
-            const colorDot = colores[index % colores.length];
+            const colorDot = (catColors[cat.nombre] && catColors[cat.nombre].fill) || colores[index % colores.length];
+            finalColors.push(colorDot);
             
             legendContainer.innerHTML += `
                 <div class="legend-item">
@@ -378,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
             type: 'doughnut',
             data: {
                 labels: dataset.map(c => c.nombre),
-                datasets: [{ data: dataset.map(c => parseFloat(c.total)), backgroundColor: colores, borderWidth: 0 }]
+                datasets: [{ data: dataset.map(c => parseFloat(c.total)), backgroundColor: finalColors, borderWidth: 0 }]
             },
             options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
         });
@@ -558,6 +576,9 @@ window.cargarDatosFirestore = async () => {
         const q = query(collection(db, "transacciones"), where("usuario_id", "==", currentUid));
         const querySnapshot = await getDocs(q);
         
+        const now = new Date();
+        const mesActual = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
         let ing = 0;
         let gas = 0;
         const movimientos = [];
@@ -568,27 +589,45 @@ window.cargarDatosFirestore = async () => {
             const data = docSnap.data();
             movimientos.push({ id: docSnap.id, ...data });
             
-            if (data.tipo === "ingreso") {
-                ing += data.monto;
-                if (!catIngresos[data.categoria]) catIngresos[data.categoria] = 0;
-                catIngresos[data.categoria] += data.monto;
-            }
-            if (data.tipo === "gasto") {
-                gas += data.monto;
-                if (!catGastos[data.categoria]) catGastos[data.categoria] = 0;
-                catGastos[data.categoria] += data.monto;
+            // Solo sumar para el resumen si es del mes actual
+            if (data.fecha && data.fecha.startsWith(mesActual)) {
+                if (data.tipo === "ingreso") {
+                    ing += data.monto;
+                    if (!catIngresos[data.categoria]) catIngresos[data.categoria] = 0;
+                    catIngresos[data.categoria] += data.monto;
+                }
+                if (data.tipo === "gasto") {
+                    gas += data.monto;
+                    if (!catGastos[data.categoria]) catGastos[data.categoria] = 0;
+                    catGastos[data.categoria] += data.monto;
+                }
             }
         });
 
-        movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        movimientos.sort((a, b) => {
+            const dateA = new Date(a.fecha + 'T00:00:00');
+            const dateB = new Date(b.fecha + 'T00:00:00');
+            if (dateB - dateA !== 0) return dateB - dateA;
+
+            // Si la fecha es igual, ordenar por fecha_creacion (Timestamp o Date)
+            const getMillis = (obj) => {
+                if (!obj) return 0;
+                // Si es un Timestamp de Firestore
+                if (typeof obj.toMillis === 'function') return obj.toMillis();
+                if (typeof obj.seconds === 'number') return obj.seconds * 1000 + (obj.nanoseconds || 0) / 1000000;
+                // Si es un objeto Date o un string de fecha
+                return new Date(obj).getTime() || 0;
+            };
+            return getMillis(b.fecha_creacion) - getMillis(a.fecha_creacion);
+        });
 
         document.getElementById('total-ingresos-view').innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(ing);
         document.getElementById('total-gastos-view').innerText = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(gas);
 
         const mapCategorias = (obj) => Object.keys(obj).map(k => ({ nombre: k, total: obj[k] })).sort((a,b) => b.total - a.total);
 
-        window.renderizarDonaYleyenda('graficaIngresos', 'center-ingresos', 'legend-ingresos-list', mapCategorias(catIngresos), ing, ['#059669', '#34d399', '#6ee7b7', '#a7f3d0'], 'ingreso');
-        window.renderizarDonaYleyenda('graficaGastos', 'center-gastos', 'legend-gastos-list', mapCategorias(catGastos), gas, ['#ef4444', '#f97316', '#eab308', '#cbd5e1'], 'gasto');
+        window.renderizarDonaYleyenda('graficaIngresos', 'center-ingresos', 'legend-ingresos-list', mapCategorias(catIngresos), ing, ['#059669', '#10b981', '#14b8a6', '#06b6d4'], 'ingreso');
+        window.renderizarDonaYleyenda('graficaGastos', 'center-gastos', 'legend-gastos-list', mapCategorias(catGastos), gas, ['#ef4444', '#f97316', '#eab308', '#8b5cf6', '#ec4899'], 'gasto');
 
         window.movimientosGlobales = movimientos;
         window.aplicarFiltros();

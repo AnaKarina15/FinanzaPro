@@ -298,7 +298,7 @@
     border-radius: 2px;
     background-color: #f1f5f9;
 }
-.heatmap-box.color-1 { background-color: #e2e8f0; } /* none/very low */
+.heatmap-box.color-1 { background-color: #e2e8f0; } /* Sin gasto (gris claro) */
 .heatmap-box.color-2 { background-color: #a7f3d0; } /* low */
 .heatmap-box.color-3 { background-color: #34d399; } /* medium */
 .heatmap-box.color-4 { background-color: #059669; } /* high */

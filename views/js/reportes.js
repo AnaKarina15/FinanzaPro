@@ -50,17 +50,33 @@ const catColors = {
     "Alimentación": { bg: "#fecaca", text: "#b91c1c", fill: "#ef4444" },
     "Transporte": { bg: "#bfdbfe", text: "#1d4ed8", fill: "#3b82f6" },
     "Renta": { bg: "#fed7aa", text: "#c2410c", fill: "#f97316" },
+    "Vivienda": { bg: "#fed7aa", text: "#c2410c", fill: "#f97316" },
     "Ocio": { bg: "#e9d5ff", text: "#7e22ce", fill: "#a855f7" },
-    "Servicios Públicos": { bg: "#fef08a", text: "#a16207", fill: "#eab308" }
+    "Ocio y Vida Social": { bg: "#e9d5ff", text: "#7e22ce", fill: "#a855f7" },
+    "Servicios Públicos": { bg: "#fef08a", text: "#a16207", fill: "#eab308" },
+    "Servicios y Celular": { bg: "#fef08a", text: "#a16207", fill: "#eab308" },
+    "Material Académico": { bg: "#cffafe", text: "#0e7490", fill: "#06b6d4" },
+    "Aseo y Personales": { bg: "#fbcfe8", text: "#be185d", fill: "#ec4899" },
+    "Salario": { bg: "#dcfce7", text: "#15803d", fill: "#22c55e" },
+    "Ayuda Familiar": { bg: "#ccfbf1", text: "#0f766e", fill: "#14b8a6" },
+    "Freelance": { bg: "#d1fae5", text: "#047857", fill: "#10b981" }
 };
-const defaultCatColor = { bg: "#e2e8f0", text: "#475569", fill: "#94a3b8" };
+const defaultCatColor = { bg: "#dbeafe", text: "#1e40af", fill: "#3b82f6" }; // Fallback azul vibrante en lugar de gris
 
 const catIcons = {
     "Alimentación": "restaurant",
     "Transporte": "directions_car",
     "Ocio": "sports_esports",
+    "Ocio y Vida Social": "sports_esports",
     "Servicios Públicos": "bolt",
-    "Renta": "home"
+    "Servicios y Celular": "bolt",
+    "Renta": "home",
+    "Vivienda": "home",
+    "Material Académico": "school",
+    "Aseo y Personales": "checkroom",
+    "Salario": "payments",
+    "Ayuda Familiar": "family_restroom",
+    "Freelance": "work"
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -348,14 +364,14 @@ function renderProgresoMetas(metas) {
         return;
     }
 
-    // Sort by progress desc
+    // Sort by current amount desc (same as line chart) to keep colors consistent
     const metasMapped = metas.map(m => {
         const obj = parseFloat(m.monto_objetivo) || 0;
         const act = parseFloat(m.monto_actual) || 0;
         const pct = obj > 0 ? Math.min((act / obj) * 100, 100) : 0;
         return { ...m, pct, obj, act };
     });
-    metasMapped.sort((a, b) => b.pct - a.pct);
+    metasMapped.sort((a, b) => b.act - a.act);
 
     const colors = ["#059669", "#3b82f6", "#ef4444", "#f59e0b"];
 
@@ -460,10 +476,11 @@ function renderCharts(transacciones, metas) {
     // Datos Ahorro (Simulación histórica para las top 2 metas)
     const ctxAhorro = document.getElementById('ahorroChart');
     if (ctxAhorro) {
+        // Same sorting as renderProgresoMetas to keep colors consistent
         const topMetas = [...metas].sort((a, b) => (parseFloat(b.monto_actual)||0) - (parseFloat(a.monto_actual)||0)).slice(0, 2);
         
         const datasetsAhorro = [];
-        const colors = ['#059669', '#3b82f6'];
+        const colors = ["#059669", "#3b82f6", "#ef4444", "#f59e0b"];
         const fills = ['rgba(5, 150, 105, 0.1)', 'transparent'];
         const dash = [[], [5, 5]];
 
@@ -648,10 +665,9 @@ function renderHeatmap(transacciones) {
 
             if (total > 0 && topCat) {
                 const c = catColors[topCat] || defaultCatColor;
-                // Opacity basada en la intensidad del gasto relativa al máximo
-                const intensity = Math.max(0.35, total / maxGasto);
+                // Color sólido sin opacidad para mayor claridad
                 box.style.backgroundColor = c.fill;
-                box.style.opacity = intensity;
+                box.style.opacity = 1;
                 const fmt = '$' + new Intl.NumberFormat('en-US').format(total);
                 box.title = `${fecha}: ${fmt} (${topCat})`;
             } else {
