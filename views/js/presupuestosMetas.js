@@ -426,11 +426,19 @@ function renderMetas(metas) {
         
         const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
         
-        const card = document.createElement('article');
-        card.className = 'card goal-card cursor-pointer';
-        card.setAttribute('onclick', `abrirModalAbonoMeta('${meta.id_meta}', '${meta.nombre.replace(/'/g, "\\'")}', event)`);
         let badgeText = 'EN PROGRESO';
-        if (porcentajeNumerico >= 100) badgeText = 'LOGRADO';
+        let goalStateClass = 'started';
+        
+        if (porcentajeNumerico >= 100) {
+            badgeText = 'LOGRADO';
+            goalStateClass = 'achieved';
+        } else if (porcentajeNumerico >= 50) {
+            goalStateClass = 'advanced';
+        }
+
+        const card = document.createElement('article');
+        card.className = `card goal-card ${goalStateClass} cursor-pointer`;
+        card.setAttribute('onclick', `abrirModalAbonoMeta('${meta.id_meta}', '${meta.nombre.replace(/'/g, "\\'")}', event)`);
 
         const mesesStrMeta = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         let metaPeriodoFormat = meta.fecha_limite;
@@ -442,19 +450,19 @@ function renderMetas(metas) {
         }
 
         card.innerHTML = `
-            <div class="goal-header" style="display: flex; align-items: center; margin-bottom: 16px;">
-              <div class="icon-box icon-blue" style="background-color: #e0f2fe; color: #0284c7; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
+            <div class="budget-header">
+              <div class="budget-icon">
                 <span class="material-symbols-outlined">${meta.codigo_material || 'stars'}</span>
               </div>
-              <div class="goal-info" style="flex: 1;">
-                <h4 class="goal-name" style="margin: 0 0 2px 0; font-size: 16px; font-weight: 600; color: var(--text-primary);">${meta.nombre}</h4>
+              <div class="budget-info">
+                <h4 class="budget-name" style="margin-bottom: 2px;">${meta.nombre}</h4>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">${metaPeriodoFormat}</div>
-                <p class="goal-status-text" style="margin: 0; font-size: 12px; font-weight: 700; color: #059669;">${porcentajeMostrar}% ALCANZADO</p>
+                <p class="budget-status-text">${porcentajeMostrar}% ALCANZADO</p>
               </div>
-              <div class="goal-badge-container" style="margin-left: 8px;">
-                <span class="budget-badge" style="background: #f1f5f9; color: #64748b; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">${badgeText}</span>
+              <div class="budget-badge-container">
+                <span class="budget-badge">${badgeText}</span>
               </div>
-              <div class="kebab-menu" style="margin-left: 8px;">
+              <div class="kebab-menu">
                 <button class="kebab-btn" onclick="toggleKebab(this, event)"><span class="material-symbols-outlined">more_vert</span></button>
                 <div class="kebab-dropdown">
                   <button class="dropdown-item" onclick="editarMeta('${meta.id_meta}')">Editar</button>
@@ -462,11 +470,11 @@ function renderMetas(metas) {
                 </div>
               </div>
             </div>
-            <div class="goal-footer" style="margin-top: auto;">
-              <div class="progress-bar-bg" style="height: 6px; border-radius: 99px; background: #e2e8f0; margin-bottom: 8px; overflow: hidden;">
-                <div class="progress-bar-fill bg-success" style="width: ${widthBarra}%; height: 100%; background: #059669; border-radius: 99px;"></div>
+            <div style="margin-top: auto;">
+              <div class="budget-progress-bar" style="margin-bottom: 8px;">
+                <div class="progress-fill" style="width: ${widthBarra}%;"></div>
               </div>
-              <div class="goal-amounts" style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; color: var(--text-secondary);">
+              <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; color: var(--text-secondary);">
                 <span>${formatter.format(act)}</span>
                 <span>${formatter.format(obj)}</span>
               </div>

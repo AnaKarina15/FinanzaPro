@@ -106,6 +106,62 @@
     color: var(--text-primary);
 }
 
+/* GOAL CARD STATES */
+.goal-card.started {
+    background-color: #eff6ff;
+}
+.goal-card.started .budget-badge {
+    background-color: #bfdbfe;
+    color: #1e3a8a;
+}
+.goal-card.started .budget-status-text {
+    color: #1e40af;
+}
+.goal-card.started .progress-fill {
+    background-color: #3b82f6;
+}
+.goal-card.started .budget-icon {
+    background-color: #ffffff;
+    color: #3b82f6;
+}
+
+.goal-card.advanced {
+    background-color: #fffbeb;
+}
+.goal-card.advanced .budget-badge {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+.goal-card.advanced .budget-status-text {
+    color: #d97706;
+}
+.goal-card.advanced .progress-fill {
+    background-color: #f59e0b;
+}
+.goal-card.advanced .budget-icon {
+    background-color: #ffffff;
+    color: #d97706;
+}
+
+.goal-card.achieved {
+    background-color: #ecfdf5;
+}
+.goal-card.achieved .budget-badge {
+    background-color: #a7f3d0;
+    color: #065f46;
+}
+.goal-card.achieved .budget-status-text {
+    color: #065f46;
+}
+.goal-card.achieved .progress-fill {
+    background-color: #10b981;
+}
+.goal-card.achieved .budget-icon {
+    background-color: #ffffff;
+    color: #10b981;
+}
+
+
 /* BUDGET CARD */
 .budget-card {
     min-height: 200px;
