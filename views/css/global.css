@@ -755,7 +755,7 @@ select:focus-visible {
 .icon-dropdown-menu {
     display: none; /* JS will override this on toggle */
     position: absolute;
-    z-index: 50; /* over the submit button */
+    z-index: 100; /* over the submit button */
     background: white;
     border: 1px solid var(--border-color);
     border-radius: 12px;
@@ -765,8 +765,23 @@ select:focus-visible {
     top: 100%;
     left: 0;
     margin-top: 8px;
-    max-height: 15rem; /* ~240px */
+    max-height: 140px; /* Even shorter to prevent overflowing smaller modals */
     overflow-y: auto;
+}
+
+/* Custom scrollbar for the icon dropdown */
+.icon-dropdown-menu::-webkit-scrollbar {
+    width: 6px;
+    display: block;
+}
+
+.icon-dropdown-menu::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.icon-dropdown-menu::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* --- ESTILOS PARA EL INPUT DEL PIN --- */

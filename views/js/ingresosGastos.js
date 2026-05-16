@@ -663,7 +663,7 @@ window.toggleIconDropdown = function(e) {
             btn.innerHTML = `<span class="material-symbols-outlined">${icon}</span>`;
             
             // Apply inline styles to mimic a nice hover effect
-            btn.style.cssText = 'background: none; border: 1px solid transparent; border-radius: 8px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s;';
+            btn.style.cssText = 'background: none; border: 1px solid transparent; border-radius: 8px; padding: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s;';
             btn.onmouseover = () => { btn.style.backgroundColor = 'var(--bg-hover)'; btn.style.borderColor = 'var(--border-color)'; };
             btn.onmouseout = () => { btn.style.backgroundColor = 'transparent'; btn.style.borderColor = 'transparent'; };
             

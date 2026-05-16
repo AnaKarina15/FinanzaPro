@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.innerHTML = `<span class="material-symbols-outlined">${icon}</span>`;
-            btn.style.cssText = 'background: none; border: 1px solid transparent; border-radius: 8px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s;';
+            btn.style.cssText = 'background: none; border: 1px solid transparent; border-radius: 8px; padding: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s;';
             btn.onmouseover = () => { btn.style.backgroundColor = 'var(--bg-hover)'; btn.style.borderColor = 'var(--border-color)'; };
             btn.onmouseout = () => { btn.style.backgroundColor = 'transparent'; btn.style.borderColor = 'transparent'; };
             btn.onclick = (ev) => {

@@ -187,7 +187,7 @@ date_default_timezone_set('America/Bogota');
     <div class="modal-content">
       <div class="modal-header">
         <h3 id="modal-titulo">Registro de Movimientos</h3>
-        <button class="btn-close" onclick="document.getElementById('modalNuevoMovimiento').classList.remove('active')">
+        <button class="btn-close" id="btn-cerrar-modal">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
