@@ -106,27 +106,51 @@ document.addEventListener("DOMContentLoaded", () => {
       const q = query(presupuestosRef, where("id_usuario", "==", currentUid));
       const querySnapshot = await getDocs(q);
 
-      const datalist = document.getElementById("lista-categorias");
-      if (datalist) {
-        let categories = new Set([
-          "Alimentación",
-          "Transporte",
-          "Ocio",
-          "Servicios Públicos",
-          "Salario",
-        ]);
-        querySnapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          if (data.categoria) categories.add(data.categoria);
-        });
-
-        datalist.innerHTML = "";
-        categories.forEach((cat) => {
-          datalist.innerHTML += `<option value="${cat}"></option>`;
-        });
-      }
+      window.allCategories = new Set([
+        "Alimentación",
+        "Transporte",
+        "Ocio",
+        "Servicios Públicos",
+        "Salario",
+      ]);
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.categoria) window.allCategories.add(data.categoria);
+      });
+      renderCategoryOptions();
     } catch (error) {
       console.error("Error al cargar categorías:", error);
+    }
+  };
+
+  const renderCategoryOptions = (filter = "") => {
+    const dropdown = document.getElementById('lista-categorias-custom');
+    if (!dropdown || !window.allCategories) return;
+
+    const term = filter.toLowerCase().trim();
+    const filtered = Array.from(window.allCategories).filter(cat => 
+        cat.toLowerCase().includes(term)
+    );
+
+    dropdown.innerHTML = '';
+    filtered.forEach(cat => {
+        const div = document.createElement('div');
+        div.className = 'dropdown-option';
+        div.textContent = cat;
+        div.onclick = () => {
+            const input = document.getElementById('categoria');
+            input.value = cat;
+            dropdown.style.display = 'none';
+            // Trigger input event to clear errors
+            input.dispatchEvent(new Event('input'));
+        };
+        dropdown.appendChild(div);
+    });
+
+    if (filtered.length > 0 && document.activeElement.id === 'categoria') {
+        dropdown.style.display = 'block';
+    } else {
+        dropdown.style.display = 'none';
     }
   };
 
@@ -396,13 +420,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const inputCategoria = document.getElementById("categoria");
+  const dropdownCat = document.getElementById('lista-categorias-custom');
   if (inputCategoria) {
+    inputCategoria.addEventListener("focus", () => {
+        renderCategoryOptions(inputCategoria.value);
+    });
     inputCategoria.addEventListener("input", () => {
       if (inputCategoria.value.trim()) {
         inputCategoria.classList.remove("input-error");
         const err = document.getElementById("error-categoria");
         if (err) err.style.display = "none";
       }
+      renderCategoryOptions(inputCategoria.value);
+    });
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+        if (!inputCategoria.contains(e.target) && !dropdownCat.contains(e.target)) {
+            dropdownCat.style.display = 'none';
+        }
     });
   }
 

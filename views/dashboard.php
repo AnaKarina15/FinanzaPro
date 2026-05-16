@@ -219,14 +219,8 @@
           <div class="input-group">
             <label for="categoria">Categoría</label>
             <div class="input-container">
-              <input list="lista-categorias" id="categoria" name="categoria" placeholder="Escribe..." autocomplete="off">
-              <datalist id="lista-categorias">
-                <option value="Alimentación"></option>
-                <option value="Transporte"></option>
-                <option value="Ocio"></option>
-                <option value="Servicios Públicos"></option>
-                <option value="Salario"></option>
-              </datalist>
+              <input type="text" id="categoria" name="categoria" placeholder="Escribe..." autocomplete="off">
+              <div id="lista-categorias-custom" class="custom-dropdown-menu"></div>
             </div>
             <span class="error-text" id="error-categoria">Obligatorio</span>
           </div>
