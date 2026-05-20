@@ -1,0 +1,200 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam noteBackgroundColor #fdf6e3
+skinparam noteBorderColor #d8e0eb
+skinparam nodesep 40
+skinparam ranksep 60
+skinparam linetype ortho
+
+!define VERDE #CFFFCE
+!define AMARILLO #FFF2CC
+!define ROJO #FFCECE
+
+actor "Usuario" as U
+actor "Administrador" as Admin
+actor "Firebase Auth" as Auth
+actor "Firebase\n(Email)" as SMS
+
+rectangle "Sistema FinanzaPro" {
+
+  package "1. Autenticación y Acceso" as P1 {
+    usecase "Registrarse" as UC_Reg VERDE
+    usecase "Iniciar Sesión" as UC_Login VERDE
+    usecase "Iniciar Sesión Google" as UC_Google VERDE
+    usecase "Restablecer Contraseña" as UC_Recup VERDE
+    usecase "Cerrar Sesión" as UC_Logout VERDE
+    usecase "Verificar Credenciales" as UC_VerCred VERDE
+    usecase "Enviar link al correo" as UC_VerPIN VERDE
+
+    note bottom of UC_Reg : Solicita nombre, apellido, correo\ny envía email de verificación
+
+    UC_Login .> UC_VerCred : <<include>>
+    UC_Google .> UC_VerCred : <<include>>
+    UC_Reg .> UC_VerCred : <<include>>
+    UC_Reg .> UC_VerPIN : <<include>>
+    UC_Recup .> UC_VerPIN : <<include>>
+  }
+
+  package "2. Perfil" as P2 {
+    usecase "Gestionar Datos" as UC_Perfil VERDE
+    usecase "Cambiar Correo" as UC_Email VERDE
+    usecase "Cambiar Teléfono" as UC_Tel VERDE
+    usecase "Cambiar Contraseña" as UC_Contraseña VERDE
+    usecase "Actualizar Foto" as UC_Foto VERDE
+
+    note bottom of UC_Perfil : Permite editar datos personales y avatar
+
+    UC_Email -up-|> UC_Perfil
+    UC_Tel -up-|> UC_Perfil
+    UC_Contraseña -up-|> UC_Perfil
+    UC_Foto .> UC_Perfil : <<extend>>
+    UC_Email .> UC_VerPIN : <<include>>
+    UC_Tel .> UC_VerPIN : <<include>>
+
+    usecase "Configurar Preferencias" as UC_Pref AMARILLO
+    usecase "Definir Moneda" as UC_Moneda ROJO
+    usecase "Alternar Tema" as UC_Tema ROJO
+    usecase "Notificaciones Push" as UC_Push ROJO
+
+    UC_Moneda -up-|> UC_Pref
+    UC_Tema -up-|> UC_Pref
+    UC_Push -up-|> UC_Pref
+  }
+
+  package "3. Dashboard" as P3 {
+    usecase "Consultar Dashboard" as UC_Dash VERDE
+    usecase "Registrar Movimiento Rápido" as UC_MovDash VERDE
+
+    note bottom of UC_Dash : Muestra tarjetas de resumen, gráficas\ny lista de últimos movimientos
+
+    UC_MovDash .> UC_Dash : <<extend>>
+  }
+
+  package "4. Ingresos y Gastos" as P4 {
+    usecase "Registrar Movimiento" as UC_RegMov VERDE
+    usecase "Registrar Ingreso" as UC_Ing VERDE
+    usecase "Registrar Gasto" as UC_Gas VERDE
+    usecase "Crear Categoría" as UC_Cat VERDE
+    usecase "Editar Movimiento" as UC_EditMov VERDE
+    usecase "Eliminar Movimiento" as UC_DelMov VERDE
+    usecase "Consultar Historial" as UC_Hist VERDE
+
+    note bottom of UC_Hist : Historial con gráficas de distribución\npor categorías (Pastel/Dona)
+
+    UC_Ing -up-|> UC_RegMov
+    UC_Gas -up-|> UC_RegMov
+    UC_Cat .> UC_RegMov : <<extend>>
+    UC_EditMov .> UC_Hist : <<extend>>
+    UC_DelMov .> UC_Hist : <<extend>>
+  }
+
+  package "5. Presupuesto y Metas" as P5 {
+    usecase "Gestionar Metas" as UC_GestMetas VERDE
+    usecase "Crear Nueva Meta" as UC_CrearMeta VERDE
+    usecase "Depositar en Meta" as UC_DepMeta VERDE
+    usecase "Retirar de Meta" as UC_RetMeta VERDE
+    usecase "Modificar Meta" as UC_ModMeta VERDE
+    usecase "Eliminar Meta" as UC_DelMeta VERDE
+
+    note bottom of UC_GestMetas : CRUD completo + depósitos\ny retiros parciales del ahorro
+
+    usecase "Gestionar Presupuestos" as UC_GestPres VERDE
+    usecase "Crear Presupuesto" as UC_CrearPres VERDE
+    usecase "Registrar Gasto en Presupuesto" as UC_GasPresup VERDE
+    usecase "Modificar Presupuesto" as UC_ModPres VERDE
+    usecase "Eliminar Presupuesto" as UC_DelPres VERDE
+    usecase "Configurar Alerta (80%)" as UC_Alerta80 VERDE
+
+    note bottom of UC_GestPres : Controla consumo por categoría\ny dispara alertas de límite
+
+    UC_CrearMeta -up-|> UC_GestMetas
+    UC_DepMeta .> UC_GestMetas : <<extend>>
+    UC_RetMeta .> UC_GestMetas : <<extend>>
+    UC_ModMeta .> UC_GestMetas : <<extend>>
+    UC_DelMeta .> UC_GestMetas : <<extend>>
+
+    UC_CrearPres -up-|> UC_GestPres
+    UC_GasPresup .> UC_GestPres : <<extend>>
+    UC_ModPres .> UC_GestPres : <<extend>>
+    UC_DelPres .> UC_GestPres : <<extend>>
+    UC_Alerta80 .> UC_CrearPres : <<extend>>
+  }
+
+  package "6. Reportes y Análisis" as P6 {
+    usecase "Consultar Reporte" as UC_Rep VERDE
+    usecase "Exportar (PDF)" as UC_Exp VERDE
+    usecase "Visualizar Insights" as UC_Insights VERDE
+
+    note bottom of UC_Rep : Métricas clave y estado financiero global
+
+    UC_Exp .> UC_Rep : <<extend>>
+    UC_Insights .> UC_Rep : <<extend>>
+  }
+
+  package "7. Componentes Globales" as P7 {
+    usecase "Consultar Notificaciones" as UC_Notif VERDE
+    usecase "Marcar Notificación Leída" as UC_MarcarLeida VERDE
+    usecase "Eliminar Notificación" as UC_EliminarNotif VERDE
+
+    note bottom of UC_Notif : Accesible a través de la campana\nen todas las vistas de la aplicación
+
+    UC_EliminarNotif .> UC_Notif : <<extend>>
+    UC_MarcarLeida .> UC_Notif : <<extend>>
+  }
+
+  package "8. Administración" as P8 {
+    usecase "Iniciar Sesión Admin" as UC_AdminLogin VERDE
+    usecase "Consultar Panel de Control" as UC_AdminPanel VERDE
+    usecase "Ver Lista Usuarios" as UC_AdminUsers VERDE
+    usecase "Activar/Desactivar Usuario" as UC_AdminToggle VERDE
+    usecase "Ver Estadísticas Globales" as UC_AdminStats VERDE
+
+    note right of UC_AdminPanel : Panel restringido solo para roles 'admin'
+
+    UC_AdminUsers -up-|> UC_AdminPanel
+    UC_AdminStats -up-|> UC_AdminPanel
+    UC_AdminToggle .> UC_AdminUsers : <<extend>>
+    UC_AdminLogin .> UC_VerCred : <<include>>
+  }
+
+  note top of P1
+      <b>LEYENDA DE ESTADO:</b>
+      <back:VERDE>      </back> Funciona (Completo)
+      <back:AMARILLO>      </back> Implementado (En progreso)
+      <back:ROJO>      </back> No implementado
+  end note
+
+  P1 -[hidden]down-> P3
+  P3 -[hidden]down-> P5
+  P5 -[hidden]down-> P8
+
+  P2 -[hidden]down-> P4
+  P4 -[hidden]down-> P6
+  P6 -[hidden]down-> P7
+}
+
+U --> UC_Reg
+U --> UC_Login
+U --> UC_Google
+U --> UC_Recup
+U --> UC_Logout
+U --> UC_Perfil
+U --> UC_Pref
+U --> UC_Dash
+U --> UC_RegMov
+U --> UC_Hist
+U --> UC_GestMetas
+U --> UC_GestPres
+U --> UC_Rep
+U --> UC_Notif
+
+Admin --> UC_AdminLogin
+Admin --> UC_AdminPanel
+Admin --> UC_AdminUsers
+Admin --> UC_AdminStats
+Admin --> UC_Notif
+
+UC_VerCred <-- Auth
+UC_VerPIN <-- SMS
+@enduml

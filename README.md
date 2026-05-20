@@ -1,8 +1,8 @@
 # FinanzaPro 💰
 
-**FinanzaPro** es un sistema web de gestión financiera personal diseñado para ayudar a los usuarios a tomar el control de sus ingresos, organizar su presupuesto y alcanzar sus metas de ahorro.
+**FinanzaPro** es un sistema web de gestión financiera personal diseñado especialmente para ayudar a estudiantes universitarios a tomar el control de sus ingresos, categorizar sus transacciones y monitorear su presupuesto diario para evitar quedarse sin fondos antes de fin de mes. Su objetivo principal es combatir el desorden financiero causado por los "gastos hormiga", reduciendo así el estrés académico y personal asociado a la inestabilidad económica.
 
-Este proyecto fue desarrollado como parte de nuestra formación en el programa de Ingeniería de Sistemas de la Universidad del Magdalena. La arquitectura ha evolucionado de un sistema MVC con PHP/MySQL a una **Single Page Application (SPA) 100% Serverless** sobre Firebase.
+Este proyecto fue desarrollado por estudiantes de la Universidad del Magdalena en el programa de Ingeniería de Sistemas. La arquitectura de la aplicación evolucionó de un sistema clásico MVC con PHP/MySQL a una moderna **Single Page Application (SPA) 100% Serverless** soportada sobre la plataforma en la nube de Firebase.
 
 ---
 
@@ -77,16 +77,20 @@ Firestore
 ```text
 FinanzaPro/
 ├── index.php                   # Redirige a views/login.php
-├── firestore.rules             # Reglas de seguridad de Firestore (referencia)
+├── firestore.rules             # Reglas de seguridad de Firestore
 ├── README.md
+├── functions/                  # Backend Serverless (Node.js)
+│   ├── index.js                # Lógica del backend
+│   └── package.json
 └── views/
     ├── login.php               # Login, registro y recuperación de contraseña
     ├── dashboard.php           # Panel principal con métricas y gráfica
     ├── ingresosGastos.php      # Registro y gestión de movimientos
     ├── presupuestosMetas.php   # Presupuestos por categoría y metas de ahorro
     ├── perfil.php              # Perfil de usuario y preferencias
+    ├── perfil_admin.php        # Vista de perfil detallada para administradores
     ├── admin.php               # Panel de administración de usuarios
-    ├── verificar_cuenta.php    # Página de verificación de correo
+    ├── reportes.php            # Visualización de reportes financieros
     ├── css/
     │   ├── global.css          # Variables, reset y componentes globales
     │   ├── login.css
@@ -94,40 +98,50 @@ FinanzaPro/
     │   ├── ingresosGastos.css
     │   ├── presupuestosMetas.css
     │   ├── perfil.css
-    │   └── admin.css
+    │   ├── admin.css
+    │   └── reportes.css        # Estilos para reportes
     └── js/
         ├── firebase-config.js  # Inicialización y exportación de app, db, auth
-        ├── login.js
-        ├── dashboard.js
-        ├── ingresosGastos.js
-        ├── presupuestosMetas.js
-        ├── perfil.js
-        └── admin.js
+        ├── login.js            # Control de login y registro
+        ├── dashboard.js        # Lógica del dashboard
+        ├── ingresosGastos.js   # Gestión transaccional
+        ├── presupuestosMetas.js# Gestión de metas y presupuestos
+        ├── perfil.js           # Gestión del perfil de usuario
+        ├── perfil_admin.js     # Gestión de perfil para administradores
+        ├── admin.js            # Lógica para administración de usuarios
+        ├── reportes.js         # Lógica de reportes y gráficas
+        ├── notificaciones.js   # Sistema de notificaciones
+        ├── notificaciones_admin.js # Notificaciones para admin
+        └── presencia.js        # Control de presencia (activo/inactivo)
 ```
 
 ---
 
-## ⚙️ Instalación (Entorno Local)
+## 📊 Diagrama de Casos de Uso
 
-> **No se requiere base de datos local.** La aplicación es 100% serverless conectada a Firebase.
+El sistema cuenta con un modelo de casos de uso detallado que define las interacciones de los usuarios y administradores con la plataforma.
 
-1. Clona el repositorio
-2. Coloca el proyecto en `C:\xampp\htdocs\FinanzaPro` (o el directorio raíz de tu servidor web).
-3. Asegúrate de tener Apache corriendo en XAMPP.
-4. Accede a `http://localhost/FinanzaPro`
-
-El proyecto se conecta automáticamente al proyecto de Firebase configurado en `views/js/firebase-config.js`.
-
-> **Para contribuidores:** Si deseas conectar tu propio proyecto Firebase, reemplaza el objeto `firebaseConfig` en `firebase-config.js` con las credenciales de tu proyecto, y añade tu dominio local (`localhost`) a la lista de dominios autorizados en Firebase Authentication.
+El diagrama está organizado en los siguientes bloques:
+1. **Autenticación y Acceso**: Registro, inicio de sesión (correo/contraseña y Google OAuth), restablecimiento de contraseña y cierre de sesión.
+2. **Perfil y Configuración**: Edición de datos personales (nombre, apellido, teléfono), foto de perfil y preferencias (moneda, tema, notificaciones).
+3. **Dashboard**: Resumen financiero rápido y atajos de registro.
+4. **Ingresos y Gastos**: Gestión transaccional completa (CRUD) e historial con gráficos.
+5. **Presupuesto y Metas**: Gestión de límites de gasto mensuales/anuales y metas de ahorro progresivas.
+6. **Reportes y Análisis**: Visualización de métricas generales y exportación de datos.
+7. **Componentes Globales**: Sistema de notificaciones en tiempo real.
+8. **Administración**: Panel para administradores con control de usuarios y estadísticas globales.
 
 ---
-
 ## ☁️ Despliegue en Producción (Render)
 
-FinanzaPro está optimizado y listo para ser desplegado en plataformas como **Render**:
-* Las rutas estáticas y redirecciones de PHP (`index.php`) y JavaScript (`window.location.href`) están configuradas para evitar errores de tipo `404 Not Found` en entornos de la nube.
-* La integración de **Google Login** está verificada para producción (asegúrate de agregar el dominio de Render a Firebase Console).
-* Soporte para ejecución en contenedores Docker estándar de PHP/Apache.
+La plataforma se encuentra totalmente desplegada y lista para su uso en la nube de **Render**, integrada directamente con la infraestructura serverless de Firebase.
+
+🔗 **Enlace de la aplicación:** [https://finanzapro.onrender.com/](https://finanzapro.onrender.com/)
+
+### Características del Despliegue:
+* **Contenedorización Docker:** Ejecución optimizada en la nube basada en un contenedor Docker con Apache configurado para soportar PHP y redirecciones estáticas.
+* **Compatibilidad SPA:** El servidor está configurado para resolver correctamente el enrutamiento lógico de la Single Page Application sin recargas de página, previniendo errores de tipo `404`.
+* **Autenticación en Producción:** El dominio de producción de Render está debidamente autorizado en la consola de Firebase, garantizando que el flujo de **Google Sign-In** funcione de forma transparente y segura para todos los usuarios.
 
 ---
 
